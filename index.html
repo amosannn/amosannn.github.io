@@ -250,6 +250,135 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/05/23/currency-formatting-by-javascript/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Amosannn">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/fox.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Amosannn">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/05/23/currency-formatting-by-javascript/" itemprop="url">
+                  使用JavaScript进行货币格式化
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-23T00:06:35+08:00">
+                2017-05-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>在项目中碰到关于货币金额的页面显示，为了让金额的显示更为人性化与规范化，需要加入货币格式化策略。<br>也就是所谓的数字千分位格式化。<br>例如<code>￥39,998</code> <code>$1,299</code></p>
+<p>以下为包含小数处理的三种代码块。</p>
+<p>保留2位小数：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * 将数值四舍五入(保留2位小数)后格式化成金额形式</div><div class="line"> *</div><div class="line"> * @param num 数值(Number或者String)</div><div class="line"> * @return 金额格式的字符串,如'1,234,567.45'</div><div class="line"> * @type String</div><div class="line"> */</div><div class="line"> <span class="function"><span class="keyword">function</span> <span class="title">formatCurrency</span>(<span class="params">num</span>) </span>&#123;</div><div class="line">    num = num.toString().replace(<span class="regexp">/\$|\,/g</span>,<span class="string">''</span>);</div><div class="line">    <span class="keyword">if</span>(<span class="built_in">isNaN</span>(num))</div><div class="line">        num = <span class="string">"0"</span>;</div><div class="line">    sign = (num == (num = <span class="built_in">Math</span>.abs(num)));</div><div class="line">    num = <span class="built_in">Math</span>.floor(num*<span class="number">100</span>+<span class="number">0.50000000001</span>);</div><div class="line">    cents = num%<span class="number">100</span>;</div><div class="line">    num = <span class="built_in">Math</span>.floor(num/<span class="number">100</span>).toString();</div><div class="line">    <span class="keyword">if</span>(cents&lt;<span class="number">10</span>)</div><div class="line">    cents = <span class="string">"0"</span> + cents;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="built_in">Math</span>.floor((num.length-(<span class="number">1</span>+i))/<span class="number">3</span>); i++)</div><div class="line">    num = num.substring(<span class="number">0</span>,num.length-(<span class="number">4</span>*i+<span class="number">3</span>))+<span class="string">','</span>+</div><div class="line">    num.substring(num.length-(<span class="number">4</span>*i+<span class="number">3</span>));</div><div class="line">    <span class="keyword">return</span> (((sign)?<span class="string">''</span>:<span class="string">'-'</span>) + num + <span class="string">'.'</span> + cents);</div></pre></td></tr></table></figure>
+<p>保留1位小数：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * 将数值四舍五入(保留1位小数)后格式化成金额形式</div><div class="line"> *</div><div class="line"> * @param num 数值(Number或者String)</div><div class="line"> * @return 金额格式的字符串,如'1,234,567.4'</div><div class="line"> * @type String</div><div class="line"> */</div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">formatCurrencyTenThou</span>(<span class="params">num</span>) </span>&#123;</div><div class="line">    num = num.toString().replace(<span class="regexp">/\$|\,/g</span>,<span class="string">''</span>);</div><div class="line">    <span class="keyword">if</span>(<span class="built_in">isNaN</span>(num))</div><div class="line">    num = <span class="string">"0"</span>;</div><div class="line">    sign = (num == (num = <span class="built_in">Math</span>.abs(num)));</div><div class="line">    num = <span class="built_in">Math</span>.floor(num*<span class="number">10</span>+<span class="number">0.50000000001</span>);</div><div class="line">    cents = num%<span class="number">10</span>;</div><div class="line">    num = <span class="built_in">Math</span>.floor(num/<span class="number">10</span>).toString();</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="built_in">Math</span>.floor((num.length-(<span class="number">1</span>+i))/<span class="number">3</span>); i++)</div><div class="line">    num = num.substring(<span class="number">0</span>,num.length-(<span class="number">4</span>*i+<span class="number">3</span>))+<span class="string">','</span>+</div><div class="line">    num.substring(num.length-(<span class="number">4</span>*i+<span class="number">3</span>));</div><div class="line">    <span class="keyword">return</span> (((sign)?<span class="string">''</span>:<span class="string">'-'</span>) + num + <span class="string">'.'</span> + cents);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>不保留小数：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">formatPrice</span>(<span class="params">n</span>) </span>&#123;</div><div class="line">   <span class="keyword">var</span> t = <span class="built_in">parseInt</span>(n), i, r;</div><div class="line">   <span class="keyword">for</span> (t = t.toString().replace(<span class="regexp">/^(\d*)$/</span>, <span class="string">"$1."</span>), t = (t + <span class="string">"00"</span>).replace(<span class="regexp">/(\d*\.\d\d)\d*/</span>, <span class="string">"$1"</span>), t = t.replace(<span class="string">"."</span>, <span class="string">","</span>), i = <span class="regexp">/(\d)(\d&#123;3&#125;,)/</span>; i.test(t); )</div><div class="line">       t = t.replace(i, <span class="string">"$1,$2"</span>);</div><div class="line">   <span class="keyword">return</span> t = t.replace(<span class="regexp">/,(\d\d)$/</span>, <span class="string">".$1"</span>), r = t.split(<span class="string">"."</span>), r[<span class="number">1</span>] == <span class="string">"00"</span> &amp;&amp; (t = r[<span class="number">0</span>]), t</div><div class="line">   &#125;</div></pre></td></tr></table></figure></p>
+<blockquote>
+<p>参考链接：<br><a href="http://www.haorooms.com/post/js_qian_huobi_gs" target="_blank" rel="external">http://www.haorooms.com/post/js_qian_huobi_gs</a><br><a href="https://github.com/lishengzxc/bblog/issues/15" target="_blank" rel="external">https://github.com/lishengzxc/bblog/issues/15</a></p>
+</blockquote>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/05/22/delete-github-history-by-bfg/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -701,7 +830,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-count">4</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -714,7 +843,7 @@
             
             <div class="site-state-item site-state-tags">
               
-                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-count">2</span>
                 <span class="site-state-item-name">标签</span>
               
             </div>
