@@ -221,6 +221,16 @@
           </a>
         </li>
       
+        
+        <li class="menu-item menu-item-search">
+          <a href="/search" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-search"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
 
       
     </ul>
@@ -240,6 +250,134 @@
           <div id="content" class="content">
             
   <section id="posts" class="posts-expand">
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/05/25/implement-queue-by-two-stacks/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Amosannn">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/fox.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Amosannn">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/05/25/implement-queue-by-two-stacks/" itemprop="url">
+                  两个栈实现一个队列
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-25T19:29:53+08:00">
+                2017-05-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>今天下午汉得来学校宣讲，笔试中看到这样一个题目，让我们用两个栈实现一个队列。</p>
+<p>那时候没想太多，队列先进先出，栈先进后出，那么只要一个栈作为主栈，另一个栈作为缓存栈，来回倒腾就能实现队列的功能了。</p>
+<p><img src="/images/two-stacks-operation.jpg" alt=""></p>
+<p>回来后仔细想想，其实还有比这更高效的方法。
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/05/25/implement-queue-by-two-stacks/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
     
       
 
@@ -326,18 +464,15 @@
 
       
         
-          
-            <p>在项目中碰到关于货币金额的页面显示，为了让金额的显示更为人性化与规范化，需要加入货币格式化策略。<br>也就是所谓的数字千分位格式化。<br>例如<code>￥39,998</code> <code>$1,299</code></p>
-<p>以下为包含小数处理的三种代码块。</p>
-<p>保留2位小数：</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * 将数值四舍五入(保留2位小数)后格式化成金额形式</div><div class="line"> *</div><div class="line"> * @param num 数值(Number或者String)</div><div class="line"> * @return 金额格式的字符串,如'1,234,567.45'</div><div class="line"> * @type String</div><div class="line"> */</div><div class="line"> <span class="function"><span class="keyword">function</span> <span class="title">formatCurrency</span>(<span class="params">num</span>) </span>&#123;</div><div class="line">    num = num.toString().replace(<span class="regexp">/\$|\,/g</span>,<span class="string">''</span>);</div><div class="line">    <span class="keyword">if</span>(<span class="built_in">isNaN</span>(num))</div><div class="line">        num = <span class="string">"0"</span>;</div><div class="line">    sign = (num == (num = <span class="built_in">Math</span>.abs(num)));</div><div class="line">    num = <span class="built_in">Math</span>.floor(num*<span class="number">100</span>+<span class="number">0.50000000001</span>);</div><div class="line">    cents = num%<span class="number">100</span>;</div><div class="line">    num = <span class="built_in">Math</span>.floor(num/<span class="number">100</span>).toString();</div><div class="line">    <span class="keyword">if</span>(cents&lt;<span class="number">10</span>)</div><div class="line">    cents = <span class="string">"0"</span> + cents;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="built_in">Math</span>.floor((num.length-(<span class="number">1</span>+i))/<span class="number">3</span>); i++)</div><div class="line">    num = num.substring(<span class="number">0</span>,num.length-(<span class="number">4</span>*i+<span class="number">3</span>))+<span class="string">','</span>+</div><div class="line">    num.substring(num.length-(<span class="number">4</span>*i+<span class="number">3</span>));</div><div class="line">    <span class="keyword">return</span> (((sign)?<span class="string">''</span>:<span class="string">'-'</span>) + num + <span class="string">'.'</span> + cents);</div></pre></td></tr></table></figure>
-<p>保留1位小数：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * 将数值四舍五入(保留1位小数)后格式化成金额形式</div><div class="line"> *</div><div class="line"> * @param num 数值(Number或者String)</div><div class="line"> * @return 金额格式的字符串,如'1,234,567.4'</div><div class="line"> * @type String</div><div class="line"> */</div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">formatCurrencyTenThou</span>(<span class="params">num</span>) </span>&#123;</div><div class="line">    num = num.toString().replace(<span class="regexp">/\$|\,/g</span>,<span class="string">''</span>);</div><div class="line">    <span class="keyword">if</span>(<span class="built_in">isNaN</span>(num))</div><div class="line">    num = <span class="string">"0"</span>;</div><div class="line">    sign = (num == (num = <span class="built_in">Math</span>.abs(num)));</div><div class="line">    num = <span class="built_in">Math</span>.floor(num*<span class="number">10</span>+<span class="number">0.50000000001</span>);</div><div class="line">    cents = num%<span class="number">10</span>;</div><div class="line">    num = <span class="built_in">Math</span>.floor(num/<span class="number">10</span>).toString();</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="built_in">Math</span>.floor((num.length-(<span class="number">1</span>+i))/<span class="number">3</span>); i++)</div><div class="line">    num = num.substring(<span class="number">0</span>,num.length-(<span class="number">4</span>*i+<span class="number">3</span>))+<span class="string">','</span>+</div><div class="line">    num.substring(num.length-(<span class="number">4</span>*i+<span class="number">3</span>));</div><div class="line">    <span class="keyword">return</span> (((sign)?<span class="string">''</span>:<span class="string">'-'</span>) + num + <span class="string">'.'</span> + cents);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>不保留小数：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">formatPrice</span>(<span class="params">n</span>) </span>&#123;</div><div class="line">   <span class="keyword">var</span> t = <span class="built_in">parseInt</span>(n), i, r;</div><div class="line">   <span class="keyword">for</span> (t = t.toString().replace(<span class="regexp">/^(\d*)$/</span>, <span class="string">"$1."</span>), t = (t + <span class="string">"00"</span>).replace(<span class="regexp">/(\d*\.\d\d)\d*/</span>, <span class="string">"$1"</span>), t = t.replace(<span class="string">"."</span>, <span class="string">","</span>), i = <span class="regexp">/(\d)(\d&#123;3&#125;,)/</span>; i.test(t); )</div><div class="line">       t = t.replace(i, <span class="string">"$1,$2"</span>);</div><div class="line">   <span class="keyword">return</span> t = t.replace(<span class="regexp">/,(\d\d)$/</span>, <span class="string">".$1"</span>), r = t.split(<span class="string">"."</span>), r[<span class="number">1</span>] == <span class="string">"00"</span> &amp;&amp; (t = r[<span class="number">0</span>]), t</div><div class="line">   &#125;</div></pre></td></tr></table></figure></p>
-<blockquote>
-<p>参考链接：<br><a href="http://www.haorooms.com/post/js_qian_huobi_gs" target="_blank" rel="external">http://www.haorooms.com/post/js_qian_huobi_gs</a><br><a href="https://github.com/lishengzxc/bblog/issues/15" target="_blank" rel="external">https://github.com/lishengzxc/bblog/issues/15</a></p>
-</blockquote>
-
-          
+          <p>在项目中碰到关于货币金额的页面显示，为了让金额的显示更为人性化与规范化，需要加入货币格式化策略。<br>也就是所谓的数字千分位格式化。<br>例如<code>￥39,998</code> <code>$1,299</code></p>
+<p>以下为包含小数处理的三种代码块。<br>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/05/23/currency-formatting-by-javascript/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -455,54 +590,16 @@
 
       
         
-          
-            <p>这可能是目前互联网上最详细的BFG Repo-Cleaner中文教程了。</p>
-<p>为了删除三天前的一次错误提交，我开始寻找关于撤销github历史commit的方法。<br>实话说，经历了6个小时的搜索，我依旧没有找到能解决我所碰到的奇怪问题的解决方案，我失败了，不知道是因为git配置或是哪出了纰漏，但也因此浏览了互联网上大部分解答。我发现网络上对于BFG的相关讨论太少太少，尤其是中文的信息，更是贫瘠。另外的原因也是大部分人确实能一步到位的删除历史提交的信息。</p>
-<p>##<a href="https://rtyley.github.io/bfg-repo-cleaner/" target="_blank" rel="external">BFG Repo-Cleaner</a></p>
-<blockquote>
-<p>github称BFG为<code>git filter-branch</code>的替代品。一款比它更快更简单的用于删除无用数据的工具。</p>
-</blockquote>
-<p>作为一个github官方推荐的”仓库清理工具”，快速和简单是它被推荐的重要原因，程序为一个<code>Scala</code>编写而成的jar包，也意味着运行环境需要jdk的支持。<br>ok，竟然github都这样推荐了，就先来试一试。</p>
-<p>###BFG的主要功能与使用步骤如下：</p>
-<p>####1.克隆仓库<br><figure class="highlight plain"><figcaption><span>git clone --mirror git://example.com/some-big-repo.git```</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">使用`--mirror`标记clone一份repo（目标仓库）到本地。</div><div class="line">####2.执行BFG命令移除文件</div><div class="line">```$ java -jar 占位符1 占位符2 占位符3</div></pre></td></tr></table></figure></p>
-<p>clone下来的git仓库和你想象中应该是有点差距的，因为它和你托管在github上的仓库并不一样，它并没有你编写的代码和文件结构，但它与你的库相关联。你可以选择备份也可以选择直接操作。</p>
-<p>占位符1：</p>
-<blockquote>
-<ul>
-<li>jar包路径，若刚好位于bash的当前目录，则直接输入jar包文件名 例：bfg-1.12.15.jar</li>
-</ul>
-</blockquote>
-<p>占位符2：</p>
-<blockquote>
-<ul>
-<li><code>--strip-blobs-bigger-than 10M</code> 删除所有大于10m的文件</li>
-<li><code>--delete-files id_{dsa,rsa}</code> 删除id_dsa, id_rsa</li>
-<li><code>--delete-files file</code> 删除目标文件</li>
-<li><code>--replace-text passwords.txt</code> txt定义语法替换文件内容</li>
-<li><code>--delete-folders folder</code> 删除文件夹</li>
-</ul>
-</blockquote>
-<p>占位符3：</p>
-<blockquote>
-<ul>
-<li>clone下来的git文件名 例：some-big-repo.git</li>
-</ul>
-</blockquote>
-<p>e.g.<br><figure class="highlight"><figcaption><span>-jar bfg.jar --strip-blobs-bigger-than 10M some-big-repo.git```</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">####3.使用gc命令删除目标数据</div><div class="line">```shell</div><div class="line">$ cd some-big-repo.git</div><div class="line">$ git reflog expire --expire=now --all &amp;&amp; git gc --prune=now --aggressive</div></pre></td></tr></table></figure></p>
-<p>####4.提交修改<br><figure class="highlight plain"><figcaption><span>git push```</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">至此，新clone出来的git库中，将再也找不到被删除的内容了。</div><div class="line">相关参考链接请移步页脚。</div><div class="line"></div><div class="line">以下记录我遇到的问题</div><div class="line"></div><div class="line">执行命令</div><div class="line">```java -jar bfg-1.12.15.jar --delete-files carousel.jsp tmall-web-store.git</div></pre></td></tr></table></figure></p>
-<p>报错信息：These are your protected commits, and so their contents will NOT be altered: commit 6c3f4d5a (protected by ‘HEAD’)</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">$ java -jar bfg-1.12.15.jar --delete-files xxxxx.xx xxxxx.git</div><div class="line"></div><div class="line">Using repo : C:\Users\js\Downloads\xxxxx.git</div><div class="line"></div><div class="line">Found 205 objects to protect</div><div class="line">Found 2 commit-pointing refs : HEAD, refs/heads/master</div><div class="line"></div><div class="line">Protected commits</div><div class="line">-----------------</div><div class="line"></div><div class="line">These are your protected commits, and so their contents will NOT be altered:</div><div class="line"></div><div class="line"> * commit 6c3f4d5a (protected by &apos;HEAD&apos;)</div><div class="line"></div><div class="line">Cleaning</div><div class="line">--------</div><div class="line"></div><div class="line">Found 14 commits</div><div class="line">Cleaning commits:       100% (14/14)</div><div class="line">Cleaning commits completed in 93 ms.</div><div class="line"></div><div class="line">BFG aborting: No refs to update - no dirty commits found??</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">--</div><div class="line">You can rewrite history in Git - don&apos;t let Trump do it for real!</div><div class="line">Trump&apos;s administration has lied consistently, to make people give up on ever</div><div class="line">being told the truth. Don&apos;t give up: https://github.com/bkeepers/stop-trump</div><div class="line">--</div></pre></td></tr></table></figure>
-<p>我不明白为什么会显示protected commits，在我尝试多次commit之后，也就是修改head~1，或是手动删除文件，都无法让程序成功运行下去。甚至在多次push与pull之后，commit记录竟x2了…</p>
-<p>几近崩溃的我只能执行git上取消上一个commit的命令,手动撤销了所有的记录（包括目标记录后的几条commit），再重新提交…Orz<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">git reset --hard HEAD~1</div><div class="line">git push --force</div></pre></td></tr></table></figure></p>
-<p>相关链接：</p>
-<blockquote>
-<ul>
-<li><a href="https://rtyley.github.io/bfg-repo-cleaner/" target="_blank" rel="external">BFG Repo-Cleaner</a></li>
-<li><a href="https://help.github.com/articles/removing-sensitive-data-from-a-repository/" target="_blank" rel="external">[github]Removing sensitive data from a repository</a></li>
-</ul>
-</blockquote>
-
-          
+          <p><img src="/images/github-hacker.jpg" alt=""></p>
+<p>这可能是目前互联网上最详细的BFG Repo-Cleaner中文教程了。</p>
+<p>为了删除三天前的一次错误提交，我开始寻找关于撤销github历史commit的方法。<br>实话说，经历了6个小时的搜索，我依旧没有找到能解决我所碰到的奇怪问题的解决方案，我发现网络上对于BFG的相关讨论太少太少，尤其是中文的信息，更是贫瘠。另外的原因也是大部分人确实能按照官方的指引，一步到位地删除历史提交的信息。我失败了，不知道是因为git配置或是哪出了纰漏，但也因此浏览了互联网上大部分解答。<br>以下是我整理出的使用教程。<br>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/05/22/delete-github-history-by-bfg/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -567,7 +664,7 @@
               
                 
                 <a class="post-title-link" href="/2017/04/16/Hello-Hexo/" itemprop="url">
-                  Hello-Hexo
+                  Hello Hexo
                 </a>
               
             
@@ -622,135 +719,6 @@
         
           
             <p>阿盛的技术博客诞生。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/04/16/hello-world/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Amosannn">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/fox.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Amosannn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2017/04/16/hello-world/" itemprop="url">
-                  Hello World
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-16T18:01:41+08:00">
-                2017-04-16
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo new <span class="string">"My New Post"</span></div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo server</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo generate</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo deploy</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
 
           
         
@@ -842,10 +810,10 @@
             
             
             <div class="site-state-item site-state-tags">
-              
-                <span class="site-state-item-count">2</span>
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">3</span>
                 <span class="site-state-item-name">标签</span>
-              
+              </a>
             </div>
           
 
@@ -854,6 +822,35 @@
         
 
         <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/amosannn" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/JasonLamcn" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/lin-jia-sheng-62" target="_blank" title="知乎">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  知乎
+                </a>
+              </span>
+            
           
         </div>
 
