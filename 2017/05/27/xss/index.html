@@ -74,7 +74,7 @@
 <link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="Network Security,java," />
 
 
 
@@ -90,15 +90,17 @@
 
 
 
-<meta name="description" content="start from zero">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Amosannn">
-<meta property="og:url" content="https://amosannn.github.io/index.html">
+<meta name="description" content="什么是XSSXSS攻击：跨站脚本攻击(Cross Site Scripting)，为不和层叠样式表(Cascading Style Sheets, CSS)的缩写混淆，故将跨站脚本攻击缩写为XSS。 XSS是一种经常出现在web应用中的计算机安全漏洞…多的就不说了，wiki里写的很清楚. XSS漏洞分类XSS通常有两类：   存储型XSS，主要出现在用户输入后会在下个页面显示的表单。例如评论或调查">
+<meta name="keywords" content="Network Security,java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java如何防范XSS攻击">
+<meta property="og:url" content="https://amosannn.github.io/2017/05/27/xss/index.html">
 <meta property="og:site_name" content="Amosannn">
-<meta property="og:description" content="start from zero">
+<meta property="og:description" content="什么是XSSXSS攻击：跨站脚本攻击(Cross Site Scripting)，为不和层叠样式表(Cascading Style Sheets, CSS)的缩写混淆，故将跨站脚本攻击缩写为XSS。 XSS是一种经常出现在web应用中的计算机安全漏洞…多的就不说了，wiki里写的很清楚. XSS漏洞分类XSS通常有两类：   存储型XSS，主要出现在用户输入后会在下个页面显示的表单。例如评论或调查">
+<meta property="og:updated_time" content="2017-05-27T16:00:21.806Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Amosannn">
-<meta name="twitter:description" content="start from zero">
+<meta name="twitter:title" content="Java如何防范XSS攻击">
+<meta name="twitter:description" content="什么是XSSXSS攻击：跨站脚本攻击(Cross Site Scripting)，为不和层叠样式表(Cascading Style Sheets, CSS)的缩写混淆，故将跨站脚本攻击缩写为XSS。 XSS是一种经常出现在web应用中的计算机安全漏洞…多的就不说了，wiki里写的很清楚. XSS漏洞分类XSS通常有两类：   存储型XSS，主要出现在用户输入后会在下个页面显示的表单。例如评论或调查">
 
 
 
@@ -126,13 +128,13 @@
 
 
 
-  <link rel="canonical" href="https://amosannn.github.io/"/>
+  <link rel="canonical" href="https://amosannn.github.io/2017/05/27/xss/"/>
 
 
 
 
 
-  <title>Amosannn</title>
+  <title>Java如何防范XSS攻击 | Amosannn</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -158,9 +160,7 @@
     
   
 
-  <div class="container sidebar-position-left 
-   page-home 
- ">
+  <div class="container sidebar-position-left page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -291,9 +291,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
 
@@ -319,9 +319,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/05/27/xss/" itemprop="url">Java如何防范XSS攻击</a></h1>
+          <h1 class="post-title" itemprop="name headline">Java如何防范XSS攻击</h1>
         
 
         <div class="post-meta">
@@ -368,9 +366,7 @@
       
 
       
-        
-          
-            <h1 id="什么是XSS"><a href="#什么是XSS" class="headerlink" title="什么是XSS"></a>什么是XSS</h1><p>XSS攻击：跨站脚本攻击(Cross Site Scripting)，为不和层叠样式表(Cascading Style Sheets, CSS)的缩写混淆，故将跨站脚本攻击缩写为XSS。</p>
+        <h1 id="什么是XSS"><a href="#什么是XSS" class="headerlink" title="什么是XSS"></a>什么是XSS</h1><p>XSS攻击：跨站脚本攻击(Cross Site Scripting)，为不和层叠样式表(Cascading Style Sheets, CSS)的缩写混淆，故将跨站脚本攻击缩写为XSS。</p>
 <p>XSS是一种经常出现在web应用中的计算机安全漏洞…多的就不说了，<a href="https://zh.wikipedia.org/wiki/%E8%B7%A8%E7%B6%B2%E7%AB%99%E6%8C%87%E4%BB%A4%E7%A2%BC" target="_blank" rel="external">wiki</a>里写的很清楚.</p>
 <h1 id="XSS漏洞分类"><a href="#XSS漏洞分类" class="headerlink" title="XSS漏洞分类"></a>XSS漏洞分类</h1><p>XSS通常有两类：</p>
 <blockquote>
@@ -387,508 +383,74 @@
 <p>实例：在调用和数据库连接的DAO方法前，进行转义，例如注册和评论等功能。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> String <span class="title">doreview</span><span class="params">(HttpServletRequest request, HttpServletResponse response, Page page)</span></span>&#123;</div><div class="line">	<span class="keyword">int</span> oid = Integer.parseInt(request.getParameter(<span class="string">"oid"</span>));</div><div class="line">	Order o = orderDAO.get(oid);</div><div class="line">	o.setStatus(orderDAO.finish);</div><div class="line">	orderDAO.update(o);</div><div class="line">	<span class="keyword">int</span> pid = Integer.parseInt(request.getParameter(<span class="string">"pid"</span>));</div><div class="line">	Product p = productDAO.get(pid);</div><div class="line"></div><div class="line">	String content = request.getParameter(<span class="string">"content"</span>);</div><div class="line">	content = HtmlUtils.htmlEscape(content);</div><div class="line"></div><div class="line">	User user = (User) request.getSession().getAttribute(<span class="string">"user"</span>);</div><div class="line">	Review review = <span class="keyword">new</span> Review();</div><div class="line">	review.setContent(content);</div><div class="line">	review.setProduct(p);</div><div class="line">	review.setCreateDate(<span class="keyword">new</span> Date());</div><div class="line">	review.setUser(user);</div><div class="line">	reviewDAO.add(review);</div><div class="line">	<span class="keyword">return</span> <span class="string">"@forereview?oid="</span>+oid+<span class="string">"&amp;showonly=true"</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p>相关链接:<br><a href="https://www.zhihu.com/question/19739025" target="_blank" rel="external">2011年新浪微博XSS事件</a><br><a href="https://gist.github.com/ninehills/1053066" target="_blank" rel="external">新浪微博XSS攻击代码</a><br><a href="http://tool.oschina.net/commons?type=2" target="_blank" rel="external">html转义字符对照表</a><br><a href="http://tieba.baidu.com/p/3567794788" target="_blank" rel="external">简单说下XSS黑站，请注意防范。</a></p>
 
-          
+      
+    </div>
+
+    <div>
+      
         
+
       
     </div>
 
     <div>
       
-    </div>
+        
 
-    <div>
       
     </div>
 
     <div>
+      
+        
+
       
     </div>
 
     <footer class="post-footer">
       
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/05/25/implement-queue-by-two-stacks/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Amosannn">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Amosannn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/05/25/implement-queue-by-two-stacks/" itemprop="url">两个栈实现一个队列</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-25T19:29:53+08:00">
-                2017-05-25
-              </time>
-            
-
-            
-
-            
-          </span>
-
+        <div class="post-tags">
           
-
+            <a href="/tags/Network-Security/" rel="tag"># Network Security</a>
           
-            
+            <a href="/tags/java/" rel="tag"># java</a>
           
-
-          
-          
-
-          
-
-          
-
-          
-
         </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
       
 
       
         
-          <p>今天下午汉得来学校宣讲，笔试中看到这样一个题目，让我们用两个栈实现一个队列。</p>
-<p>那时候没想太多，队列先进先出，栈先进后出，那么只要一个栈作为主栈，另一个栈作为缓存栈，来回倒腾就能实现队列的功能了。</p>
-<p><img src="/images/two-stacks-operation.jpg" alt=""></p>
-<p>回来后仔细想想，其实还有比这更高效的方法。
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/05/25/implement-queue-by-two-stacks/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
           </div>
-          <!--/noindex-->
-        
-      
-    </div>
 
-    <div>
-      
-    </div>
+          <span class="post-nav-divider"></span>
 
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/05/23/currency-formatting-by-javascript/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Amosannn">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Amosannn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/05/23/currency-formatting-by-javascript/" itemprop="url">使用JavaScript进行货币格式化</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
+          <div class="post-nav-prev post-nav-item">
             
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-23T00:06:35+08:00">
-                2017-05-23
-              </time>
+              <a href="/2017/05/25/implement-queue-by-two-stacks/" rel="prev" title="两个栈实现一个队列">
+                两个栈实现一个队列 <i class="fa fa-chevron-right"></i>
+              </a>
             
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>在项目中碰到关于货币金额的页面显示，为了让金额的显示更为人性化与规范化，需要加入货币格式化策略。<br>也就是所谓的数字千分位格式化。<br>例如<code>￥39,998</code> <code>$1,299</code></p>
-<p>以下为包含小数处理的三种代码块。<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/05/23/currency-formatting-by-javascript/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
           </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/05/22/delete-github-history-by-bfg/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Amosannn">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Amosannn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/05/22/delete-github-history-by-bfg/" itemprop="url">如何删除GitHub的历史commit</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-22T01:33:24+08:00">
-                2017-05-22
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
         </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
       
 
       
-        
-          <p><img src="/images/github-hacker.jpg" alt=""></p>
-<p>这可能是目前互联网上最详细的BFG Repo-Cleaner中文教程了。</p>
-<p>为了删除三天前的一次错误提交，我开始寻找关于撤销github历史commit的方法。<br>实话说，经历了6个小时的搜索，我依旧没有找到能解决我所碰到的奇怪问题的解决方案，我发现网络上对于BFG的相关讨论太少太少，尤其是中文的信息，更是贫瘠。另外的原因也是大部分人确实能按照官方的指引，一步到位地删除历史提交的信息。我失败了，不知道是因为git配置或是哪出了纰漏，但也因此浏览了互联网上大部分解答。<br>以下是我整理出的使用教程。<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/05/22/delete-github-history-by-bfg/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </article>
 
 
-    
-      
 
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/04/16/Hello-Hexo/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Amosannn">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Amosannn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/04/16/Hello-Hexo/" itemprop="url">Hello Hexo</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-16T21:04:36+08:00">
-                2017-04-16
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>阿盛的技术博客诞生。</p>
-
-          
-        
+    <div class="post-spread">
       
     </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-  </section>
-
-  
+  </div>
 
 
           </div>
@@ -896,6 +458,10 @@
 
 
           
+  <div class="comments" id="comments">
+    
+  </div>
+
 
         </div>
         
@@ -915,8 +481,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel sidebar-panel-active">
+      <section class="site-overview sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400"
@@ -998,6 +573,22 @@
 
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#什么是XSS"><span class="nav-number">1.</span> <span class="nav-text">什么是XSS</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#XSS漏洞分类"><span class="nav-number">2.</span> <span class="nav-text">XSS漏洞分类</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#XSS原理："><span class="nav-number">3.</span> <span class="nav-text">XSS原理：</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#如何预防XSS"><span class="nav-number">4.</span> <span class="nav-text">如何预防XSS</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -1118,6 +709,10 @@
 
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
 
   
 
