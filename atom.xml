@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://amosannn.github.io/"/>
-  <updated>2017-05-31T15:00:37.258Z</updated>
+  <updated>2017-06-01T14:22:01.142Z</updated>
   <id>https://amosannn.github.io/</id>
   
   <author>
@@ -14,6 +14,65 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>给GitHub Pages绑定域名 附namesilo域名优惠券</title>
+    <link href="https://amosannn.github.io/2017/06/01/github-blog-binding-domain/"/>
+    <id>https://amosannn.github.io/2017/06/01/github-blog-binding-domain/</id>
+    <published>2017-06-01T11:51:17.000Z</published>
+    <updated>2017-06-01T14:22:01.142Z</updated>
+    
+    <content type="html"><![CDATA[<p>在GitHub上托管Hexo博客，访问地址自然是username.github.io，如果想用自己的域名访问这个网址，怎么做呢？<br>本文从域名选购到域名绑定一条龙,给你一个更清晰的操作流程。<br><a id="more"></a></p>
+<h1 id="域名选购"><a href="#域名选购" class="headerlink" title="域名选购"></a>域名选购</h1><p>若已有域名可直接跳到(第二步)[amosannn.com/2017/06/01/github-blog-binding-domain/#使用DNSPod解析服务]。</p>
+<p>说到域名选购，大家第一个想到的应该是狗爹(godaddy)？name？或namecheap？我使用的域名商叫<code>namesilo</code>，虽不是老牌的域名商，却也不是小年轻。并且不需要你有paypal或双币信用卡，良心地<code>支持支付宝</code>，还<code>免费赠送Whois隐私保护</code>。可能你们也听说过，没错我就是冲着赠送的whois保护去的哈哈哈~~<br>进入<a href="www.namesilo.com">namesilo官网</a>，点击右上角创建账户</p>
+<p><img src="/images/namesilo-address-info.png" alt=""><br>值得一提的是上图红框中的信息最好填写真实地址，毕竟账号丢了或者因为其他原因登录不了，你得凭借真实信息找回账号的嘛。whois隐私保护的好处也就体现在这里，你的私人信息只有namesilo看得到。</p>
+<p><img src="/images/namesilo-buy.png" alt=""><br>选择你想要的域名</p>
+<p><img src="/images/namesilo-cart.png" alt=""><br>然后这个页面记得选上<code>privacy setting</code>里的whois保护</p>
+<p>以及每个账户仅限一次的1美元优惠，填入<code>11%off</code>或者<code>1udown</code>即可以$7.99的价格拿下这个域名。</p>
+<p>今天的汇率是 $1 : ￥6.8 你们呢2333</p>
+<h1 id="域名绑定"><a href="#域名绑定" class="headerlink" title="域名绑定"></a>域名绑定</h1><h2 id="更改namesilo的dns指向"><a href="#更改namesilo的dns指向" class="headerlink" title="更改namesilo的dns指向"></a>更改namesilo的dns指向</h2><p>如果在域名购买时，表单中的NameServers有填入dns的话，就可以直接跳到下一步啦。</p>
+<p><img src="/images/namesilo-dns.png" alt=""><br>如果没有的话就在右上角<code>Manage My Domains</code>中点击这个蓝色小按钮，删除其中的三条默认dns解析地址，再回来点击<code>ChangeNameservers</code>按钮。</p>
+<p><img src="/images/namesilo-change.png" alt=""><br>将<code>NameServer 1</code>和<code>NameServer 2</code>改成</p>
+<blockquote>
+<p>f1g1ns1.dnspod.net<br>f1g1ns2.dnspod.net</p>
+</blockquote>
+<p>当然你想用默认或其他的dns解析服务也行。</p>
+<h2 id="使用DNSPod解析服务"><a href="#使用DNSPod解析服务" class="headerlink" title="使用DNSPod解析服务"></a>使用DNSPod解析服务</h2><p>提供dns解析的商家有很多，这里只给出DNSPod的操作步骤，但是一通百通，界面不一样，操作手法还是相同的。<br><img src="/images/dnspod-setting.png" alt=""></p>
+<p>添加三个数据</p>
+<blockquote>
+<p>@  A  192.30.252.153<br>@  A  192.30.252.154<br>www  CNAME  username.github.io</p>
+</blockquote>
+<p>注意：CNAME后的ip地址，千万不要使用ping命令得到的ip，因为GitHub Pages的页面ip不是固定ip，可能这阵子可以正常解析到你的页面，过阵子可能就解析到别人的页面去了！</p>
+<h3 id="主机记录和记录类型说明"><a href="#主机记录和记录类型说明" class="headerlink" title="主机记录和记录类型说明"></a>主机记录和记录类型说明</h3><blockquote>
+<p>www：解析后的域名为 www.xxxxx.com<br>@：直接解析主域名 xxxxx.com<br><em>：泛解析，匹配其他所有域名 </em>.xxxxx.com</p>
+<p>A记录：地址记录，用来指定域名的IPv4地址（如：8.8.8.8），如果需要将域名指向一个IP地址，就需要添加A记录。<br>CNAME： 如果需要将域名指向另一个域名，再由另一个域名提供ip地址，就需要添加CNAME记录。</p>
+</blockquote>
+<h2 id="添加CNAME文件"><a href="#添加CNAME文件" class="headerlink" title="添加CNAME文件"></a>添加CNAME文件</h2><p>在Hexo本地目录中的source文件夹里，添加一个命名为CNAME的无后缀文件，文件中的填写你的域名<br>例如</p>
+<blockquote>
+<p>xxxxx.com</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">hexo c</div><div class="line">hexo g -d</div></pre></td></tr></table></figure>
+<p>配置完后等待一会儿就可以访问啦~</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;在GitHub上托管Hexo博客，访问地址自然是username.github.io，如果想用自己的域名访问这个网址，怎么做呢？&lt;br&gt;本文从域名选购到域名绑定一条龙,给你一个更清晰的操作流程。&lt;br&gt;
+    
+    </summary>
+    
+    
+      <category term="GitHub" scheme="https://amosannn.github.io/tags/GitHub/"/>
+    
+      <category term="namesilo" scheme="https://amosannn.github.io/tags/namesilo/"/>
+    
+      <category term="domain" scheme="https://amosannn.github.io/tags/domain/"/>
+    
+      <category term="Hexo" scheme="https://amosannn.github.io/tags/Hexo/"/>
+    
+      <category term="DNSPod" scheme="https://amosannn.github.io/tags/DNSPod/"/>
+    
+  </entry>
   
   <entry>
     <title>MySQL的default约束用法</title>
@@ -182,7 +241,7 @@
     <link href="https://amosannn.github.io/2017/05/22/delete-github-history-by-bfg/"/>
     <id>https://amosannn.github.io/2017/05/22/delete-github-history-by-bfg/</id>
     <published>2017-05-21T17:33:24.000Z</published>
-    <updated>2017-05-25T14:08:07.116Z</updated>
+    <updated>2017-06-01T13:53:58.960Z</updated>
     
     <content type="html"><![CDATA[<p><img src="/images/github-hacker.jpg" alt=""></p>
 <p>这可能是目前互联网上最详细的BFG Repo-Cleaner中文教程了。</p>
@@ -246,7 +305,9 @@
     </summary>
     
     
-      <category term="github" scheme="https://amosannn.github.io/tags/github/"/>
+      <category term="GitHub" scheme="https://amosannn.github.io/tags/GitHub/"/>
+    
+      <category term="BFG" scheme="https://amosannn.github.io/tags/BFG/"/>
     
   </entry>
   
