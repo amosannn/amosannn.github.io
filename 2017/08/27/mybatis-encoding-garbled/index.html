@@ -74,7 +74,7 @@
 <link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Mybatis," />
+  <meta name="keywords" content="Mybatis,MySQL," />
 
 
 
@@ -92,17 +92,24 @@
 
 
 
-<meta name="description" content="start from zero">
-<meta name="keywords" content="Mybatis">
+<meta name="description" content="分析问题前端显示页面 数据库页面 目前可以推测出的几种情况： . 数据库表的字符编码与服务端不同.字符编码为非utf-8,gbk等能识别中文的编码.配置文件出错（读取或编写格式">
+<meta name="keywords" content="Mybatis,MySQL">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Mybatis传值乱码">
 <meta property="og:url" content="https://amosannn.github.io/2017/08/27/mybatis-encoding-garbled/index.html">
 <meta property="og:site_name" content="Amosannn">
-<meta property="og:description" content="start from zero">
-<meta property="og:updated_time" content="2017-08-27T15:59:07.000Z">
+<meta property="og:description" content="分析问题前端显示页面 数据库页面 目前可以推测出的几种情况： . 数据库表的字符编码与服务端不同.字符编码为非utf-8,gbk等能识别中文的编码.配置文件出错（读取或编写格式">
+<meta property="og:image" content="https://amosannn.github.io/images/garbled_page1.png">
+<meta property="og:image" content="https://amosannn.github.io/images/garbled_db1.png">
+<meta property="og:image" content="https://amosannn.github.io/images/garbled_db2.png">
+<meta property="og:image" content="https://amosannn.github.io/images/application_properties.png">
+<meta property="og:image" content="https://amosannn.github.io/images/garbled_db3.png">
+<meta property="og:image" content="https://amosannn.github.io/images/garbled_page2.png">
+<meta property="og:updated_time" content="2017-08-28T12:59:16.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Mybatis传值乱码">
-<meta name="twitter:description" content="start from zero">
+<meta name="twitter:description" content="分析问题前端显示页面 数据库页面 目前可以推测出的几种情况： . 数据库表的字符编码与服务端不同.字符编码为非utf-8,gbk等能识别中文的编码.配置文件出错（读取或编写格式">
+<meta name="twitter:image" content="https://amosannn.github.io/images/garbled_page1.png">
 
 
 
@@ -401,7 +408,16 @@
       
 
       
-        
+        <h1 id="分析问题"><a href="#分析问题" class="headerlink" title="分析问题"></a>分析问题</h1><h2 id="前端显示页面"><a href="#前端显示页面" class="headerlink" title="前端显示页面"></a>前端显示页面</h2><p><img src="/images/garbled_page1.png" alt=""></p>
+<h2 id="数据库页面"><a href="#数据库页面" class="headerlink" title="数据库页面"></a>数据库页面</h2><p><img src="/images/garbled_db1.png" alt=""></p>
+<h2 id="目前可以推测出的几种情况："><a href="#目前可以推测出的几种情况：" class="headerlink" title="目前可以推测出的几种情况："></a>目前可以推测出的几种情况：</h2><blockquote>
+<p>. 数据库表的字符编码与服务端不同<br>.字符编码为非utf-8,gbk等能识别中文的编码<br>.配置文件出错（读取或编写格式<br><a id="more"></a><br>试试手动插入数据<br><img src="/images/garbled_db2.png" alt=""><br>数据库显示正常，页面乱码<br>–&gt;排除数据库编码问题</p>
+</blockquote>
+<h2 id="查看配置文件"><a href="#查看配置文件" class="headerlink" title="查看配置文件"></a>查看配置文件</h2><p><img src="/images/application_properties.png" alt=""><br>编码与数据库同为UTF-8</p>
+<p>发现一段诡异代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">spring.datasource.url=jdbc:mysql://localhost:3306/toutiao?useUnicode=true&amp;ampcharacterEncoding=UTF-8&amp;ampuseSSL=false</div></pre></td></tr></table></figure></p>
+<h1 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h1><p>删除amp<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">spring.datasource.url=jdbc:mysql://localhost:3306/toutiao?useUnicode=true&amp;characterEncoding=utf8&amp;useSSL=false</div></pre></td></tr></table></figure></p>
+<p>重启系统，乱码问题解决.<br><img src="/images/garbled_db3.png" alt=""><br><img src="/images/garbled_page2.png" alt=""></p>
+
       
     </div>
 
@@ -431,6 +447,8 @@
         <div class="post-tags">
           
             <a href="/tags/Mybatis/" rel="tag"># Mybatis</a>
+          
+            <a href="/tags/MySQL/" rel="tag"># MySQL</a>
           
         </div>
       
@@ -505,8 +523,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel sidebar-panel-active">
+      <section class="site-overview sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400"
@@ -604,6 +631,22 @@
 
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#分析问题"><span class="nav-number">1.</span> <span class="nav-text">分析问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#前端显示页面"><span class="nav-number">1.1.</span> <span class="nav-text">前端显示页面</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据库页面"><span class="nav-number">1.2.</span> <span class="nav-text">数据库页面</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#目前可以推测出的几种情况："><span class="nav-number">1.3.</span> <span class="nav-text">目前可以推测出的几种情况：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看配置文件"><span class="nav-number">1.4.</span> <span class="nav-text">查看配置文件</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#解决问题"><span class="nav-number">2.</span> <span class="nav-text">解决问题</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
