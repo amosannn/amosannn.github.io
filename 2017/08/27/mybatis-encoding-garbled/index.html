@@ -105,7 +105,7 @@
 <meta property="og:image" content="https://amosannn.github.io/images/application_properties.png">
 <meta property="og:image" content="https://amosannn.github.io/images/garbled_db3.png">
 <meta property="og:image" content="https://amosannn.github.io/images/garbled_page2.png">
-<meta property="og:updated_time" content="2017-08-28T12:59:16.000Z">
+<meta property="og:updated_time" content="2017-08-28T13:12:45.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Mybatis传值乱码">
 <meta name="twitter:description" content="分析问题前端显示页面 数据库页面 目前可以推测出的几种情况： . 数据库表的字符编码与服务端不同.字符编码为非utf-8,gbk等能识别中文的编码.配置文件出错（读取或编写格式">
@@ -411,8 +411,10 @@
         <h1 id="分析问题"><a href="#分析问题" class="headerlink" title="分析问题"></a>分析问题</h1><h2 id="前端显示页面"><a href="#前端显示页面" class="headerlink" title="前端显示页面"></a>前端显示页面</h2><p><img src="/images/garbled_page1.png" alt=""></p>
 <h2 id="数据库页面"><a href="#数据库页面" class="headerlink" title="数据库页面"></a>数据库页面</h2><p><img src="/images/garbled_db1.png" alt=""></p>
 <h2 id="目前可以推测出的几种情况："><a href="#目前可以推测出的几种情况：" class="headerlink" title="目前可以推测出的几种情况："></a>目前可以推测出的几种情况：</h2><blockquote>
-<p>. 数据库表的字符编码与服务端不同<br>.字符编码为非utf-8,gbk等能识别中文的编码<br>.配置文件出错（读取或编写格式<br><a id="more"></a><br>试试手动插入数据<br><img src="/images/garbled_db2.png" alt=""><br>数据库显示正常，页面乱码<br>–&gt;排除数据库编码问题</p>
+<p>. 数据库表的字符编码与服务端不同<br>.字符编码为非utf-8,gbk等能识别中文的编码<br>.配置文件出错（读取或编写格式</p>
 </blockquote>
+<a id="more"></a>
+<p>试试手动插入数据<br><img src="/images/garbled_db2.png" alt=""><br>数据库显示正常，页面乱码<br>–&gt;排除数据库编码问题</p>
 <h2 id="查看配置文件"><a href="#查看配置文件" class="headerlink" title="查看配置文件"></a>查看配置文件</h2><p><img src="/images/application_properties.png" alt=""><br>编码与数据库同为UTF-8</p>
 <p>发现一段诡异代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">spring.datasource.url=jdbc:mysql://localhost:3306/toutiao?useUnicode=true&amp;ampcharacterEncoding=UTF-8&amp;ampuseSSL=false</div></pre></td></tr></table></figure></p>
 <h1 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h1><p>删除amp<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">spring.datasource.url=jdbc:mysql://localhost:3306/toutiao?useUnicode=true&amp;characterEncoding=utf8&amp;useSSL=false</div></pre></td></tr></table></figure></p>
