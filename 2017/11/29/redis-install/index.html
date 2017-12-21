@@ -74,7 +74,7 @@
 <link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="MySQL,Database," />
+  <meta name="keywords" content="Hexo, NexT" />
 
 
 
@@ -92,18 +92,25 @@
 
 
 
-<meta name="description" content="在sql最基本的curd语句使用熟练后，我开始发现提高数据库的稳定性和易用性需要一些其他的东西，比如constraint(约束)。 我就一个没经过数据加密的user表演示一下default约束的用法。 建表语句中使用123456create table user(	id int(11) not null auto_increment,	username varchar(255) default n">
-<meta name="keywords" content="MySQL,Database">
+<meta name="description" content="先贴Redis官网：https://redis.io/download 1234$ wget http://download.redis.io/releases/redis-4.0.2.tar.gz$ tar xzf redis-4.0.2.tar.gz$ cd redis-4.0.2$ make 如果没有安装gcc，则会抛出这样的错误：1$ yum install gcc 在执行一次make可能">
 <meta property="og:type" content="article">
-<meta property="og:title" content="MySQL的default约束用法">
-<meta property="og:url" content="https://amosannn.github.io/2017/05/31/mysql-default-constraint/index.html">
+<meta property="og:title" content="Redis从安装到踩坑">
+<meta property="og:url" content="https://amosannn.github.io/2017/11/29/redis-install/index.html">
 <meta property="og:site_name" content="Amosannn">
-<meta property="og:description" content="在sql最基本的curd语句使用熟练后，我开始发现提高数据库的稳定性和易用性需要一些其他的东西，比如constraint(约束)。 我就一个没经过数据加密的user表演示一下default约束的用法。 建表语句中使用123456create table user(	id int(11) not null auto_increment,	username varchar(255) default n">
+<meta property="og:description" content="先贴Redis官网：https://redis.io/download 1234$ wget http://download.redis.io/releases/redis-4.0.2.tar.gz$ tar xzf redis-4.0.2.tar.gz$ cd redis-4.0.2$ make 如果没有安装gcc，则会抛出这样的错误：1$ yum install gcc 在执行一次make可能">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-06-01T16:04:32.000Z">
+<meta property="og:image" content="https://amosannn.github.io/images/redis_install/redis_install_error.png">
+<meta property="og:image" content="https://amosannn.github.io/images/redis_install/redis_install_error2.png">
+<meta property="og:image" content="https://amosannn.github.io/images/redis_install/redis_running.png">
+<meta property="og:image" content="https://amosannn.github.io/images/redis_install/redis_test.png">
+<meta property="og:image" content="https://amosannn.github.io/images/redis_install/denied_of_protected_mode.png">
+<meta property="og:image" content="https://amosannn.github.io/images/redis_install/denied_of_127_binded.png">
+<meta property="og:image" content="https://amosannn.github.io/images/redis_install/external_access_success.png">
+<meta property="og:updated_time" content="2017-12-21T14:48:02.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="MySQL的default约束用法">
-<meta name="twitter:description" content="在sql最基本的curd语句使用熟练后，我开始发现提高数据库的稳定性和易用性需要一些其他的东西，比如constraint(约束)。 我就一个没经过数据加密的user表演示一下default约束的用法。 建表语句中使用123456create table user(	id int(11) not null auto_increment,	username varchar(255) default n">
+<meta name="twitter:title" content="Redis从安装到踩坑">
+<meta name="twitter:description" content="先贴Redis官网：https://redis.io/download 1234$ wget http://download.redis.io/releases/redis-4.0.2.tar.gz$ tar xzf redis-4.0.2.tar.gz$ cd redis-4.0.2$ make 如果没有安装gcc，则会抛出这样的错误：1$ yum install gcc 在执行一次make可能">
+<meta name="twitter:image" content="https://amosannn.github.io/images/redis_install/redis_install_error.png">
 
 
 
@@ -131,13 +138,13 @@
 
 
 
-  <link rel="canonical" href="https://amosannn.github.io/2017/05/31/mysql-default-constraint/"/>
+  <link rel="canonical" href="https://amosannn.github.io/2017/11/29/redis-install/"/>
 
 
 
 
 
-  <title>MySQL的default约束用法 | Amosannn</title>
+  <title>Redis从安装到踩坑 | Amosannn</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -305,7 +312,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/05/31/mysql-default-constraint/">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/11/29/redis-install/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Amosannn">
@@ -322,7 +329,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">MySQL的default约束用法</h1>
+          <h1 class="post-title" itemprop="name headline">Redis从安装到踩坑</h1>
         
 
         <div class="post-meta">
@@ -334,8 +341,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-31T22:19:51+08:00">
-                2017-05-31
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-29T16:13:02+08:00">
+                2017-11-29
               </time>
             
 
@@ -345,28 +352,6 @@
           </span>
 
           
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/技术一路走到黑/" itemprop="url" rel="index">
-                    <span itemprop="name">技术一路走到黑</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
 
           
             
@@ -375,9 +360,9 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2017/05/31/mysql-default-constraint/#comments" itemprop="discussionUrl">
+                <a href="/2017/11/29/redis-install/#comments" itemprop="discussionUrl">
                   <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/05/31/mysql-default-constraint/" itemprop="commentCount"></span>
+                        data-disqus-identifier="2017/11/29/redis-install/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -402,14 +387,22 @@
       
 
       
-        <p>在sql最基本的curd语句使用熟练后，我开始发现提高数据库的稳定性和易用性需要一些其他的东西，比如<code>constraint</code>(约束)。</p>
-<p>我就一个没经过数据加密的user表演示一下<code>default约束</code>的用法。</p>
-<h2 id="建表语句中使用"><a href="#建表语句中使用" class="headerlink" title="建表语句中使用"></a>建表语句中使用</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> <span class="keyword">user</span>(</span><br><span class="line">	<span class="keyword">id</span> <span class="built_in">int</span>(<span class="number">11</span>) <span class="keyword">not</span> <span class="literal">null</span> auto_increment,</span><br><span class="line">	username <span class="built_in">varchar</span>(<span class="number">255</span>) <span class="keyword">default</span> <span class="literal">null</span>,</span><br><span class="line">	<span class="keyword">status</span> <span class="built_in">varchar</span>(<span class="number">255</span>) <span class="keyword">default</span> <span class="string">"active"</span>;</span><br><span class="line">	primary key (id)</span><br><span class="line">) engine=InnoDB default charset=utf8;</span><br></pre></td></tr></table></figure>
-<h2 id="已有表结构？使用alter插入字段"><a href="#已有表结构？使用alter插入字段" class="headerlink" title="已有表结构？使用alter插入字段"></a>已有表结构？使用alter插入字段</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> <span class="keyword">user</span> <span class="keyword">add</span> <span class="keyword">status</span> <span class="built_in">varchar</span>(<span class="number">255</span>) <span class="keyword">default</span> <span class="string">"active"</span>;</span><br></pre></td></tr></table></figure>
-<h2 id="有默认值的表如何添加数据"><a href="#有默认值的表如何添加数据" class="headerlink" title="有默认值的表如何添加数据"></a>有默认值的表如何添加数据</h2><p>那么表结构已经有了<code>default约束</code>，在插入值的时候如何处理字段的默认值呢？<br>传入null？空字符串？或者是不填？都不行！<br><a id="more"></a><br>答案是<code>传入default关键字</code>，表示插入字段预设的默认值。<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> <span class="keyword">user</span> <span class="keyword">values</span>(<span class="literal">null</span>, <span class="string">"c"</span>, <span class="string">"c"</span>, <span class="keyword">default</span>);</span><br></pre></td></tr></table></figure></p>
-<p>你想覆盖default约束传入自定义值？ 填写对应类型的值就行了。</p>
-<hr>
-<p>参考链接：<br><a href="https://www.w3schools.com/sql/sql_default.asp" target="_blank" rel="noopener">SQL DEFAULT Constraint</a></p>
+        <p>先贴Redis官网：<a href="https://redis.io/download" target="_blank" rel="noopener">https://redis.io/download</a></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> wget http://download.redis.io/releases/redis-4.0.2.tar.gz</span><br><span class="line"><span class="meta">$</span> tar xzf redis-4.0.2.tar.gz</span><br><span class="line"><span class="meta">$</span> cd redis-4.0.2</span><br><span class="line"><span class="meta">$</span> make</span><br></pre></td></tr></table></figure>
+<p>如果没有安装gcc，则会抛出这样的错误：<br><img src="/images/redis_install/redis_install_error.png" alt=""><br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> yum install gcc</span><br></pre></td></tr></table></figure></p>
+<p>在执行一次make可能会再抛出这样一个错误：<br><img src="/images/redis_install/redis_install_error2.png" alt=""></p>
+<p>这样的话便在make后加上参数<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> make MALLOC=libc</span><br></pre></td></tr></table></figure></p>
+<p>编译完成后<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> src/redis-server  redis.conf</span><br></pre></td></tr></table></figure></p>
+<p>当看到这个画面redis就启动完成了<br><img src="/images/redis_install/redis_running.png" alt=""></p>
+<p>新建一个链接（开启新的终端或新的ssh标签页）<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> cd /usr/local/redis-4.0.2</span><br><span class="line"><span class="meta">$</span> src/redis-cli</span><br></pre></td></tr></table></figure></p>
+<p><img src="/images/redis_install/redis_test.png" alt=""><br>至此大功告成，如果想学习redis命令，则点击：xxx.xxx/xxx</p>
+<p>二：redis开启外部访问<br>远程连接redis访问被拒绝，初步推断为redis配置问题。<br>开了另一台服务器redis-cli远程连接，发现如下错误<br><img src="/images/redis_install/denied_of_protected_mode.png" alt=""><br>由图中可知，要想外部访问当前redis服务，需关闭安全模式。</p>
+<p>关闭安全模式<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">vi redis.conf</span><br><span class="line"><span class="meta">#</span> 更改protected-mode 由yes 改成 no</span><br></pre></td></tr></table></figure></p>
+<p>关闭并重启后发现依旧访问被拒。<br><img src="/images/redis_install/denied_of_127_binded.png" alt=""></p>
+<p>一波操作之后发现，需修改默认配置文件中的bind配置<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> 更改 bind 127.0.0.1 为 bind 0.0.0.0</span><br><span class="line"><span class="meta">#</span> 重启redis后便可使用cmd或terminal测试连接</span><br><span class="line"></span><br><span class="line"><span class="meta">$</span> redis-cli -h &#123;redis_host&#125; -p &#123;redis_port&#125;</span><br></pre></td></tr></table></figure></p>
+<p>其中<code>{redis_host}</code>就是远程的Redis服务所在服务器地址，<code>{redis_port}</code>就是Redis服务端口（默认端口为6379）。<br>例如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_77_16_centos src]# ./redis-cli -h 你的ip -p 6379</span><br></pre></td></tr></table></figure></p>
+<p>大功告成<br><img src="/images/redis_install/external_access_success.png" alt=""></p>
+<p>三：redis的基本操作<br>关闭redis的两种方法<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># 无密码</span><br><span class="line"># redis-cli shutdown</span><br><span class="line"></span><br><span class="line"># 有密码</span><br><span class="line"># redis-cli -a password shutdown</span><br><span class="line"></span><br><span class="line"># 查询redis的pid，关闭进程</span><br><span class="line"># ps aux | grep redis</span><br><span class="line"># kill -9 pid</span><br></pre></td></tr></table></figure></p>
 
       
     </div>
@@ -437,14 +430,6 @@
 
     <footer class="post-footer">
       
-        <div class="post-tags">
-          
-            <a href="/tags/MySQL/" rel="tag"># MySQL</a>
-          
-            <a href="/tags/Database/" rel="tag"># Database</a>
-          
-        </div>
-      
 
       
         
@@ -454,8 +439,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/05/28/java-get-time/" rel="next" title="使用Calendar或DateFormat拆分日期">
-                <i class="fa fa-chevron-left"></i> 使用Calendar或DateFormat拆分日期
+              <a href="/2017/11/05/intalled-item2/" rel="next" title="从Terminal过渡到Item2">
+                <i class="fa fa-chevron-left"></i> 从Terminal过渡到Item2
               </a>
             
           </div>
@@ -463,10 +448,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/06/01/github-blog-binding-domain/" rel="prev" title="给GitHub Pages绑定域名 附namesilo域名优惠券">
-                给GitHub Pages绑定域名 附namesilo域名优惠券 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -520,17 +501,8 @@
       
 
       
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
-            文章目录
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview">
-            站点概览
-          </li>
-        </ul>
-      
 
-      <section class="site-overview sidebar-panel">
+      <section class="site-overview sidebar-panel sidebar-panel-active">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400"
@@ -628,22 +600,6 @@
 
       </section>
 
-      
-      <!--noindex-->
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-
-            
-              
-            
-
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#建表语句中使用"><span class="nav-number">1.</span> <span class="nav-text">建表语句中使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#已有表结构？使用alter插入字段"><span class="nav-number">2.</span> <span class="nav-text">已有表结构？使用alter插入字段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#有默认值的表如何添加数据"><span class="nav-number">3.</span> <span class="nav-text">有默认值的表如何添加数据</span></a></li></ol></div>
-            
-
-          </div>
-        </section>
-      <!--/noindex-->
       
 
       
@@ -781,9 +737,9 @@
     
       <script type="text/javascript">
         var disqus_config = function () {
-          this.page.url = 'https://amosannn.github.io/2017/05/31/mysql-default-constraint/';
-          this.page.identifier = '2017/05/31/mysql-default-constraint/';
-          this.page.title = 'MySQL的default约束用法';
+          this.page.url = 'https://amosannn.github.io/2017/11/29/redis-install/';
+          this.page.identifier = '2017/11/29/redis-install/';
+          this.page.title = 'Redis从安装到踩坑';
         };
         var d = document, s = d.createElement('script');
         s.src = 'https://amosannn.disqus.com/embed.js';

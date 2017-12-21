@@ -5,7 +5,7 @@
   
 
 
-<html class="theme-next pisces use-motion" lang="zh-Hans">
+<html class="theme-next muse use-motion" lang="zh-Hans">
 <head>
   <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -99,6 +99,7 @@
 <meta property="og:url" content="https://amosannn.github.io/2017/05/25/implement-queue-by-two-stacks/index.html">
 <meta property="og:site_name" content="Amosannn">
 <meta property="og:description" content="今天下午汉得来学校宣讲，笔试中看到这样一个题目，让我们用两个栈实现一个队列。 那时候没想太多，队列先进先出，栈先进后出，那么只要一个栈作为主栈，另一个栈作为缓存栈，来回倒腾就能实现队列的功能了。  回来后仔细想想，其实还有比这更高效的方法。">
+<meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://amosannn.github.io/images/two-stacks-operation.jpg">
 <meta property="og:updated_time" content="2017-06-01T16:04:52.000Z">
 <meta name="twitter:card" content="summary">
@@ -112,7 +113,7 @@
   var NexT = window.NexT || {};
   var CONFIG = {
     root: '/',
-    scheme: 'Pisces',
+    scheme: 'Muse',
     sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
     fancybox: true,
     motion: true,
@@ -408,7 +409,7 @@
 <p><img src="/images/two-stacks-operation.jpg" alt=""></p>
 <p>回来后仔细想想，其实还有比这更高效的方法。<a id="more"></a>也就是保留主栈的栈底元素，弹出即可，这样可以减少一次压栈操作。</p>
 <p>顺便用代码实现了一下。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/*</span></div><div class="line">入队时将元素压入栈1。</div><div class="line">出队时先判断栈2是否为空，若不为空则直接弹出栈2的栈顶元素。若为空，则将栈1除了栈底的元素弹出并压入栈2，然后弹出栈1的元素再将栈2的元素弹出并压回栈1即可。</div><div class="line">这样做的好处是可以减少一次压栈的操作，并且考虑了没有元素可出队的异常处理。</div><div class="line">*/</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">StackToQueue</span> </span>&#123;</div><div class="line">    <span class="keyword">private</span> Stack&lt;Integer&gt; stack1;</div><div class="line">    <span class="keyword">private</span> Stack&lt;Integer&gt; stack2;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">StackToQueue</span><span class="params">()</span> </span>&#123;</div><div class="line">       stack1 = <span class="keyword">new</span> Stack&lt;Integer&gt;();</div><div class="line">       stack2 = <span class="keyword">new</span> Stack&lt;Integer&gt;();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">pop</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="comment">//如果栈1不为空，且栈1所剩元素大于1，则将栈1出栈并压入栈2</span></div><div class="line">        <span class="keyword">while</span>(!stack1.isEmpty())&#123;</div><div class="line">        	<span class="keyword">if</span>(<span class="number">1</span>==stack.size())</div><div class="line">        		<span class="keyword">break</span>;</div><div class="line">        	stack2.push(stack1.pop());</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="comment">//将栈1的元素出栈，即出队。</span></div><div class="line">        <span class="keyword">int</span> top = stack1.pop();</div><div class="line"></div><div class="line">        <span class="comment">//如果栈2不为空，将栈2中的元素出栈并压回栈1中</span></div><div class="line">        <span class="keyword">while</span>(!stack2.isEmpty())&#123;</div><div class="line">            stack1.push(stack2.pop());</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> top;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">入队时将元素压入栈1。</span></span><br><span class="line"><span class="comment">出队时先判断栈2是否为空，若不为空则直接弹出栈2的栈顶元素。若为空，则将栈1除了栈底的元素弹出并压入栈2，然后弹出栈1的元素再将栈2的元素弹出并压回栈1即可。</span></span><br><span class="line"><span class="comment">这样做的好处是可以减少一次压栈的操作，并且考虑了没有元素可出队的异常处理。</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">StackToQueue</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Stack&lt;Integer&gt; stack1;</span><br><span class="line">    <span class="keyword">private</span> Stack&lt;Integer&gt; stack2;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">StackToQueue</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       stack1 = <span class="keyword">new</span> Stack&lt;Integer&gt;();</span><br><span class="line">       stack2 = <span class="keyword">new</span> Stack&lt;Integer&gt;();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">pop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//如果栈1不为空，且栈1所剩元素大于1，则将栈1出栈并压入栈2</span></span><br><span class="line">        <span class="keyword">while</span>(!stack1.isEmpty())&#123;</span><br><span class="line">        	<span class="keyword">if</span>(<span class="number">1</span>==stack.size())</span><br><span class="line">        		<span class="keyword">break</span>;</span><br><span class="line">        	stack2.push(stack1.pop());</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//将栈1的元素出栈，即出队。</span></span><br><span class="line">        <span class="keyword">int</span> top = stack1.pop();</span><br><span class="line"></span><br><span class="line">        <span class="comment">//如果栈2不为空，将栈2中的元素出栈并压回栈1中</span></span><br><span class="line">        <span class="keyword">while</span>(!stack2.isEmpty())&#123;</span><br><span class="line">            stack1.push(stack2.pop());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> top;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
       
     </div>
 
@@ -532,7 +533,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-count">15</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -647,7 +648,7 @@
 <div class="theme-info">
   主题 -
   <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
-    NexT.Pisces
+    NexT.Muse
   </a>
 </div>
 
@@ -726,13 +727,6 @@
 
   
   
-
-
-  <script type="text/javascript" src="/js/src/affix.js?v=5.1.1"></script>
-
-  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.1"></script>
-
-
 
   
   <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>

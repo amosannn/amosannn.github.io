@@ -5,7 +5,7 @@
   
 
 
-<html class="theme-next pisces use-motion" lang="zh-Hans">
+<html class="theme-next muse use-motion" lang="zh-Hans">
 <head>
   <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -99,6 +99,7 @@
 <meta property="og:url" content="https://amosannn.github.io/2017/05/22/delete-github-history-by-bfg/index.html">
 <meta property="og:site_name" content="Amosannn">
 <meta property="og:description" content="这可能是目前互联网上最详细的BFG Repo-Cleaner中文教程了。 为了删除三天前的一次错误提交，我开始寻找关于撤销github历史commit的方法。实话说，经历了6个小时的搜索，我依旧没有找到能解决我所碰到的奇怪问题的解决方案，我发现网络上对于BFG的相关讨论太少太少，尤其是中文的信息，更是贫瘠。另外的原因也是大部分人确实能按照官方的指引，一步到位地删除历史提交的信息。我失败了，不知道">
+<meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://amosannn.github.io/images/github-hacker.jpg">
 <meta property="og:updated_time" content="2017-06-01T13:54:00.000Z">
 <meta name="twitter:card" content="summary">
@@ -112,7 +113,7 @@
   var NexT = window.NexT || {};
   var CONFIG = {
     root: '/',
-    scheme: 'Pisces',
+    scheme: 'Muse',
     sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
     fancybox: true,
     motion: true,
@@ -384,13 +385,13 @@
         <p><img src="/images/github-hacker.jpg" alt=""></p>
 <p>这可能是目前互联网上最详细的BFG Repo-Cleaner中文教程了。</p>
 <p>为了删除三天前的一次错误提交，我开始寻找关于撤销github历史commit的方法。<br>实话说，经历了6个小时的搜索，我依旧没有找到能解决我所碰到的奇怪问题的解决方案，我发现网络上对于BFG的相关讨论太少太少，尤其是中文的信息，更是贫瘠。另外的原因也是大部分人确实能按照官方的指引，一步到位地删除历史提交的信息。我失败了，不知道是因为git配置或是哪出了纰漏，但也因此浏览了互联网上大部分解答。<br>以下是我整理出的使用教程。<br><a id="more"></a></p>
-<h2 id="BFG-Repo-Cleaner"><a href="#BFG-Repo-Cleaner" class="headerlink" title="BFG Repo-Cleaner"></a><a href="https://rtyley.github.io/bfg-repo-cleaner/" target="_blank" rel="external">BFG Repo-Cleaner</a></h2><blockquote>
+<h2 id="BFG-Repo-Cleaner"><a href="#BFG-Repo-Cleaner" class="headerlink" title="BFG Repo-Cleaner"></a><a href="https://rtyley.github.io/bfg-repo-cleaner/" target="_blank" rel="noopener">BFG Repo-Cleaner</a></h2><blockquote>
 <p>github称BFG为<code>git filter-branch</code>的替代品。一款比它更快更简单的用于删除无用数据的工具。</p>
 </blockquote>
 <p>作为一个github官方推荐的”仓库清理工具”，快速和简单是它被推荐的重要原因，程序为一个<code>Scala</code>编写而成的jar包，也意味着运行环境需要jdk的支持。<br>ok，竟然github都这样推荐了，就先来试一试。</p>
-<h3 id="BFG的主要功能与使用步骤如下："><a href="#BFG的主要功能与使用步骤如下：" class="headerlink" title="BFG的主要功能与使用步骤如下："></a>BFG的主要功能与使用步骤如下：</h3><h4 id="1-克隆仓库"><a href="#1-克隆仓库" class="headerlink" title="1.克隆仓库"></a>1.克隆仓库</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ git clone --mirror git://example.com/some-big-repo.git</div></pre></td></tr></table></figure>
+<h3 id="BFG的主要功能与使用步骤如下："><a href="#BFG的主要功能与使用步骤如下：" class="headerlink" title="BFG的主要功能与使用步骤如下："></a>BFG的主要功能与使用步骤如下：</h3><h4 id="1-克隆仓库"><a href="#1-克隆仓库" class="headerlink" title="1.克隆仓库"></a>1.克隆仓库</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> git clone --mirror git://example.com/some-big-repo.git</span><br></pre></td></tr></table></figure>
 <p>使用<code>--mirror</code>标记clone一份repo（目标仓库）到本地。</p>
-<h4 id="2-执行BFG命令移除文件"><a href="#2-执行BFG命令移除文件" class="headerlink" title="2.执行BFG命令移除文件"></a>2.执行BFG命令移除文件</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ java -jar 占位符1 占位符2 占位符3</div></pre></td></tr></table></figure>
+<h4 id="2-执行BFG命令移除文件"><a href="#2-执行BFG命令移除文件" class="headerlink" title="2.执行BFG命令移除文件"></a>2.执行BFG命令移除文件</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> java -jar 占位符1 占位符2 占位符3</span><br></pre></td></tr></table></figure>
 <p>clone下来的git仓库和你想象中应该是有点差距的，因为它和你托管在github上的仓库并不一样，它并没有你编写的代码和文件结构，但它与你的库相关联。你可以选择备份也可以选择直接操作。</p>
 <p>占位符1：</p>
 <blockquote>
@@ -414,22 +415,22 @@
 <li>clone下来的git文件名 例：some-big-repo.git</li>
 </ul>
 </blockquote>
-<p>e.g.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">java -jar bfg.jar --strip-blobs-bigger-than 10M some-big-repo.git</div></pre></td></tr></table></figure></p>
-<h4 id="3-使用gc命令删除目标数据"><a href="#3-使用gc命令删除目标数据" class="headerlink" title="3.使用gc命令删除目标数据"></a>3.使用gc命令删除目标数据</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ cd some-big-repo.git</div><div class="line">$ git reflog expire --expire=now --all &amp;&amp; git gc --prune=now --aggressive</div></pre></td></tr></table></figure>
-<h4 id="4-提交修改"><a href="#4-提交修改" class="headerlink" title="4.提交修改"></a>4.提交修改</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ git push</div></pre></td></tr></table></figure>
+<p>e.g.<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -jar bfg.jar --strip-blobs-bigger-than 10M some-big-repo.git</span><br></pre></td></tr></table></figure></p>
+<h4 id="3-使用gc命令删除目标数据"><a href="#3-使用gc命令删除目标数据" class="headerlink" title="3.使用gc命令删除目标数据"></a>3.使用gc命令删除目标数据</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> cd some-big-repo.git</span><br><span class="line"><span class="meta">$</span> git reflog expire --expire=now --all &amp;&amp; git gc --prune=now --aggressive</span><br></pre></td></tr></table></figure>
+<h4 id="4-提交修改"><a href="#4-提交修改" class="headerlink" title="4.提交修改"></a>4.提交修改</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> git push</span><br></pre></td></tr></table></figure>
 <p>至此，新clone出来的git库中，将再也找不到被删除的内容了。<br>相关参考链接请移步页脚。</p>
 <hr>
 <p>以下记录我遇到的问题</p>
-<p>执行命令<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">java -jar bfg-1.12.15.jar --delete-files carousel.jsp tmall-web-store.git</div></pre></td></tr></table></figure></p>
+<p>执行命令<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -jar bfg-1.12.15.jar --delete-files carousel.jsp tmall-web-store.git</span><br></pre></td></tr></table></figure></p>
 <p>报错信息：These are your protected commits, and so their contents will NOT be altered: commit 6c3f4d5a (protected by ‘HEAD’)</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">$ java -jar bfg-1.12.15.jar --delete-files xxxxx.xx xxxxx.git</div><div class="line"></div><div class="line">Using repo : C:\Users\js\Downloads\xxxxx.git</div><div class="line"></div><div class="line">Found 205 objects to protect</div><div class="line">Found 2 commit-pointing refs : HEAD, refs/heads/master</div><div class="line"></div><div class="line">Protected commits</div><div class="line">-----------------</div><div class="line"></div><div class="line">These are your protected commits, and so their contents will NOT be altered:</div><div class="line"></div><div class="line"> * commit 6c3f4d5a (protected by &apos;HEAD&apos;)</div><div class="line"></div><div class="line">Cleaning</div><div class="line">--------</div><div class="line"></div><div class="line">Found 14 commits</div><div class="line">Cleaning commits:       100% (14/14)</div><div class="line">Cleaning commits completed in 93 ms.</div><div class="line"></div><div class="line">BFG aborting: No refs to update - no dirty commits found??</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">--</div><div class="line">You can rewrite history in Git - don&apos;t let Trump do it for real!</div><div class="line">Trump&apos;s administration has lied consistently, to make people give up on ever</div><div class="line">being told the truth. Don&apos;t give up: https://github.com/bkeepers/stop-trump</div><div class="line">--</div></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> java -jar bfg-1.12.15.jar --delete-files xxxxx.xx xxxxx.git</span><br><span class="line"></span><br><span class="line">Using repo : C:\Users\js\Downloads\xxxxx.git</span><br><span class="line"></span><br><span class="line">Found 205 objects to protect</span><br><span class="line">Found 2 commit-pointing refs : HEAD, refs/heads/master</span><br><span class="line"></span><br><span class="line">Protected commits</span><br><span class="line">-----------------</span><br><span class="line"></span><br><span class="line">These are your protected commits, and so their contents will NOT be altered:</span><br><span class="line"></span><br><span class="line"> * commit 6c3f4d5a (protected by 'HEAD')</span><br><span class="line"></span><br><span class="line">Cleaning</span><br><span class="line">--------</span><br><span class="line"></span><br><span class="line">Found 14 commits</span><br><span class="line">Cleaning commits:       100% (14/14)</span><br><span class="line">Cleaning commits completed in 93 ms.</span><br><span class="line"></span><br><span class="line">BFG aborting: No refs to update - no dirty commits found??</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">--</span><br><span class="line">You can rewrite history in Git - don't let Trump do it for real!</span><br><span class="line">Trump's administration has lied consistently, to make people give up on ever</span><br><span class="line">being told the truth. Don't give up: https://github.com/bkeepers/stop-trump</span><br><span class="line">--</span><br></pre></td></tr></table></figure>
 <p>我不明白为什么会显示protected commits，在我尝试多次commit之后，也就是修改head~1，或是手动删除文件，都无法让程序成功运行下去。甚至在多次push与pull之后，commit记录竟x2了…</p>
-<p>几近崩溃的我只能执行git上取消上一个commit的命令,手动撤销了所有的记录（包括目标记录后的几条commit），再重新提交…Orz<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">git reset --hard HEAD~1</div><div class="line">git push --force</div></pre></td></tr></table></figure></p>
+<p>几近崩溃的我只能执行git上取消上一个commit的命令,手动撤销了所有的记录（包括目标记录后的几条commit），再重新提交…Orz<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git reset --hard HEAD~1</span><br><span class="line">git push --force</span><br></pre></td></tr></table></figure></p>
 <p>相关链接：</p>
 <blockquote>
 <ul>
-<li><a href="https://rtyley.github.io/bfg-repo-cleaner/" target="_blank" rel="external">BFG Repo-Cleaner</a></li>
-<li><a href="https://help.github.com/articles/removing-sensitive-data-from-a-repository/" target="_blank" rel="external">[github]Removing sensitive data from a repository</a></li>
+<li><a href="https://rtyley.github.io/bfg-repo-cleaner/" target="_blank" rel="noopener">BFG Repo-Cleaner</a></li>
+<li><a href="https://help.github.com/articles/removing-sensitive-data-from-a-repository/" target="_blank" rel="noopener">[github]Removing sensitive data from a repository</a></li>
 </ul>
 </blockquote>
 
@@ -567,7 +568,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-count">15</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -698,7 +699,7 @@
 <div class="theme-info">
   主题 -
   <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
-    NexT.Pisces
+    NexT.Muse
   </a>
 </div>
 
@@ -777,13 +778,6 @@
 
   
   
-
-
-  <script type="text/javascript" src="/js/src/affix.js?v=5.1.1"></script>
-
-  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.1"></script>
-
-
 
   
   <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
