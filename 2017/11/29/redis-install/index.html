@@ -106,7 +106,7 @@
 <meta property="og:image" content="https://amosannn.github.io/images/redis_install/denied_of_protected_mode.png">
 <meta property="og:image" content="https://amosannn.github.io/images/redis_install/denied_of_127_binded.png">
 <meta property="og:image" content="https://amosannn.github.io/images/redis_install/external_access_success.png">
-<meta property="og:updated_time" content="2017-12-21T14:48:02.000Z">
+<meta property="og:updated_time" content="2017-12-24T14:28:56.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Redis从安装到踩坑">
 <meta name="twitter:description" content="先贴Redis官网：https://redis.io/download 1234$ wget http://download.redis.io/releases/redis-4.0.2.tar.gz$ tar xzf redis-4.0.2.tar.gz$ cd redis-4.0.2$ make 如果没有安装gcc，则会抛出这样的错误：1$ yum install gcc 在执行一次make可能">
@@ -393,6 +393,7 @@
 <p>在执行一次make可能会再抛出这样一个错误：<br><img src="/images/redis_install/redis_install_error2.png" alt=""></p>
 <p>这样的话便在make后加上参数<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> make MALLOC=libc</span><br></pre></td></tr></table></figure></p>
 <p>编译完成后<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> src/redis-server  redis.conf</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
 <p>当看到这个画面redis就启动完成了<br><img src="/images/redis_install/redis_running.png" alt=""></p>
 <p>新建一个链接（开启新的终端或新的ssh标签页）<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> cd /usr/local/redis-4.0.2</span><br><span class="line"><span class="meta">$</span> src/redis-cli</span><br></pre></td></tr></table></figure></p>
 <p><img src="/images/redis_install/redis_test.png" alt=""><br>至此大功告成，如果想学习redis命令，则点击：xxx.xxx/xxx</p>
@@ -448,6 +449,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/12/24/remove-your-own-python/" rel="prev" title="如何删除自己安装的python(干净、无残留)">
+                如何删除自己安装的python(干净、无残留) <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -517,7 +522,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">15</span>
+                <span class="site-state-item-count">16</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -539,7 +544,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-count">16</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

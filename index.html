@@ -305,6 +305,135 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/12/24/remove-your-own-python/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Amosannn">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Amosannn">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/12/24/remove-your-own-python/" itemprop="url">如何删除自己安装的python(干净、无残留)</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-24T21:27:15+08:00">
+                2017-12-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/12/24/remove-your-own-python/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/12/24/remove-your-own-python/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>最近又折腾起了python，于是发现很久以前的自己在各个地方留下了python的足迹，简直就是个更新日志。。<br>既然习惯了brew这个管家，那就把以前的坑都填好吧！</p>
+<p>安装软件的时候很快活，卸载的时候就难受的不行，不熟悉系统目录，你就根本卸不干净。<br>当然市面上有很多pkg卸载软件，但是强迫症的自己总觉得它卸不干净~。~</p>
+<p>搜了一票国内论坛。。还是跑去StackOverFlow，找到了一个靠谱回答。<br>答主提供了python官网的反馈页面，是一位不知如何完整卸载python的网友提交的反馈。<br>一个叫<code>Ned Deily</code>的朋友提取了安装目录并将其制成卸载脚本（详情见参考链接）<br>知道了该删哪就可以动手了…</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/12/24/remove-your-own-python/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/11/29/redis-install/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -383,25 +512,19 @@
 
       
         
-          
-            <p>先贴Redis官网：<a href="https://redis.io/download" target="_blank" rel="noopener">https://redis.io/download</a></p>
+          <p>先贴Redis官网：<a href="https://redis.io/download" target="_blank" rel="noopener">https://redis.io/download</a></p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> wget http://download.redis.io/releases/redis-4.0.2.tar.gz</span><br><span class="line"><span class="meta">$</span> tar xzf redis-4.0.2.tar.gz</span><br><span class="line"><span class="meta">$</span> cd redis-4.0.2</span><br><span class="line"><span class="meta">$</span> make</span><br></pre></td></tr></table></figure>
 <p>如果没有安装gcc，则会抛出这样的错误：<br><img src="/images/redis_install/redis_install_error.png" alt=""><br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> yum install gcc</span><br></pre></td></tr></table></figure></p>
 <p>在执行一次make可能会再抛出这样一个错误：<br><img src="/images/redis_install/redis_install_error2.png" alt=""></p>
 <p>这样的话便在make后加上参数<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> make MALLOC=libc</span><br></pre></td></tr></table></figure></p>
 <p>编译完成后<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> src/redis-server  redis.conf</span><br></pre></td></tr></table></figure></p>
-<p>当看到这个画面redis就启动完成了<br><img src="/images/redis_install/redis_running.png" alt=""></p>
-<p>新建一个链接（开启新的终端或新的ssh标签页）<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> cd /usr/local/redis-4.0.2</span><br><span class="line"><span class="meta">$</span> src/redis-cli</span><br></pre></td></tr></table></figure></p>
-<p><img src="/images/redis_install/redis_test.png" alt=""><br>至此大功告成，如果想学习redis命令，则点击：xxx.xxx/xxx</p>
-<p>二：redis开启外部访问<br>远程连接redis访问被拒绝，初步推断为redis配置问题。<br>开了另一台服务器redis-cli远程连接，发现如下错误<br><img src="/images/redis_install/denied_of_protected_mode.png" alt=""><br>由图中可知，要想外部访问当前redis服务，需关闭安全模式。</p>
-<p>关闭安全模式<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">vi redis.conf</span><br><span class="line"><span class="meta">#</span> 更改protected-mode 由yes 改成 no</span><br></pre></td></tr></table></figure></p>
-<p>关闭并重启后发现依旧访问被拒。<br><img src="/images/redis_install/denied_of_127_binded.png" alt=""></p>
-<p>一波操作之后发现，需修改默认配置文件中的bind配置<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> 更改 bind 127.0.0.1 为 bind 0.0.0.0</span><br><span class="line"><span class="meta">#</span> 重启redis后便可使用cmd或terminal测试连接</span><br><span class="line"></span><br><span class="line"><span class="meta">$</span> redis-cli -h &#123;redis_host&#125; -p &#123;redis_port&#125;</span><br></pre></td></tr></table></figure></p>
-<p>其中<code>{redis_host}</code>就是远程的Redis服务所在服务器地址，<code>{redis_port}</code>就是Redis服务端口（默认端口为6379）。<br>例如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_77_16_centos src]# ./redis-cli -h 你的ip -p 6379</span><br></pre></td></tr></table></figure></p>
-<p>大功告成<br><img src="/images/redis_install/external_access_success.png" alt=""></p>
-<p>三：redis的基本操作<br>关闭redis的两种方法<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># 无密码</span><br><span class="line"># redis-cli shutdown</span><br><span class="line"></span><br><span class="line"># 有密码</span><br><span class="line"># redis-cli -a password shutdown</span><br><span class="line"></span><br><span class="line"># 查询redis的pid，关闭进程</span><br><span class="line"># ps aux | grep redis</span><br><span class="line"># kill -9 pid</span><br></pre></td></tr></table></figure></p>
-
-          
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/11/29/redis-install/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1621,157 +1744,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/05/28/java-get-time/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Amosannn">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Amosannn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/05/28/java-get-time/" itemprop="url">使用Calendar或DateFormat拆分日期</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-28T23:18:28+08:00">
-                2017-05-28
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/技术一路走到黑/" itemprop="url" rel="index">
-                    <span itemprop="name">技术一路走到黑</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2017/05/28/java-get-time/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/05/28/java-get-time/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>今天碰到获取时间中月份和日期的需求，立马去翻jdk，发现<code>util.Date类</code>中的获取方法竟然在jdk1.1就过期了…<br>于是按着jdk中推荐的<code>Calendar类</code>摸过去，找到方法。但是不知道为什么Date里的get方法不推荐了，找机会一定要瞅一瞅源码(ง๑ •̀_•́)ง</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> 使用Calendar实现时间拆解</span></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">public void getTimeByCalendar()&#123;</span></span><br><span class="line"><span class="comment">	Calendar cal = Calendar.getInstance();</span></span><br><span class="line"><span class="comment">	cal.setTime(new Date());//  传入Date对象即可</span></span><br><span class="line"><span class="comment">	int year = cal.get(Calendar.YEAR);// 获取年份</span></span><br><span class="line"><span class="comment">	int month=cal.get(Calendar.MONTH);// 获取月份</span></span><br><span class="line"><span class="comment">	int day=cal.get(Calendar.DATE);// 获取日</span></span><br><span class="line"><span class="comment">	int hour=cal.get(Calendar.HOUR);// 小时</span></span><br><span class="line"><span class="comment">	int minute=cal.get(Calendar.MINUTE);// 分           </span></span><br><span class="line"><span class="comment">	int second=cal.get(Calendar.SECOND);// 秒</span></span><br><span class="line"><span class="comment">	int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);// 一周的第几天</span></span><br><span class="line"><span class="comment">	System.out.println("现在的时间是：公元"+year+"年"+month+"月"+day+"日      "+hour+"时"+minute+"分"+second+"秒       星期"+dayOfWeek);</span></span><br><span class="line"><span class="comment">&#125;</span></span><br></pre></td></tr></table></figure>
-<p>翻jdk的同时还发现另一种拆分时间的方法，但是没有<code>Calendar</code>自由。<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/05/28/java-get-time/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1821,7 +1793,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">15</span>
+                <span class="site-state-item-count">16</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -1843,7 +1815,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-count">16</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
