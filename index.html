@@ -305,6 +305,135 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/01/24/vue-error-collection/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Amosannn">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Amosannn">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/01/24/vue-error-collection/" itemprop="url">Vue开发路上遇到的坑儿们</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-24T10:52:06+08:00">
+                2018-01-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/01/24/vue-error-collection/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/01/24/vue-error-collection/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="开篇"><a href="#开篇" class="headerlink" title="开篇"></a>开篇</h1><p>此文仅用于记录vue开发中遇到的各种奇葩事。</p>
+<h1 id="错误"><a href="#错误" class="headerlink" title="错误"></a>错误</h1><h2 id="项目不报错但是路由不加载"><a href="#项目不报错但是路由不加载" class="headerlink" title="项目不报错但是路由不加载"></a>项目不报错但是路由不加载</h2><p>前方预警：这是个低级错误Orz<br>index.js<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">routes: [</span><br><span class="line">    &#123;</span><br><span class="line">      path: &apos;/&apos;,</span><br><span class="line">      name: &apos;Index&apos;,</span><br><span class="line">      component: &#123;</span><br><span class="line">        nav: Navv,</span><br><span class="line">        main: Index,</span><br><span class="line">        footer: Footter</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure></p>
+<p>App.vue<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;template&gt;</span><br><span class="line">  &lt;div id=&quot;app&quot;&gt;</span><br><span class="line">    &lt;router-view name=&quot;nav&quot;&gt;&lt;/router-view&gt;</span><br><span class="line">    &lt;router-view name=&quot;main&quot;&gt;&lt;/router-view&gt;</span><br><span class="line">    &lt;router-view name=&quot;footer&quot;&gt;&lt;/router-view&gt;</span><br><span class="line">  &lt;/div&gt;</span><br><span class="line">&lt;/template&gt;</span><br></pre></td></tr></table></figure></p>
+<p>如果你和我一样是只小白菜，可能咋一看会发现没什么毛病，仔细一看就会发现路由配置里的<code>components</code>被我写成了·component·。。<br>vue中到目前为止我知道的两种路由配置方式:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">// 第一种</span><br><span class="line">...</span><br><span class="line">component: navv</span><br><span class="line">...</span><br><span class="line">// 第二种</span><br><span class="line">components: &#123;</span><br><span class="line">	navv</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>over, 经验值 +1</p>
+<h2 id="Failed-to-execute-‘setAttribute’-on-‘Element’-‘method-’-is-not-a-valid-attribute-name"><a href="#Failed-to-execute-‘setAttribute’-on-‘Element’-‘method-’-is-not-a-valid-attribute-name" class="headerlink" title="Failed to execute ‘setAttribute’ on ‘Element’: ‘method+’ is not a valid attribute name."></a>Failed to execute ‘setAttribute’ on ‘Element’: ‘method+’ is not a valid attribute name.</h2><p>由于项目中引入了饿了么开发的组件库·element-ui·，所以一度以为是和我引入的css文件起了冲突？？甚至我还去执行了<code>npm uninstall element-ui</code>这条命令。最后实在没办法了，一段一段代码排查问题，找到一个诡异的地方。。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;form action=&quot;/listTopic&quot; method+=&quot;post&quot;&gt;</span><br><span class="line">  &lt;input name=&quot;topicName&quot; type=&quot;text&quot; class=&quot;search-input&quot; placeholder=&quot;搜索你感兴趣的内容...&quot;&gt;</span><br><span class="line">  &lt;button type=&quot;submit&quot; class=&quot;search-button&quot;&gt;&lt;i class=&quot;sprite-search&quot;&gt;&lt;/i&gt;&lt;/button&gt;</span><br><span class="line">&lt;/form&gt;</span><br></pre></td></tr></table></figure></p>
+<p>噗。。form标签下的method方法多了个+号。。。想拿头去撞豆腐了。<br>ok，经验值 +1</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/12/24/remove-your-own-python/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -513,11 +642,11 @@
       
         
           <p>先贴Redis官网：<a href="https://redis.io/download" target="_blank" rel="noopener">https://redis.io/download</a></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> wget http://download.redis.io/releases/redis-4.0.2.tar.gz</span><br><span class="line"><span class="meta">$</span> tar xzf redis-4.0.2.tar.gz</span><br><span class="line"><span class="meta">$</span> cd redis-4.0.2</span><br><span class="line"><span class="meta">$</span> make</span><br></pre></td></tr></table></figure>
-<p>如果没有安装gcc，则会抛出这样的错误：<br><img src="/images/redis_install/redis_install_error.png" alt=""><br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> yum install gcc</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> wget http://download.redis.io/releases/redis-4.0.2.tar.gz</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> tar xzf redis-4.0.2.tar.gz</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">cd</span> redis-4.0.2</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> make</span></span><br></pre></td></tr></table></figure>
+<p>如果没有安装gcc，则会抛出这样的错误：<br><img src="/images/redis_install/redis_install_error.png" alt=""><br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> yum install gcc</span></span><br></pre></td></tr></table></figure></p>
 <p>在执行一次make可能会再抛出这样一个错误：<br><img src="/images/redis_install/redis_install_error2.png" alt=""></p>
-<p>这样的话便在make后加上参数<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> make MALLOC=libc</span><br></pre></td></tr></table></figure></p>
-<p>编译完成后<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> src/redis-server  redis.conf</span><br></pre></td></tr></table></figure></p>
+<p>这样的话便在make后加上参数<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> make MALLOC=libc</span></span><br></pre></td></tr></table></figure></p>
+<p>编译完成后<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> src/redis-server  redis.conf</span></span><br></pre></td></tr></table></figure></p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2017/11/29/redis-install/#more" rel="contents">
@@ -1591,159 +1720,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/05/31/mysql-default-constraint/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Amosannn">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Amosannn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/05/31/mysql-default-constraint/" itemprop="url">MySQL的default约束用法</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-31T22:19:51+08:00">
-                2017-05-31
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/技术一路走到黑/" itemprop="url" rel="index">
-                    <span itemprop="name">技术一路走到黑</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2017/05/31/mysql-default-constraint/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/05/31/mysql-default-constraint/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>在sql最基本的curd语句使用熟练后，我开始发现提高数据库的稳定性和易用性需要一些其他的东西，比如<code>constraint</code>(约束)。</p>
-<p>我就一个没经过数据加密的user表演示一下<code>default约束</code>的用法。</p>
-<h2 id="建表语句中使用"><a href="#建表语句中使用" class="headerlink" title="建表语句中使用"></a>建表语句中使用</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> <span class="keyword">user</span>(</span><br><span class="line">	<span class="keyword">id</span> <span class="built_in">int</span>(<span class="number">11</span>) <span class="keyword">not</span> <span class="literal">null</span> auto_increment,</span><br><span class="line">	username <span class="built_in">varchar</span>(<span class="number">255</span>) <span class="keyword">default</span> <span class="literal">null</span>,</span><br><span class="line">	<span class="keyword">status</span> <span class="built_in">varchar</span>(<span class="number">255</span>) <span class="keyword">default</span> <span class="string">"active"</span>;</span><br><span class="line">	primary key (id)</span><br><span class="line">) engine=InnoDB default charset=utf8;</span><br></pre></td></tr></table></figure>
-<h2 id="已有表结构？使用alter插入字段"><a href="#已有表结构？使用alter插入字段" class="headerlink" title="已有表结构？使用alter插入字段"></a>已有表结构？使用alter插入字段</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> <span class="keyword">user</span> <span class="keyword">add</span> <span class="keyword">status</span> <span class="built_in">varchar</span>(<span class="number">255</span>) <span class="keyword">default</span> <span class="string">"active"</span>;</span><br></pre></td></tr></table></figure>
-<h2 id="有默认值的表如何添加数据"><a href="#有默认值的表如何添加数据" class="headerlink" title="有默认值的表如何添加数据"></a>有默认值的表如何添加数据</h2><p>那么表结构已经有了<code>default约束</code>，在插入值的时候如何处理字段的默认值呢？<br>传入null？空字符串？或者是不填？都不行！<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/05/31/mysql-default-constraint/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1793,7 +1769,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">16</span>
+                <span class="site-state-item-count">17</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -1815,7 +1791,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">16</span>
+                <span class="site-state-item-count">17</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -1892,8 +1868,8 @@
       <div class="footer-inner">
         <div class="copyright" >
   
-  &copy; 
-  <span itemprop="copyrightYear">2017</span>
+  &copy;  2017 - 
+  <span itemprop="copyrightYear">2018</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

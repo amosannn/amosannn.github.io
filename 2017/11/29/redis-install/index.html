@@ -388,19 +388,19 @@
 
       
         <p>先贴Redis官网：<a href="https://redis.io/download" target="_blank" rel="noopener">https://redis.io/download</a></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> wget http://download.redis.io/releases/redis-4.0.2.tar.gz</span><br><span class="line"><span class="meta">$</span> tar xzf redis-4.0.2.tar.gz</span><br><span class="line"><span class="meta">$</span> cd redis-4.0.2</span><br><span class="line"><span class="meta">$</span> make</span><br></pre></td></tr></table></figure>
-<p>如果没有安装gcc，则会抛出这样的错误：<br><img src="/images/redis_install/redis_install_error.png" alt=""><br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> yum install gcc</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> wget http://download.redis.io/releases/redis-4.0.2.tar.gz</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> tar xzf redis-4.0.2.tar.gz</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">cd</span> redis-4.0.2</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> make</span></span><br></pre></td></tr></table></figure>
+<p>如果没有安装gcc，则会抛出这样的错误：<br><img src="/images/redis_install/redis_install_error.png" alt=""><br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> yum install gcc</span></span><br></pre></td></tr></table></figure></p>
 <p>在执行一次make可能会再抛出这样一个错误：<br><img src="/images/redis_install/redis_install_error2.png" alt=""></p>
-<p>这样的话便在make后加上参数<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> make MALLOC=libc</span><br></pre></td></tr></table></figure></p>
-<p>编译完成后<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> src/redis-server  redis.conf</span><br></pre></td></tr></table></figure></p>
+<p>这样的话便在make后加上参数<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> make MALLOC=libc</span></span><br></pre></td></tr></table></figure></p>
+<p>编译完成后<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> src/redis-server  redis.conf</span></span><br></pre></td></tr></table></figure></p>
 <a id="more"></a>
 <p>当看到这个画面redis就启动完成了<br><img src="/images/redis_install/redis_running.png" alt=""></p>
-<p>新建一个链接（开启新的终端或新的ssh标签页）<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> cd /usr/local/redis-4.0.2</span><br><span class="line"><span class="meta">$</span> src/redis-cli</span><br></pre></td></tr></table></figure></p>
+<p>新建一个链接（开启新的终端或新的ssh标签页）<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">cd</span> /usr/<span class="built_in">local</span>/redis-4.0.2</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> src/redis-cli</span></span><br></pre></td></tr></table></figure></p>
 <p><img src="/images/redis_install/redis_test.png" alt=""><br>至此大功告成，如果想学习redis命令，则点击：xxx.xxx/xxx</p>
 <p>二：redis开启外部访问<br>远程连接redis访问被拒绝，初步推断为redis配置问题。<br>开了另一台服务器redis-cli远程连接，发现如下错误<br><img src="/images/redis_install/denied_of_protected_mode.png" alt=""><br>由图中可知，要想外部访问当前redis服务，需关闭安全模式。</p>
-<p>关闭安全模式<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">vi redis.conf</span><br><span class="line"><span class="meta">#</span> 更改protected-mode 由yes 改成 no</span><br></pre></td></tr></table></figure></p>
+<p>关闭安全模式<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">vi redis.conf</span><br><span class="line"><span class="meta">#</span><span class="bash"> 更改protected-mode 由yes 改成 no</span></span><br></pre></td></tr></table></figure></p>
 <p>关闭并重启后发现依旧访问被拒。<br><img src="/images/redis_install/denied_of_127_binded.png" alt=""></p>
-<p>一波操作之后发现，需修改默认配置文件中的bind配置<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> 更改 bind 127.0.0.1 为 bind 0.0.0.0</span><br><span class="line"><span class="meta">#</span> 重启redis后便可使用cmd或terminal测试连接</span><br><span class="line"></span><br><span class="line"><span class="meta">$</span> redis-cli -h &#123;redis_host&#125; -p &#123;redis_port&#125;</span><br></pre></td></tr></table></figure></p>
+<p>一波操作之后发现，需修改默认配置文件中的bind配置<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 更改 <span class="built_in">bind</span> 127.0.0.1 为 <span class="built_in">bind</span> 0.0.0.0</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 重启redis后便可使用cmd或terminal测试连接</span></span><br><span class="line"></span><br><span class="line"><span class="meta">$</span><span class="bash"> redis-cli -h &#123;redis_host&#125; -p &#123;redis_port&#125;</span></span><br></pre></td></tr></table></figure></p>
 <p>其中<code>{redis_host}</code>就是远程的Redis服务所在服务器地址，<code>{redis_port}</code>就是Redis服务端口（默认端口为6379）。<br>例如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_77_16_centos src]# ./redis-cli -h 你的ip -p 6379</span><br></pre></td></tr></table></figure></p>
 <p>大功告成<br><img src="/images/redis_install/external_access_success.png" alt=""></p>
 <p>三：redis的基本操作<br>关闭redis的两种方法<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># 无密码</span><br><span class="line"># redis-cli shutdown</span><br><span class="line"></span><br><span class="line"># 有密码</span><br><span class="line"># redis-cli -a password shutdown</span><br><span class="line"></span><br><span class="line"># 查询redis的pid，关闭进程</span><br><span class="line"># ps aux | grep redis</span><br><span class="line"># kill -9 pid</span><br></pre></td></tr></table></figure></p>
@@ -522,7 +522,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">16</span>
+                <span class="site-state-item-count">17</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -544,7 +544,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">16</span>
+                <span class="site-state-item-count">17</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -621,8 +621,8 @@
       <div class="footer-inner">
         <div class="copyright" >
   
-  &copy; 
-  <span itemprop="copyrightYear">2017</span>
+  &copy;  2017 - 
+  <span itemprop="copyrightYear">2018</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
