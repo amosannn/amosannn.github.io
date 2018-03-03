@@ -305,6 +305,136 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/03/03/SelectProvider-use-List-parameter/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Amosannn">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Amosannn">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/03/03/SelectProvider-use-List-parameter/" itemprop="url">在SelectProvider注解中使用复杂类型参数（List）</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-03T23:50:39+08:00">
+                2018-03-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/03/03/SelectProvider-use-List-parameter/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/03/03/SelectProvider-use-List-parameter/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>最近开发中尝试使用注解来代替xml完成Mybatis的sql编写，实现更完(装)整(逼)的无xml编程。结果没写多久就跌进大坑了Orz</p>
+<p>总所周知的是Mybatis支持的注解中有@Select、@Insert、@Update、@Delete这四个基本操作。使用这些注解你可以非常快的完成基础操作，如果想执行一些复杂操作，例如包含where、foreach等xml中一个标签即可完成的操作，便需要用到另一个注解 –&gt; @SelectProvider</p>
+<p>如果你的需求只是传递一些基础类型，那你学习使用SelectProvider的曲线还是很平滑的。如果你的需求是传递一些复杂类型，例如List，那就可能会尴尬了。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Mapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">QuestionMapper</span> </span>&#123;</span><br><span class="line">  <span class="meta">@SelectProvider</span>(type = QuestionSqlProvider.class, method = <span class="string">"listQuestionByQuestionId"</span>)</span><br><span class="line">  <span class="function">List&lt;Question&gt; <span class="title">listQuestionByQuestionId</span><span class="params">(@Param(<span class="string">"idList"</span>)</span> List&lt;Integer&gt; idList)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>一开始我理所当然的把List<integer>作为输入参数。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">listQuestionByQuestionId</span><span class="params">(<span class="keyword">final</span> List&lt;Integer&gt; idList)</span> </span>&#123;</span><br><span class="line">    StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">    sb.append(<span class="string">"("</span>);</span><br><span class="line">    <span class="keyword">for</span> (Integer questionId : idList) &#123;</span><br><span class="line">      sb.append(<span class="string">" '"</span> + questionId + <span class="string">"',"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    sb.deleteCharAt(sb.length() - <span class="number">1</span>);</span><br><span class="line">    sb.append(<span class="string">")"</span>);</span><br><span class="line">    System.out.println(sb.toString());</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> SQL() &#123;&#123;</span><br><span class="line">      SELECT(<span class="string">" question_id,question_title,create_time "</span>);</span><br><span class="line">      FROM(<span class="string">" question "</span>);</span><br><span class="line">      WHERE(<span class="string">" question_id in "</span> + sb.toString());</span><br><span class="line">    &#125;&#125;.toString();</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></integer></p>
+<p>燃鹅。。jvm很无情的抛了个错误出来<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">00:29:39.814 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Could not complete request</span><br><span class="line">org.mybatis.spring.MyBatisSystemException: nested exception is org.apache.ibatis.builder.BuilderException: Error invoking SqlProvider method (com.amosannn.mapper.QuestionSqlProvider.listQuestionByQuestionId).  Cause: org.apache.ibatis.binding.BindingException: Parameter &apos;arg0&apos; not found. Available parameters are [idList, param1]</span><br></pre></td></tr></table></figure></p>
+<p>很难受，Mybatis的官方文档里并没有针对@SelectProvider有更多的demo，翻遍了各大门户网站也没见到有相关的讨论。兜兜转转依旧没有眉目，想到多参数的传递会被Mybatis自动封装进Map，该不会List也是同样被封装进Map吧。结果一试还真是这样。。</p>
+<p>终于摸索出问题的关键，只需把形参由List<integer>类型替换为Map类型就能接收到前面传来的List了。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QuestionSqlProvider</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> String <span class="title">listQuestionByQuestionId</span><span class="params">(<span class="keyword">final</span> Map&lt;String, Object&gt; map)</span> </span>&#123;</span><br><span class="line">    List&lt;Integer&gt; idList = (List&lt;Integer&gt;)map.get(<span class="string">"idList"</span>);</span><br><span class="line">    StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">    sb.append(<span class="string">"("</span>);</span><br><span class="line">    <span class="keyword">for</span> (Integer questionId : idList) &#123;</span><br><span class="line">      sb.append(<span class="string">" '"</span> + questionId + <span class="string">"',"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    sb.deleteCharAt(sb.length() - <span class="number">1</span>);</span><br><span class="line">    sb.append(<span class="string">")"</span>);</span><br><span class="line">    System.out.println(sb.toString());</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> SQL() &#123;&#123;</span><br><span class="line">      SELECT(<span class="string">" question_id,question_title,create_time "</span>);</span><br><span class="line">      FROM(<span class="string">" question "</span>);</span><br><span class="line">      WHERE(<span class="string">" question_id in "</span> + sb.toString());</span><br><span class="line">    &#125;&#125;.toString();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></integer></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/01/30/jedispool-could-not-return-resource-error/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1572,166 +1702,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/06/22/hexo-installation-error-on-mac/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Amosannn">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Amosannn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/06/22/hexo-installation-error-on-mac/" itemprop="url">mac下的hexo安装出现异常</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-22T18:16:59+08:00">
-                2017-06-22
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/技术一路走到黑/" itemprop="url" rel="index">
-                    <span itemprop="name">技术一路走到黑</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2017/06/22/hexo-installation-error-on-mac/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/06/22/hexo-installation-error-on-mac/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>将hexo从win迁移到mac时发生了安装错误。</p>
-<p>没有保留报错截图，就从日志文件中截取了关键段落。</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">5751 error code ELIFECYCLE</span><br><span class="line">5752 error errno 1</span><br><span class="line">5753 error hexo-util@0.6.0 postinstall: `npm run build:highlight`</span><br><span class="line">5753 error Exit status 1</span><br><span class="line">5754 error Failed at the hexo-util@0.6.0 postinstall script.</span><br><span class="line">5754 error This is probably not a problem with npm. There is likely additional logging output above.</span><br><span class="line">5755 verbose exit [ 1, true ]</span><br></pre></td></tr></table></figure>
-<p>按照网上的几种解法都没能完成安装</p>
-<blockquote>
-<p>sudo npm install -g hexo-cli</p>
-<p>sudo npm install hexo –no-optional</p>
-<p>sudo npm install -g hexo-cli –registry=<a href="https://registry.npm.taobao.org" target="_blank" rel="noopener">https://registry.npm.taobao.org</a></p>
-</blockquote>
-<p>最后尝试进入root权限中执行npm命令，即</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo -s</span><br><span class="line">npm install -g hexo-cli</span><br></pre></td></tr></table></figure>
-<p>安装成功。<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/06/22/hexo-installation-error-on-mac/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1781,7 +1751,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-count">19</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>

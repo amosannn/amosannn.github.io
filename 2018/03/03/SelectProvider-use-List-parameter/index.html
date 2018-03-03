@@ -74,7 +74,7 @@
 <link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="java," />
+  <meta name="keywords" content="Mybatis," />
 
 
 
@@ -92,18 +92,18 @@
 
 
 
-<meta name="description" content="今天碰到获取时间中月份和日期的需求，立马去翻jdk，发现util.Date类中的获取方法竟然在jdk1.1就过期了…于是按着jdk中推荐的Calendar类摸过去，找到方法。但是不知道为什么Date里的get方法不推荐了，找机会一定要瞅一瞅源码(ง๑ •̀_•́)ง 123456789101112131415/* 使用Calendar实现时间拆解/*public void getTimeByCal">
-<meta name="keywords" content="java">
+<meta name="description" content="最近开发中尝试使用注解来代替xml完成Mybatis的sql编写，实现更完(装)整(逼)的无xml编程。结果没写多久就跌进大坑了Orz 总所周知的是Mybatis支持的注解中有@Select、@Insert、@Update、@Delete这四个基本操作。使用这些注解你可以非常快的完成基础操作，如果想执行一些复杂操作，例如包含where、foreach等xml中一个标签即可完成的操作，便需要用到另一">
+<meta name="keywords" content="Mybatis">
 <meta property="og:type" content="article">
-<meta property="og:title" content="使用Calendar或DateFormat拆分日期">
-<meta property="og:url" content="https://amosannn.github.io/2017/05/28/java-get-time/index.html">
+<meta property="og:title" content="在SelectProvider注解中使用复杂类型参数（List）">
+<meta property="og:url" content="https://amosannn.github.io/2018/03/03/SelectProvider-use-List-parameter/index.html">
 <meta property="og:site_name" content="Amosannn">
-<meta property="og:description" content="今天碰到获取时间中月份和日期的需求，立马去翻jdk，发现util.Date类中的获取方法竟然在jdk1.1就过期了…于是按着jdk中推荐的Calendar类摸过去，找到方法。但是不知道为什么Date里的get方法不推荐了，找机会一定要瞅一瞅源码(ง๑ •̀_•́)ง 123456789101112131415/* 使用Calendar实现时间拆解/*public void getTimeByCal">
+<meta property="og:description" content="最近开发中尝试使用注解来代替xml完成Mybatis的sql编写，实现更完(装)整(逼)的无xml编程。结果没写多久就跌进大坑了Orz 总所周知的是Mybatis支持的注解中有@Select、@Insert、@Update、@Delete这四个基本操作。使用这些注解你可以非常快的完成基础操作，如果想执行一些复杂操作，例如包含where、foreach等xml中一个标签即可完成的操作，便需要用到另一">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-06-01T16:02:54.000Z">
+<meta property="og:updated_time" content="2018-03-03T16:39:44.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="使用Calendar或DateFormat拆分日期">
-<meta name="twitter:description" content="今天碰到获取时间中月份和日期的需求，立马去翻jdk，发现util.Date类中的获取方法竟然在jdk1.1就过期了…于是按着jdk中推荐的Calendar类摸过去，找到方法。但是不知道为什么Date里的get方法不推荐了，找机会一定要瞅一瞅源码(ง๑ •̀_•́)ง 123456789101112131415/* 使用Calendar实现时间拆解/*public void getTimeByCal">
+<meta name="twitter:title" content="在SelectProvider注解中使用复杂类型参数（List）">
+<meta name="twitter:description" content="最近开发中尝试使用注解来代替xml完成Mybatis的sql编写，实现更完(装)整(逼)的无xml编程。结果没写多久就跌进大坑了Orz 总所周知的是Mybatis支持的注解中有@Select、@Insert、@Update、@Delete这四个基本操作。使用这些注解你可以非常快的完成基础操作，如果想执行一些复杂操作，例如包含where、foreach等xml中一个标签即可完成的操作，便需要用到另一">
 
 
 
@@ -131,13 +131,13 @@
 
 
 
-  <link rel="canonical" href="https://amosannn.github.io/2017/05/28/java-get-time/"/>
+  <link rel="canonical" href="https://amosannn.github.io/2018/03/03/SelectProvider-use-List-parameter/"/>
 
 
 
 
 
-  <title>使用Calendar或DateFormat拆分日期 | Amosannn</title>
+  <title>在SelectProvider注解中使用复杂类型参数（List） | Amosannn</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -305,7 +305,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/05/28/java-get-time/">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/03/03/SelectProvider-use-List-parameter/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Amosannn">
@@ -322,7 +322,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">使用Calendar或DateFormat拆分日期</h1>
+          <h1 class="post-title" itemprop="name headline">在SelectProvider注解中使用复杂类型参数（List）</h1>
         
 
         <div class="post-meta">
@@ -334,8 +334,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-28T23:18:28+08:00">
-                2017-05-28
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-03T23:50:39+08:00">
+                2018-03-03
               </time>
             
 
@@ -345,28 +345,6 @@
           </span>
 
           
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/技术一路走到黑/" itemprop="url" rel="index">
-                    <span itemprop="name">技术一路走到黑</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
 
           
             
@@ -375,9 +353,9 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2017/05/28/java-get-time/#comments" itemprop="discussionUrl">
+                <a href="/2018/03/03/SelectProvider-use-List-parameter/#comments" itemprop="discussionUrl">
                   <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/05/28/java-get-time/" itemprop="commentCount"></span>
+                        data-disqus-identifier="2018/03/03/SelectProvider-use-List-parameter/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -402,12 +380,14 @@
       
 
       
-        <p>今天碰到获取时间中月份和日期的需求，立马去翻jdk，发现<code>util.Date类</code>中的获取方法竟然在jdk1.1就过期了…<br>于是按着jdk中推荐的<code>Calendar类</code>摸过去，找到方法。但是不知道为什么Date里的get方法不推荐了，找机会一定要瞅一瞅源码(ง๑ •̀_•́)ง</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> 使用Calendar实现时间拆解</span></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">public void getTimeByCalendar()&#123;</span></span><br><span class="line"><span class="comment">	Calendar cal = Calendar.getInstance();</span></span><br><span class="line"><span class="comment">	cal.setTime(new Date());//  传入Date对象即可</span></span><br><span class="line"><span class="comment">	int year = cal.get(Calendar.YEAR);// 获取年份</span></span><br><span class="line"><span class="comment">	int month=cal.get(Calendar.MONTH);// 获取月份</span></span><br><span class="line"><span class="comment">	int day=cal.get(Calendar.DATE);// 获取日</span></span><br><span class="line"><span class="comment">	int hour=cal.get(Calendar.HOUR);// 小时</span></span><br><span class="line"><span class="comment">	int minute=cal.get(Calendar.MINUTE);// 分           </span></span><br><span class="line"><span class="comment">	int second=cal.get(Calendar.SECOND);// 秒</span></span><br><span class="line"><span class="comment">	int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);// 一周的第几天</span></span><br><span class="line"><span class="comment">	System.out.println("现在的时间是：公元"+year+"年"+month+"月"+day+"日      "+hour+"时"+minute+"分"+second+"秒       星期"+dayOfWeek);</span></span><br><span class="line"><span class="comment">&#125;</span></span><br></pre></td></tr></table></figure>
-<p>翻jdk的同时还发现另一种拆分时间的方法，但是没有<code>Calendar</code>自由。<br><a id="more"></a><br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">使用DateFormat实现时间拆解</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">getTimeByDate</span><span class="params">()</span></span>&#123;</span><br><span class="line">    Date date = <span class="keyword">new</span> Date();</span><br><span class="line">    DateFormat df1 = DateFormat.getDateInstance();<span class="comment">//日期格式，精确到日</span></span><br><span class="line">    DateFormat df2 = DateFormat.getDateTimeInstance();<span class="comment">//可以精确到时分秒</span></span><br><span class="line">    DateFormat df3 = DateFormat.getTimeInstance();<span class="comment">//只显示出时分秒</span></span><br><span class="line">    DateFormat df4 = DateFormat.getDateTimeInstance(DateFormat.FULL,DateFormat.FULL); <span class="comment">//显示日期，周，上下午，时间（精确到秒）</span></span><br><span class="line">    DateFormat df5 = DateFormat.getDateTimeInstance(DateFormat.LONG,DateFormat.LONG); <span class="comment">//显示日期,上下午，时间（精确到秒）</span></span><br><span class="line">    DateFormat df6 = DateFormat.getDateTimeInstance(DateFormat.SHORT,DateFormat.SHORT); <span class="comment">//显示日期，上下午,时间（精确到分）</span></span><br><span class="line">    DateFormat df7 = DateFormat.getDateTimeInstance(DateFormat.MEDIUM,DateFormat.MEDIUM); <span class="comment">//显示日期，时间（精确到分）</span></span><br><span class="line">    System.out.println(df1.format(date));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>我个人是比较喜欢Calendar啦，虽然觉得Date类中的get方法更方便，但毕竟oracle不推荐了，那就算了吧。<br>说来说去不就是为了少写几行代码吗Orz</p>
-<hr>
-<p>相关链接：<br><a href="http://docs.oracle.com/javase/8/docs/api/index.html" target="_blank" rel="noopener">Java™ Platform, Standard Edition 8 API Specification</a></p>
+        <p>最近开发中尝试使用注解来代替xml完成Mybatis的sql编写，实现更完(装)整(逼)的无xml编程。结果没写多久就跌进大坑了Orz</p>
+<p>总所周知的是Mybatis支持的注解中有@Select、@Insert、@Update、@Delete这四个基本操作。使用这些注解你可以非常快的完成基础操作，如果想执行一些复杂操作，例如包含where、foreach等xml中一个标签即可完成的操作，便需要用到另一个注解 –&gt; @SelectProvider</p>
+<p>如果你的需求只是传递一些基础类型，那你学习使用SelectProvider的曲线还是很平滑的。如果你的需求是传递一些复杂类型，例如List，那就可能会尴尬了。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Mapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">QuestionMapper</span> </span>&#123;</span><br><span class="line">  <span class="meta">@SelectProvider</span>(type = QuestionSqlProvider.class, method = <span class="string">"listQuestionByQuestionId"</span>)</span><br><span class="line">  <span class="function">List&lt;Question&gt; <span class="title">listQuestionByQuestionId</span><span class="params">(@Param(<span class="string">"idList"</span>)</span> List&lt;Integer&gt; idList)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>一开始我理所当然的把List<integer>作为输入参数。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">listQuestionByQuestionId</span><span class="params">(<span class="keyword">final</span> List&lt;Integer&gt; idList)</span> </span>&#123;</span><br><span class="line">    StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">    sb.append(<span class="string">"("</span>);</span><br><span class="line">    <span class="keyword">for</span> (Integer questionId : idList) &#123;</span><br><span class="line">      sb.append(<span class="string">" '"</span> + questionId + <span class="string">"',"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    sb.deleteCharAt(sb.length() - <span class="number">1</span>);</span><br><span class="line">    sb.append(<span class="string">")"</span>);</span><br><span class="line">    System.out.println(sb.toString());</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> SQL() &#123;&#123;</span><br><span class="line">      SELECT(<span class="string">" question_id,question_title,create_time "</span>);</span><br><span class="line">      FROM(<span class="string">" question "</span>);</span><br><span class="line">      WHERE(<span class="string">" question_id in "</span> + sb.toString());</span><br><span class="line">    &#125;&#125;.toString();</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></integer></p>
+<p>燃鹅。。jvm很无情的抛了个错误出来<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">00:29:39.814 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Could not complete request</span><br><span class="line">org.mybatis.spring.MyBatisSystemException: nested exception is org.apache.ibatis.builder.BuilderException: Error invoking SqlProvider method (com.amosannn.mapper.QuestionSqlProvider.listQuestionByQuestionId).  Cause: org.apache.ibatis.binding.BindingException: Parameter &apos;arg0&apos; not found. Available parameters are [idList, param1]</span><br></pre></td></tr></table></figure></p>
+<p>很难受，Mybatis的官方文档里并没有针对@SelectProvider有更多的demo，翻遍了各大门户网站也没见到有相关的讨论。兜兜转转依旧没有眉目，想到多参数的传递会被Mybatis自动封装进Map，该不会List也是同样被封装进Map吧。结果一试还真是这样。。</p>
+<p>终于摸索出问题的关键，只需把形参由List<integer>类型替换为Map类型就能接收到前面传来的List了。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QuestionSqlProvider</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> String <span class="title">listQuestionByQuestionId</span><span class="params">(<span class="keyword">final</span> Map&lt;String, Object&gt; map)</span> </span>&#123;</span><br><span class="line">    List&lt;Integer&gt; idList = (List&lt;Integer&gt;)map.get(<span class="string">"idList"</span>);</span><br><span class="line">    StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">    sb.append(<span class="string">"("</span>);</span><br><span class="line">    <span class="keyword">for</span> (Integer questionId : idList) &#123;</span><br><span class="line">      sb.append(<span class="string">" '"</span> + questionId + <span class="string">"',"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    sb.deleteCharAt(sb.length() - <span class="number">1</span>);</span><br><span class="line">    sb.append(<span class="string">")"</span>);</span><br><span class="line">    System.out.println(sb.toString());</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> SQL() &#123;&#123;</span><br><span class="line">      SELECT(<span class="string">" question_id,question_title,create_time "</span>);</span><br><span class="line">      FROM(<span class="string">" question "</span>);</span><br><span class="line">      WHERE(<span class="string">" question_id in "</span> + sb.toString());</span><br><span class="line">    &#125;&#125;.toString();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></integer></p>
 
       
     </div>
@@ -437,7 +417,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/java/" rel="tag"># java</a>
+            <a href="/tags/Mybatis/" rel="tag"># Mybatis</a>
           
         </div>
       
@@ -450,8 +430,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/05/27/xss/" rel="next" title="Java如何防范XSS攻击">
-                <i class="fa fa-chevron-left"></i> Java如何防范XSS攻击
+              <a href="/2018/01/30/jedispool-could-not-return-resource-error/" rel="next" title="JedisPool报错：Could not return the resource to the pool">
+                <i class="fa fa-chevron-left"></i> JedisPool报错：Could not return the resource to the pool
               </a>
             
           </div>
@@ -459,10 +439,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/05/31/mysql-default-constraint/" rel="prev" title="MySQL的default约束用法">
-                MySQL的default约束用法 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -752,9 +728,9 @@
     
       <script type="text/javascript">
         var disqus_config = function () {
-          this.page.url = 'https://amosannn.github.io/2017/05/28/java-get-time/';
-          this.page.identifier = '2017/05/28/java-get-time/';
-          this.page.title = '使用Calendar或DateFormat拆分日期';
+          this.page.url = 'https://amosannn.github.io/2018/03/03/SelectProvider-use-List-parameter/';
+          this.page.identifier = '2018/03/03/SelectProvider-use-List-parameter/';
+          this.page.title = '在SelectProvider注解中使用复杂类型参数（List）';
         };
         var d = document, s = d.createElement('script');
         s.src = 'https://amosannn.disqus.com/embed.js';
