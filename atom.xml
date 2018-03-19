@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://amosannn.github.io/"/>
-  <updated>2018-03-08T15:35:13.000Z</updated>
+  <updated>2018-03-19T10:46:45.000Z</updated>
   <id>https://amosannn.github.io/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>什么是分布式事务</title>
+    <link href="https://amosannn.github.io/2018/03/19/simple-to-understand-transaction/"/>
+    <id>https://amosannn.github.io/2018/03/19/simple-to-understand-transaction/</id>
+    <published>2018-03-19T09:27:21.000Z</published>
+    <updated>2018-03-19T10:46:45.000Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="简单说一下事务"><a href="#简单说一下事务" class="headerlink" title="简单说一下事务"></a>简单说一下事务</h1><p>事务就是单个逻辑执行的一系列操作，要么全部成功，要么全部失败。<br>事务包含4个特性（<strong>ACID</strong>）：</p><ol><li>Atomicity（原子性）：事务中包含的所有操作要么全做，要么全不做。</li><li>Consistency（一致性）：事务开始以前，数据库处于一致性的状态，事务结束后，数据库也必须处于一致性的状态。</li><li>Isolation（隔离性）：系统必须保证事务不受其他并发执行的事务的影响。</li><li>Durability（持久性）：一个事务一旦成功完成，它对数据库的改变必须是永久的，即使是在系统遇到故障的情况下也不会丢失。</li></ol><h1 id="假如没有事务"><a href="#假如没有事务" class="headerlink" title="假如没有事务"></a>假如没有事务</h1><p>我们以银行的ATM机为例子：</p><p>取款操作一般为两个核心步骤：</p><ol><li>余额扣除相应金额</li><li>ATM机吐钞</li></ol><p>如果金额扣除了，而ATM机却因某些原因无法吐钞，那用户就崩溃了。而若是金额没扣除，ATM却吐钞了，那就是银行崩溃了。所以事务（分布式）的重要性在这里就体现的淋漓尽致了，这也正是事务中的一致性。</p><h1 id="说说分布式事务"><a href="#说说分布式事务" class="headerlink" title="说说分布式事务"></a>说说分布式事务</h1><p>分布式事务的体现有很多种，其中最具代表性的是由Oracle Tuxedo系统提出的XA分布式事务协议。</p><p>XA协议包含<strong>两阶段提交（2PC）</strong>和<strong>三阶段提交（3PC</strong>两种实现。</p><h2 id="两阶段提交（2PC）"><a href="#两阶段提交（2PC）" class="headerlink" title="两阶段提交（2PC）"></a>两阶段提交（2PC）</h2><p>两阶段提交就像支持多人游戏的网游游戏模式（可参考近日火热的PUBG）。</p><p>在游戏开始前，一个队伍中会有两种角色，队长与队员，也分别对应着<strong>事务协调者</strong>与<strong>事务参与者</strong>。</p><h3 id="正向流程"><a href="#正向流程" class="headerlink" title="正向流程"></a>正向流程</h3><p>一个XA两阶段提交的正向流程分为这两阶段：</p><blockquote><p>第一阶段：</p></blockquote><ol><li>以发送邀请的玩家A为首，邀请到了呵自己开黑的小伙伴B、C、D进入队伍，并请求他们点击准备按钮。</li><li>小伙伴 B、C、D 全部准备就绪。</li></ol><blockquote><p>第二阶段：</p></blockquote><ol><li>A 大吼一声，「伞兵一号准备就绪！」随即点击开始游戏。</li><li>A 首先进入游戏，等待 B、C、D片刻后，大家都成功进入游戏地图。</li></ol><p>对应到正经的XA中是这样的：</p><blockquote><p>第一阶段：</p></blockquote><ol><li><p>协调者向参与者们发送Prepare请求</p></li><li><p>参与者们各自执行自己与事务有关的数据更新，写入Undo Log和Redo Log。如果参与者执行成功，暂时不提交事务，而是向事务协调节点返回“Done”消息。</p><p>当事务协调者接到了所有参与者的返回消息，整个分布式事务将会进入第二阶段。</p></li></ol><blockquote><p>第二阶段：</p></blockquote><ol><li>如果事务协调节点在之前所收到都是正向返回，那么它将会向所有事务参与者发出Commit请求。</li><li>接到Commit请求之后，事务参与者节点会各自进行本地的事务提交，并释放锁资源。当本地事务完成提交后，将会向事务协调者返回“ACK”消息。</li><li>事务协调者接收到所有事务参与者的“完成”反馈，整个分布式事务完成。</li></ol><h3 id="失败处理"><a href="#失败处理" class="headerlink" title="失败处理"></a>失败处理</h3><ol><li>如果某个事务参与者反馈失败消息，说明该节点的本地事务执行不成功，必须回滚。</li><li>于是在第二阶段，事务协调节点向所有的事务参与者发送Abort请求。接收到Abort请求之后，各个事务参与者节点需要在本地进行事务的回滚操作，回滚操作依照Undo Log来进行。</li></ol><h2 id="XA两阶段提交的不足"><a href="#XA两阶段提交的不足" class="headerlink" title="XA两阶段提交的不足"></a>XA两阶段提交的不足</h2><blockquote><p>性能问题</p></blockquote><p>XA协议遵循强一致性。在事务执行过程中，各个节点占用着数据库资源，只有当所有节点准备完毕，事务协调者才会通知提交，参与者提交后释放资源。这样的过程有着非常明显的性能问题。</p><blockquote><p>协调者单点故障问题</p></blockquote><p>事务协调者是整个XA模型的核心，一旦事务协调者节点挂掉，参与者收不到提交或是回滚通知，参与者会一直处于中间状态无法完成事务。</p><blockquote><p>丢失消息导致的不一致问题</p></blockquote><p>在XA协议的第二个阶段，如果发生局部网络问题，一部分事务参与者收到了提交消息，另一部分事务参与者没收到提交消息，那么就导致了节点之间数据的不一致。</p><h3 id="如何避免XA两阶段提交的种种问题"><a href="#如何避免XA两阶段提交的种种问题" class="headerlink" title="如何避免XA两阶段提交的种种问题"></a>如何避免XA两阶段提交的种种问题</h3><p>有许多其他的分布式事务方案可供选择：</p><blockquote><p>XA三阶段提交</p></blockquote><p>XA三阶段提交在两阶段提交的基础上增加了CanCommit阶段，并且引入了超时机制。一旦事物参与者迟迟没有接到协调者的commit请求，会自动进行本地commit。这样有效解决了协调者单点故障的问题。但是性能问题和不一致的问题仍然没有根本解决。</p><blockquote><p>MQ事务</p></blockquote><p>利用消息中间件来异步完成事务的后一半更新，实现系统的最终一致性。这个方式避免了像XA协议那样的性能问题。</p><blockquote><p>TCC事务</p></blockquote><p>TCC事务是Try、Commit、Cancel三种指令的缩写，其逻辑模式类似于XA两阶段提交，但是实现方式是在代码层面来人为实现。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h1 id=&quot;简单说一下事务&quot;&gt;&lt;a href=&quot;#简单说一下事务&quot; class=&quot;headerlink&quot; title=&quot;简单说一下事务&quot;&gt;&lt;/a&gt;简单说一下事务&lt;/h1&gt;&lt;p&gt;事务就是单个逻辑执行的一系列操作，要么全部成功，要么全部失败。&lt;br&gt;事务包含4个特性（&lt;stron
+      
+    
+    </summary>
+    
+    
+      <category term="Transaction" scheme="https://amosannn.github.io/tags/Transaction/"/>
+    
+      <category term="SQL" scheme="https://amosannn.github.io/tags/SQL/"/>
+    
+  </entry>
   
   <entry>
     <title>MyBatis一对一映射注解@One的使用及理解</title>
@@ -499,28 +524,6 @@
       <category term="GitHub" scheme="https://amosannn.github.io/tags/GitHub/"/>
     
       <category term="BFG" scheme="https://amosannn.github.io/tags/BFG/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Hello Hexo</title>
-    <link href="https://amosannn.github.io/2017/04/16/Hello-Hexo/"/>
-    <id>https://amosannn.github.io/2017/04/16/Hello-Hexo/</id>
-    <published>2017-04-16T13:04:36.000Z</published>
-    <updated>2017-05-25T15:11:18.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>阿盛的技术博客诞生。</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;阿盛的技术博客诞生。&lt;/p&gt;
-
-      
-    
-    </summary>
-    
     
   </entry>
   
