@@ -99,8 +99,7 @@
 <meta property="og:url" content="https://amosannn.github.io/2017/05/31/mysql-default-constraint/index.html">
 <meta property="og:site_name" content="Amosannn">
 <meta property="og:description" content="在sql最基本的curd语句使用熟练后，我开始发现提高数据库的稳定性和易用性需要一些其他的东西，比如constraint(约束)。 我就一个没经过数据加密的user表演示一下default约束的用法。 建表语句中使用123456create table user(	id int(11) not null auto_increment,	username varchar(255) default n">
-<meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-06-01T16:04:32.000Z">
+<meta property="og:updated_time" content="2017-06-02T00:04:32.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MySQL的default约束用法">
 <meta name="twitter:description" content="在sql最基本的curd语句使用熟练后，我开始发现提高数据库的稳定性和易用性需要一些其他的东西，比如constraint(约束)。 我就一个没经过数据加密的user表演示一下default约束的用法。 建表语句中使用123456create table user(	id int(11) not null auto_increment,	username varchar(255) default n">
@@ -404,12 +403,12 @@
       
         <p>在sql最基本的curd语句使用熟练后，我开始发现提高数据库的稳定性和易用性需要一些其他的东西，比如<code>constraint</code>(约束)。</p>
 <p>我就一个没经过数据加密的user表演示一下<code>default约束</code>的用法。</p>
-<h2 id="建表语句中使用"><a href="#建表语句中使用" class="headerlink" title="建表语句中使用"></a>建表语句中使用</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> <span class="keyword">user</span>(</span><br><span class="line">	<span class="keyword">id</span> <span class="built_in">int</span>(<span class="number">11</span>) <span class="keyword">not</span> <span class="literal">null</span> auto_increment,</span><br><span class="line">	username <span class="built_in">varchar</span>(<span class="number">255</span>) <span class="keyword">default</span> <span class="literal">null</span>,</span><br><span class="line">	<span class="keyword">status</span> <span class="built_in">varchar</span>(<span class="number">255</span>) <span class="keyword">default</span> <span class="string">"active"</span>;</span><br><span class="line">	primary key (id)</span><br><span class="line">) engine=InnoDB default charset=utf8;</span><br></pre></td></tr></table></figure>
-<h2 id="已有表结构？使用alter插入字段"><a href="#已有表结构？使用alter插入字段" class="headerlink" title="已有表结构？使用alter插入字段"></a>已有表结构？使用alter插入字段</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> <span class="keyword">user</span> <span class="keyword">add</span> <span class="keyword">status</span> <span class="built_in">varchar</span>(<span class="number">255</span>) <span class="keyword">default</span> <span class="string">"active"</span>;</span><br></pre></td></tr></table></figure>
-<h2 id="有默认值的表如何添加数据"><a href="#有默认值的表如何添加数据" class="headerlink" title="有默认值的表如何添加数据"></a>有默认值的表如何添加数据</h2><p>那么表结构已经有了<code>default约束</code>，在插入值的时候如何处理字段的默认值呢？<br>传入null？空字符串？或者是不填？都不行！<br><a id="more"></a><br>答案是<code>传入default关键字</code>，表示插入字段预设的默认值。<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> <span class="keyword">user</span> <span class="keyword">values</span>(<span class="literal">null</span>, <span class="string">"c"</span>, <span class="string">"c"</span>, <span class="keyword">default</span>);</span><br></pre></td></tr></table></figure></p>
+<h2 id="建表语句中使用"><a href="#建表语句中使用" class="headerlink" title="建表语句中使用"></a>建表语句中使用</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">create</span> <span class="keyword">table</span> <span class="keyword">user</span>(</div><div class="line">	<span class="keyword">id</span> <span class="built_in">int</span>(<span class="number">11</span>) <span class="keyword">not</span> <span class="literal">null</span> auto_increment,</div><div class="line">	username <span class="built_in">varchar</span>(<span class="number">255</span>) <span class="keyword">default</span> <span class="literal">null</span>,</div><div class="line">	<span class="keyword">status</span> <span class="built_in">varchar</span>(<span class="number">255</span>) <span class="keyword">default</span> <span class="string">"active"</span>;</div><div class="line">	primary key (id)</div><div class="line">) engine=InnoDB default charset=utf8;</div></pre></td></tr></table></figure>
+<h2 id="已有表结构？使用alter插入字段"><a href="#已有表结构？使用alter插入字段" class="headerlink" title="已有表结构？使用alter插入字段"></a>已有表结构？使用alter插入字段</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">alter</span> <span class="keyword">table</span> <span class="keyword">user</span> <span class="keyword">add</span> <span class="keyword">status</span> <span class="built_in">varchar</span>(<span class="number">255</span>) <span class="keyword">default</span> <span class="string">"active"</span>;</div></pre></td></tr></table></figure>
+<h2 id="有默认值的表如何添加数据"><a href="#有默认值的表如何添加数据" class="headerlink" title="有默认值的表如何添加数据"></a>有默认值的表如何添加数据</h2><p>那么表结构已经有了<code>default约束</code>，在插入值的时候如何处理字段的默认值呢？<br>传入null？空字符串？或者是不填？都不行！<br><a id="more"></a><br>答案是<code>传入default关键字</code>，表示插入字段预设的默认值。<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">insert</span> <span class="keyword">into</span> <span class="keyword">user</span> <span class="keyword">values</span>(<span class="literal">null</span>, <span class="string">"c"</span>, <span class="string">"c"</span>, <span class="keyword">default</span>);</div></pre></td></tr></table></figure></p>
 <p>你想覆盖default约束传入自定义值？ 填写对应类型的值就行了。</p>
 <hr>
-<p>参考链接：<br><a href="https://www.w3schools.com/sql/sql_default.asp" target="_blank" rel="noopener">SQL DEFAULT Constraint</a></p>
+<p>参考链接：<br><a href="https://www.w3schools.com/sql/sql_default.asp" target="_blank" rel="external">SQL DEFAULT Constraint</a></p>
 
       
     </div>
@@ -545,7 +544,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-count">28</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -567,7 +566,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">28</span>
+                <span class="site-state-item-count">30</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

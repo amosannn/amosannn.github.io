@@ -98,7 +98,6 @@
 <meta property="og:url" content="https://amosannn.github.io/index.html">
 <meta property="og:site_name" content="Amosannn">
 <meta property="og:description" content="start from zero">
-<meta property="og:locale" content="zh-Hans">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Amosannn">
 <meta name="twitter:description" content="start from zero">
@@ -305,6 +304,696 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/11/01/airflow-dag-get-stuck-in-running-state/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Amosannn">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Amosannn">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/11/01/airflow-dag-get-stuck-in-running-state/" itemprop="url">Airflow 居然趁服务器不注意卡在 running 状态不执行</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-01T11:11:16+08:00">
+                2018-11-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术一路走到黑/" itemprop="url" rel="index">
+                    <span itemprop="name">技术一路走到黑</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/11/01/airflow-dag-get-stuck-in-running-state/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/11/01/airflow-dag-get-stuck-in-running-state/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>就像这样，这小子坏得很。</p>
+<p><img src="/images/airflow/1541489895790.png" alt="1541489895790"></p>
+<h2 id="初现端倪"><a href="#初现端倪" class="headerlink" title="初现端倪"></a>初现端倪</h2><p>好在 <code>Task Instance Details</code> 中可以看到这小子心里都在想些啥，这是十分关键的，以及具有重大突破性的调查入口！</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">depends_on_past is true for this task&apos;s DAG, but the previous task instance has not run yet.</div></pre></td></tr></table></figure>
+<p>做为一个新来的 dag，旗下每一个格子都是小白块，怎么可能会有前置依赖没执行？十分任性！</p>
+<h2 id="顺藤摸瓜"><a href="#顺藤摸瓜" class="headerlink" title="顺藤摸瓜"></a>顺藤摸瓜</h2><p>找到问题所在就好办了</p>
+<p>前往代码中查看，我确实将 <code>depends_on_past</code> 置为 True` 了，但是每个 task 之间的依赖更是没有问题。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">default_args = &#123;</div><div class="line">    &apos;owner&apos;: &apos;amos&apos;,</div><div class="line">    &apos;depends_on_past&apos;: True,</div><div class="line">    # &apos;start_date&apos;: airflow.utils.dates.days_ago(1),</div><div class="line">    &apos;start_date&apos;: datetime.now(),</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>尝试着将 <code>depends_on_past</code> 置为 <code>False</code> ，Airflow 立马开始了属于他自己的奔跑（按照依赖关系奔跑）！</p>
+<h2 id="别出纰漏"><a href="#别出纰漏" class="headerlink" title="别出纰漏"></a>别出纰漏</h2><p>顺便一提，还有一种可能会导致这种情况的发生</p>
+<p>那就是没有开启这个 dag，也就是 <code>trigger</code> 的状态为 <code>off</code>，这样会把任务挂起，直至开启 dag 才会执行。</p>
+<hr>
+<h2 id="了解更多"><a href="#了解更多" class="headerlink" title="了解更多"></a>了解更多</h2><p><a href="https://stackoverflow.com/questions/51261841/airflow-dag-get-stuck-in-running-state" target="_blank" rel="external">AirFlow DAG Get stuck in running state</a></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/10/31/airflow-dag-does-not-follow-the-schedule-configuration-execution/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Amosannn">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Amosannn">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/10/31/airflow-dag-does-not-follow-the-schedule-configuration-execution/" itemprop="url">Airflow 不遵循调度配置执行</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-31T16:45:11+08:00">
+                2018-10-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术一路走到黑/" itemprop="url" rel="index">
+                    <span itemprop="name">技术一路走到黑</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/10/31/airflow-dag-does-not-follow-the-schedule-configuration-execution/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/10/31/airflow-dag-does-not-follow-the-schedule-configuration-execution/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>在 Airflow 的使用过程中，曾多次遇到令人惊奇的现象，其中之一便是它没有按照 dag 中的配置执行。</p>
+<p>可能你也会遇到这样的情况，为什么配置了 <code>schedule_interval</code> 和 <code>start_date</code>，但是依旧没有按照调度配置的时间自动执行。</p>
+<h2 id="举个栗子"><a href="#举个栗子" class="headerlink" title="举个栗子"></a>举个栗子</h2><p>比如我这么配：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">from</span> datetime <span class="keyword">import</span> datetime, timedelta, timedelta</div><div class="line"></div><div class="line">default_args = &#123;</div><div class="line">    <span class="string">'owner'</span>: <span class="string">'amos'</span>,</div><div class="line">    <span class="string">'depends_on_past'</span>: <span class="keyword">False</span>,</div><div class="line">    <span class="string">'start_date'</span>: datetime.now(),</div><div class="line">&#125;</div><div class="line"></div><div class="line">dag = DAG(<span class="string">'test_rerun_dag'</span>,</div><div class="line">          default_args=default_args,</div><div class="line">          description=<span class="string">'test_rerun_dag'</span>,</div><div class="line">          schedule_interval=<span class="string">"*/1 * * * *"</span>)</div></pre></td></tr></table></figure>
+<p>照理说它应该按照配置中写的，每分钟执行一次操作。可是它没有，是它变心了吗？</p>
+<p>不，不是的。</p>
+<h2 id="这究竟是为什么"><a href="#这究竟是为什么" class="headerlink" title="这究竟是为什么"></a>这究竟是为什么</h2><blockquote>
+<p>Airflow sets execution_date based on the left bound of the schedule period it is covering, not based on when it fires (which would be the right bound of the period) .</p>
+</blockquote>
+<p>原因在于 Airflow 是个有原则的程序，它有个窗口的概念，会把 start_date 开始后，符合 schedule_interval 定义的第一个时间点记为 execution_date，但是会在下个时间点到达时才开始运行。也就是说由于这个窗口的原因，last run 会滞后一个周期。 </p>
+<p>所以，按上面的配置来说，每次当 scheduler 读到了这段 DAG，它会拿小本本记下 start_date 和每分钟执行的操作，准备在下一分钟开始执行了。但是当下一分钟来临的时候，它看了看表，嗯！start_date + 1，那么 execution_date 也 + 1，于是把小本本上的 start_date 划掉重写。所以 start_date 在不断被覆盖的过程中，任务没有像我们预想中的在调度奔跑，反而一直是挂起状态。</p>
+<h2 id="这可咋整啊"><a href="#这可咋整啊" class="headerlink" title="这可咋整啊"></a>这可咋整啊</h2><p>那么如何才能真正地让它规律地执行呢？</p>
+<p>将 start_date 往前错位到上一个周期</p>
+<p>什么意思呢？假如本例中的每分钟执行一次，那就将 start_date 调整到上一分钟的状态</p>
+<blockquote>
+<p><del>‘start_date’: datetime.now()</del></p>
+<p>‘start_date’: datetime.now() - timedelta(minutes=1)</p>
+</blockquote>
+<p>这下 scheduler 就可以在小本本工工整整地记录每一次调度计划，而不用写了划，划了写，把小本本涂得黑黑的了！</p>
+<hr>
+<p>如果你的 dag 趁你不注意卡在running 状态下不能动弹，或许你可以改改调度时间或周期。</p>
+<p>或者试试参考这篇文章：<a href="/2018/11/01/airflow-dag-get-stuck-in-running-state/" title="Airflow 居然趁服务器不注意卡在 running 状态不执行">Airflow 居然趁服务器不注意卡在 running 状态不执行</a></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/10/30/airflow-concept-combing/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Amosannn">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Amosannn">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/10/30/airflow-concept-combing/" itemprop="url">Airflow 概念梳理</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-30T19:18:16+08:00">
+                2018-10-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术一路走到黑/" itemprop="url" rel="index">
+                    <span itemprop="name">技术一路走到黑</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/10/30/airflow-concept-combing/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/10/30/airflow-concept-combing/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="有向无环图"><a href="#有向无环图" class="headerlink" title="有向无环图"></a>有向无环图</h1><p>Airflow 基于一个重要的数据结构，DAG。</p>
+<p>为什么依赖 DAG？</p>
+<p>LInux 与 WIndows 的 crontab 与任务计划，只可以配置定时任务或间隔任务，无法配置作业间的依赖关系。</p>
+<p>一个很大的弊端是，如果我们需要在作业 A 执行之后才有供作业 B 执行的数据，而出现了不可因素导致轮到作业 B 执行的时候作业 A 还未执行完毕。这必定会导致数据缺失，或作业 B 执行失败。</p>
+<p>所以，使用有向无环图来定义作业流，在任务调度中是非常合适的。</p>
+<h1 id="基础服务"><a href="#基础服务" class="headerlink" title="基础服务"></a>基础服务</h1><h2 id="Webserver"><a href="#Webserver" class="headerlink" title="Webserver"></a>Webserver</h2><p>是 Airflow 的基础服务，提供了前端可视化管理工具，可视化才是最好的！</p>
+<p>你可以在上面执行调度操作，查看任务处理耗时分析，清除状态作业重跑，查看日志，管理用户和数据连接，以及配置的 DAG 是否正确等。</p>
+<h2 id="Scheduler"><a href="#Scheduler" class="headerlink" title="Scheduler"></a>Scheduler</h2><p>也是 Airflow 的基础服务之一，身为调度器，负责监控 DAG 的状态，计算调度时间，启动满足条件的 DAG，并将任务提交到 Executor。</p>
+<h2 id="Worker"><a href="#Worker" class="headerlink" title="Worker"></a>Worker</h2><p>工作节点，这个角色类似于 yarn 中的 namenode，直接负责 Executor 的执行分配。</p>
+<p>ps: yarn 为 hadoop 中的资源管理系统</p>
+<h3 id="Executor"><a href="#Executor" class="headerlink" title="Executor"></a>Executor</h3><p>Airflow 有三种执行器</p>
+<ul>
+<li><p>SequentialExecutor </p>
+<p>顺序执行器，无需额外配置，默认使用 sqlite 作为元数据，因此也无法支持任务之间的并发操作。</p>
+</li>
+<li><p>LocalExecutor</p>
+<p>本地执行器，不支持 sqlite，但可使用 mysql、oracle、postgress 等主流数据库，需配置数据库链接 URL。</p>
+</li>
+<li><p>CeleryExecutor</p>
+<p>江湖人称芹菜，是一款基于消息队列的分布式异步任务调度工具，可将任务运行在千里之外（远程节点），十分优秀！</p>
+<p>ps: 需执行 Airflow 的工作节点 <code>airflow worker</code></p>
+<p>pps: 需额外安装 <code>Redis</code> 或 <code>RabbitMQ</code> 等</p>
+</li>
+</ul>
+<h1 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h1><h2 id="Operators"><a href="#Operators" class="headerlink" title="Operators"></a>Operators</h2><p>有了作业流，就得有作业内容，Operators 就是做这事的。</p>
+<p>Airflow 目前支持十多种不同的作业类型</p>
+<ul>
+<li>BashOperator</li>
+<li>PythonOperator</li>
+<li>DockerOperator</li>
+<li>DruidCheckOperator</li>
+<li>EmailOperator</li>
+<li>HiveOperator</li>
+<li>HTTPOperator</li>
+<li>DummyOperator </li>
+<li>……</li>
+</ul>
+<p>他们的作用都像字面意思说的那样，可完成相应的操作或调用。</p>
+<p>值得注意的是 DummyOperator，是个空操作，相当于标记和中转节点。</p>
+<p>当然，他们有一个共同的爸爸「BaseOperator」，全部首其控制，从中继承的功能也会因为他一人的修改而相应改变。</p>
+<h2 id="Timezone"><a href="#Timezone" class="headerlink" title="Timezone"></a>Timezone</h2><p>在 1.9 版本及以前，Airflow 使用的是本地时间，不同服务器时区不同容易产生运行错误。</p>
+<p>而在 1.10 中，加入了自定义的时区配置（1.9 的时区配置无法生效，大坑。。）</p>
+<h2 id="预警与监控"><a href="#预警与监控" class="headerlink" title="预警与监控"></a>预警与监控</h2><p>当任务执行失败或状态异常时，发送短信或邮件。</p>
+<p>这是个棒棒的功能，守卫再严的城池也有失守的时候，硝烟一起，家书即刻送达。</p>
+<p>你说，这为镇守襄阳城提供多少便利？</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/10/29/airflow_install_and_more/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Amosannn">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Amosannn">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/10/29/airflow_install_and_more/" itemprop="url">Airflow 安装及跳坑指南</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-29T19:58:16+08:00">
+                2018-10-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术一路走到黑/" itemprop="url" rel="index">
+                    <span itemprop="name">技术一路走到黑</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/10/29/airflow_install_and_more/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/10/29/airflow_install_and_more/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="有啥用"><a href="#有啥用" class="headerlink" title="有啥用"></a>有啥用</h2><p><code>Airflow</code> 简单来说就是管理和调度各种离线定时的 Job，用以替代 <code>crontab</code>， 可以把它看作是个高级版的 <code>crontab</code>。</p>
+<p>如果 <code>crontab</code>  的规模达到百千万，管理起来会非常复杂。这个时候可以考虑将任务迁移到 <code>Airflow</code>，你将可以清楚地分辨出哪些 DAG 是稳定的，哪些不那么见状，需要优化。如果 DAG 不足以打动你，强交互性、友好的界面管理、重跑任务以及合适的报警级别足以让你感觉相见恨晚。</p>
+<h2 id="简单记录安装及配置过程"><a href="#简单记录安装及配置过程" class="headerlink" title="简单记录安装及配置过程"></a>简单记录安装及配置过程</h2><p><code>Airflow</code> 在 1.8 之后更名为 <code>apache-airflow</code></p>
+<blockquote>
+<p>NOTE: The transition from 1.8.0 (or before) to 1.8.1 (or after) requires uninstalling Airflow before installing the new version. The package name was changed from airflow to apache-airflow as of version 1.8.1.</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ pip3 install apache-airflow</div></pre></td></tr></table></figure>
+<p>如果你想安装 1.8.0 的 <code>Airflow</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ pip3 install airflow</div></pre></td></tr></table></figure>
+<h3 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ airflow inidb</div></pre></td></tr></table></figure>
+<p>初始化后默认会在 <code>~/</code> 下生成 <code>airflow</code> 文件夹，如果想更换 <code>MySQL</code> 或其他数据库做为元数据存储，那么在配置文件中修改配置后重新初始化即可。</p>
+<p>关于如何在 python3 中安装 <code>MySQL</code>，此处不做赘述。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ vi ~/airflow/airflow.cfg</div><div class="line">sql_alchemy_conn = mysql://username:password@host:port/airflow</div></pre></td></tr></table></figure>
+<h2 id="安装扩展"><a href="#安装扩展" class="headerlink" title="安装扩展"></a>安装扩展</h2><p><code>Airflow</code> 内置了芹菜的调度器，只需要手动安装芹菜并进行简单配置就可以使用。</p>
+<p><code>Celery</code> 可使用 <code>RabbitMQ</code> 或 <code>Redis</code> 做为 broker，按需选择即可，此处也不做赘述。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">$ pip3 install apache-airflow[celery]</div><div class="line"></div><div class="line"># 启用还需修改几处配置</div><div class="line">$ vi ~/airflow/airflow.cfg</div><div class="line">executor = CeleryExecutor</div><div class="line">broker_url = redis://127.0.0.1:6379/0</div><div class="line">result_backend = db+mysql://root:xxx@127.0.0.1:3306/airflow</div></pre></td></tr></table></figure>
+<h3 id="这里有一个可能会踩入的小坑"><a href="#这里有一个可能会踩入的小坑" class="headerlink" title="这里有一个可能会踩入的小坑"></a>这里有一个可能会踩入的小坑</h3><p>既然项目更名了，在安装芹菜等扩展时，记得选对项目。</p>
+<p>否则便会安装两个项目，导致后期使用出现冲突。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$ pip3 install apache-airflow</div><div class="line">$ pip3 install airflow[celery]</div><div class="line"></div><div class="line">$ pip3 list</div><div class="line">...</div><div class="line">apache-airflow (1.10.0)</div><div class="line">airflow (1.8.0)</div><div class="line">...</div></pre></td></tr></table></figure>
+<h2 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"># 启动 webserver</div><div class="line">$ airflow webserver -p 8080</div><div class="line"># 启动调度程序</div><div class="line">$ airflow scheduler</div><div class="line"># 启动 Celery</div><div class="line">$ airflow worker</div></pre></td></tr></table></figure>
+<p>启动完成后就可以运行官方内置的 example 测试啦！</p>
+<h2 id="大坑"><a href="#大坑" class="headerlink" title="大坑"></a>大坑</h2><p>记录几个遇到的报错</p>
+<h3 id="airflow-exceptions-AirflowException-Could-not-create-Fernet-object-Incorrect-padding"><a href="#airflow-exceptions-AirflowException-Could-not-create-Fernet-object-Incorrect-padding" class="headerlink" title="airflow.exceptions.AirflowException: Could not create Fernet object: Incorrect padding"></a>airflow.exceptions.AirflowException: Could not create Fernet object: Incorrect padding</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div></pre></td><td class="code"><pre><div class="line">$ airflow initdb</div><div class="line">[2018-10-30 15:30:26,857] &#123;settings.py:174&#125; INFO - setting.configure_orm(): Using pool settings. pool_size=5, pool_recycle=1800</div><div class="line">[2018-10-30 15:30:27,164] &#123;__init__.py:51&#125; INFO - Using executor CeleryExecutor</div><div class="line">DB: mysql://root:***@localhost:3306/airflow</div><div class="line">[2018-10-30 15:30:27,320] &#123;db.py:338&#125; INFO - Creating tables</div><div class="line">INFO  [alembic.runtime.migration] Context impl MySQLImpl.</div><div class="line">INFO  [alembic.runtime.migration] Will assume non-transactional DDL.</div><div class="line">Traceback (most recent call last):</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/airflow/models.py&quot;, line 159, in get_fernet</div><div class="line">    _fernet = Fernet(configuration.conf.get(&apos;core&apos;, &apos;FERNET_KEY&apos;).encode(&apos;utf-8&apos;))</div><div class="line">  File &quot;/usr/lib/python3/dist-packages/cryptography/fernet.py&quot;, line 34, in __init__</div><div class="line">    key = base64.urlsafe_b64decode(key)</div><div class="line">  File &quot;/usr/lib/python3.5/base64.py&quot;, line 134, in urlsafe_b64decode</div><div class="line">    return b64decode(s)</div><div class="line">  File &quot;/usr/lib/python3.5/base64.py&quot;, line 88, in b64decode</div><div class="line">    return binascii.a2b_base64(s)</div><div class="line">binascii.Error: Incorrect padding</div><div class="line"></div><div class="line">During handling of the above exception, another exception occurred:</div><div class="line"></div><div class="line">Traceback (most recent call last):</div><div class="line">  File &quot;/home/ubuntu/.local/bin/airflow&quot;, line 32, in &lt;module&gt;</div><div class="line">    args.func(args)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/airflow/bin/cli.py&quot;, line 1002, in initdb</div><div class="line">    db_utils.initdb(settings.RBAC)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/airflow/utils/db.py&quot;, line 103, in initdb</div><div class="line">    schema=&apos;airflow_ci&apos;))</div><div class="line">  File &quot;&lt;string&gt;&quot;, line 4, in __init__</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/sqlalchemy/orm/state.py&quot;, line 414, in _initialize_instance</div><div class="line">    manager.dispatch.init_failure(self, args, kwargs)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/sqlalchemy/util/langhelpers.py&quot;, line 66, in __exit__</div><div class="line">    compat.reraise(exc_type, exc_value, exc_tb)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/sqlalchemy/util/compat.py&quot;, line 187, in reraise</div><div class="line">    raise value</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/sqlalchemy/orm/state.py&quot;, line 411, in _initialize_instance</div><div class="line">    return manager.original_init(*mixed[1:], **kwargs)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/airflow/models.py&quot;, line 677, in __init__</div><div class="line">    self.extra = extra</div><div class="line">  File &quot;&lt;string&gt;&quot;, line 1, in __set__</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/airflow/models.py&quot;, line 731, in set_extra</div><div class="line">    fernet = get_fernet()</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/airflow/models.py&quot;, line 163, in get_fernet</div><div class="line">    raise AirflowException(&quot;Could not create Fernet object: &#123;&#125;&quot;.format(ve))</div><div class="line">airflow.exceptions.AirflowException: Could not create Fernet object: Incorrect padding</div></pre></td></tr></table></figure>
+<h4 id="fernet-key"><a href="#fernet-key" class="headerlink" title="fernet_key"></a>fernet_key</h4><p>关于 <code>fernet_key</code> 是什么，配置文件里给出了相应的解释：</p>
+<blockquote>
+<p>Secret key to save connection passwords in the db</p>
+</blockquote>
+<h4 id="干掉它"><a href="#干掉它" class="headerlink" title="干掉它"></a>干掉它</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"># 生成一个 key 替换配置文件中的 fernet_key</div><div class="line">$ python3 -c &quot;from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())&quot;</div><div class="line"></div><div class="line">$ vi ~/airflow/airflow.cfg</div><div class="line">fernet_key = g3589dfasdfhnht289tghdsfij---dfadfgeu812=</div><div class="line"></div><div class="line">$ airflow initdb</div><div class="line">[2018-10-30 15:31:21,159] &#123;settings.py:174&#125; INFO - setting.configure_orm(): Using pool settings. pool_size=5, pool_recycle=1800</div><div class="line">[2018-10-30 15:31:21,464] &#123;__init__.py:51&#125; INFO - Using executor CeleryExecutor</div><div class="line">DB: mysql://root:***@localhost:3306/airflow</div><div class="line">[2018-10-30 15:31:21,620] &#123;db.py:338&#125; INFO - Creating tables</div><div class="line">INFO  [alembic.runtime.migration] Context impl MySQLImpl.</div><div class="line">INFO  [alembic.runtime.migration] Will assume non-transactional DDL.</div><div class="line">Done.</div></pre></td></tr></table></figure>
+<h3 id="TypeError-b’5e36be93294a6fea65a4c81571388241b1667fca’-is-not-JSON-serializable"><a href="#TypeError-b’5e36be93294a6fea65a4c81571388241b1667fca’-is-not-JSON-serializable" class="headerlink" title="TypeError: b’5e36be93294a6fea65a4c81571388241b1667fca’ is not JSON serializable"></a>TypeError: b’5e36be93294a6fea65a4c81571388241b1667fca’ is not JSON serializable</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div></pre></td><td class="code"><pre><div class="line">Ooops.</div><div class="line"></div><div class="line">                          ____/ (  (    )   )  \___</div><div class="line">                         /( (  (  )   _    ))  )   )\</div><div class="line">                       ((     (   )(    )  )   (   )  )</div><div class="line">                     ((/  ( _(   )   (   _) ) (  () )  )</div><div class="line">                    ( (  ( (_)   ((    (   )  .((_ ) .  )_</div><div class="line">                   ( (  )    (      (  )    )   ) . ) (   )</div><div class="line">                  (  (   (  (   ) (  _  ( _) ).  ) . ) ) ( )</div><div class="line">                  ( (  (   ) (  )   (  ))     ) _)(   )  )  )</div><div class="line">                 ( (  ( \ ) (    (_  ( ) ( )  )   ) )  )) ( )</div><div class="line">                  (  (   (  (   (_ ( ) ( _    )  ) (  )  )   )</div><div class="line">                 ( (  ( (  (  )     (_  )  ) )  _)   ) _( ( )</div><div class="line">                  ((  (   )(    (     _    )   _) _(_ (  (_ )</div><div class="line">                   (_((__(_(__(( ( ( |  ) ) ) )_))__))_)___)</div><div class="line">                   ((__)        \\||lll|l||///          \_))</div><div class="line">                            (   /(/ (  )  ) )\   )</div><div class="line">                          (    ( ( ( | | ) ) )\   )</div><div class="line">                           (   /(| / ( )) ) ) )) )</div><div class="line">                         (     ( ((((_(|)_)))))     )</div><div class="line">                          (      ||\(|(|)|/||     )</div><div class="line">                        (        |(||(||)||||        )</div><div class="line">                          (     //|/l|||)|\\ \     )</div><div class="line">                        (/ / //  /|//||||\\  \ \  \ _)</div><div class="line">-------------------------------------------------------------------------------</div><div class="line">Node: ubuntu</div><div class="line">-------------------------------------------------------------------------------</div><div class="line">Traceback (most recent call last):</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/flask/app.py&quot;, line 1982, in wsgi_app</div><div class="line">    response = self.full_dispatch_request()</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/flask/app.py&quot;, line 1614, in full_dispatch_request</div><div class="line">    rv = self.handle_user_exception(e)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/flask/app.py&quot;, line 1517, in handle_user_exception</div><div class="line">    reraise(exc_type, exc_value, tb)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/flask/_compat.py&quot;, line 33, in reraise</div><div class="line">    raise value</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/flask/app.py&quot;, line 1612, in full_dispatch_request</div><div class="line">    rv = self.dispatch_request()</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/flask/app.py&quot;, line 1598, in dispatch_request</div><div class="line">    return self.view_functions[rule.endpoint](**req.view_args)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/flask_admin/base.py&quot;, line 69, in inner</div><div class="line">    return self._run_view(f, *args, **kwargs)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/flask_admin/base.py&quot;, line 368, in _run_view</div><div class="line">    return fn(self, *args, **kwargs)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/flask_login.py&quot;, line 755, in decorated_view</div><div class="line">    return func(*args, **kwargs)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/airflow/utils/db.py&quot;, line 74, in wrapper</div><div class="line">    return func(*args, **kwargs)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/airflow/www/views.py&quot;, line 2061, in index</div><div class="line">    auto_complete_data=auto_complete_data)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/flask_admin/base.py&quot;, line 308, in render</div><div class="line">    return render_template(template, **kwargs)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/flask/templating.py&quot;, line 134, in render_template</div><div class="line">    context, ctx.app)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/flask/templating.py&quot;, line 116, in _render</div><div class="line">    rv = template.render(context)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/jinja2/environment.py&quot;, line 989, in render</div><div class="line">    return self.environment.handle_exception(exc_info, True)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/jinja2/environment.py&quot;, line 754, in handle_exception</div><div class="line">    reraise(exc_type, exc_value, tb)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/jinja2/_compat.py&quot;, line 37, in reraise</div><div class="line">    raise value.with_traceback(tb)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/airflow/www/templates/airflow/dags.html&quot;, line 18, in top-level template code</div><div class="line">    &#123;% extends &quot;airflow/master.html&quot; %&#125;</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/airflow/www/templates/airflow/master.html&quot;, line 18, in top-level template code</div><div class="line">    &#123;% extends &quot;admin/master.html&quot; %&#125;</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/airflow/www/templates/admin/master.html&quot;, line 18, in top-level template code</div><div class="line">    &#123;% extends &apos;admin/base.html&apos; %&#125;</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/flask_admin/templates/bootstrap3/admin/base.html&quot;, line 74, in top-level template code</div><div class="line">    &#123;% block tail_js %&#125;</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/airflow/www/templates/admin/master.html&quot;, line 44, in block &quot;tail_js&quot;</div><div class="line">    xhr.setRequestHeader(&quot;X-CSRFToken&quot;, &quot;&#123;&#123; csrf_token() &#125;&#125;&quot;);</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/flask_wtf/csrf.py&quot;, line 47, in generate_csrf</div><div class="line">    setattr(g, field_name, s.dumps(session[field_name]))</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/itsdangerous/serializer.py&quot;, line 166, in dumps</div><div class="line">    payload = want_bytes(self.dump_payload(obj))</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/itsdangerous/url_safe.py&quot;, line 42, in dump_payload</div><div class="line">    json = super(URLSafeSerializerMixin, self).dump_payload(obj)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/itsdangerous/serializer.py&quot;, line 133, in dump_payload</div><div class="line">    return want_bytes(self.serializer.dumps(obj, **self.serializer_kwargs))</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/itsdangerous/_json.py&quot;, line 18, in dumps</div><div class="line">    return json.dumps(obj, **kwargs)</div><div class="line">  File &quot;/usr/lib/python3.5/json/__init__.py&quot;, line 237, in dumps</div><div class="line">    **kw).encode(obj)</div><div class="line">  File &quot;/usr/lib/python3.5/json/encoder.py&quot;, line 198, in encode</div><div class="line">    chunks = self.iterencode(o, _one_shot=True)</div><div class="line">  File &quot;/usr/lib/python3.5/json/encoder.py&quot;, line 256, in iterencode</div><div class="line">    return _iterencode(o, 0)</div><div class="line">  File &quot;/usr/lib/python3.5/json/encoder.py&quot;, line 179, in default</div><div class="line">    raise TypeError(repr(o) + &quot; is not JSON serializable&quot;)</div><div class="line">TypeError: b&apos;5e36be93294a6fea65a4c81571388241b1667fca&apos; is not JSON serializable</div></pre></td></tr></table></figure>
+<p>这个错误十分诡异，至今不解，项目运行环境为 <code>Python 3.5.2</code></p>
+<p>连首页都进不去，使用的地址为 <code>127.0.0.1:8080</code>，后面尝试把地址修改为 <code>localhost:8080</code> ，就没有这个报错了 Orz</p>
+<hr>
+<h2 id="了解更多"><a href="#了解更多" class="headerlink" title="了解更多"></a>了解更多</h2><p><a href="https://medium.com/airbnb-engineering/airflow-a-workflow-management-platform-46318b977fd8" target="_blank" rel="external">Airflow: a workflow management platform</a></p>
+<p><a href="https://medium.com/videoamp/what-we-learned-migrating-off-cron-to-airflow-b391841a0da4" target="_blank" rel="external">What we learned migrating off Cron to Airflow</a></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/04/02/axios-intercepter-perflight-response-error/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -385,27 +1074,27 @@
         
           
             <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>为了加强网站安全性，给除了登录注册等特殊页面外的页面路由都加上了访问控制。然后问题就出现了，接口请求没有返回值了！抛了这样一个错误：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Request header field 8080:1 Authorization is not allowed by Access-Control-Allow-Headers in preflight response</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Request header field 8080:1 Authorization is not allowed by Access-Control-Allow-Headers in preflight response</div></pre></td></tr></table></figure>
 <p>之前的跨域设置居然不管用了！</p>
 <h1 id="挣扎"><a href="#挣扎" class="headerlink" title="挣扎"></a>挣扎</h1><h2 id="分析拦截器代码"><a href="#分析拦截器代码" class="headerlink" title="分析拦截器代码"></a>分析拦截器代码</h2><p>看看这个拦截器代码究竟做了什么！</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// http request 拦截器</span></span><br><span class="line">axios.interceptors.request.use(</span><br><span class="line">    config =&gt; &#123;</span><br><span class="line">        <span class="keyword">if</span> (store.state.token) &#123;  <span class="comment">// 判断是否存在token，如果存在的话，则每个http header都加上token</span></span><br><span class="line">            config.headers.Authorization = <span class="string">`token <span class="subst">$&#123;store.state.token&#125;</span>`</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> config;</span><br><span class="line">    &#125;,</span><br><span class="line">    err =&gt; &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Promise</span>.reject(err);</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// http response 拦截器</span></span><br><span class="line">axios.interceptors.response.use(</span><br><span class="line">    response =&gt; &#123;</span><br><span class="line">        <span class="keyword">return</span> response;</span><br><span class="line">    &#125;,</span><br><span class="line">    error =&gt; &#123;</span><br><span class="line">        <span class="keyword">if</span> (error.response) &#123;</span><br><span class="line">            <span class="keyword">switch</span> (error.response.status) &#123;</span><br><span class="line">                <span class="keyword">case</span> <span class="number">401</span>:</span><br><span class="line">                    <span class="comment">// 返回 401 清除token信息并跳转到登录页面</span></span><br><span class="line">                    store.commit(types.LOGOUT);</span><br><span class="line">                    router.replace(&#123;</span><br><span class="line">                        path: <span class="string">'login'</span>,</span><br><span class="line">                        query: &#123;<span class="attr">redirect</span>: router.currentRoute.fullPath&#125;</span><br><span class="line">                    &#125;)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Promise</span>.reject(error.response.data)   <span class="comment">// 返回接口返回的错误信息</span></span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// http request 拦截器</span></div><div class="line">axios.interceptors.request.use(</div><div class="line">    <span class="function"><span class="params">config</span> =&gt;</span> &#123;</div><div class="line">        <span class="keyword">if</span> (store.state.token) &#123;  <span class="comment">// 判断是否存在token，如果存在的话，则每个http header都加上token</span></div><div class="line">            config.headers.Authorization = <span class="string">`token <span class="subst">$&#123;store.state.token&#125;</span>`</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> config;</div><div class="line">    &#125;,</div><div class="line">    err =&gt; &#123;</div><div class="line">        <span class="keyword">return</span> <span class="built_in">Promise</span>.reject(err);</div><div class="line">    &#125;);</div><div class="line"></div><div class="line"><span class="comment">// http response 拦截器</span></div><div class="line">axios.interceptors.response.use(</div><div class="line">    <span class="function"><span class="params">response</span> =&gt;</span> &#123;</div><div class="line">        <span class="keyword">return</span> response;</div><div class="line">    &#125;,</div><div class="line">    error =&gt; &#123;</div><div class="line">        <span class="keyword">if</span> (error.response) &#123;</div><div class="line">            <span class="keyword">switch</span> (error.response.status) &#123;</div><div class="line">                <span class="keyword">case</span> <span class="number">401</span>:</div><div class="line">                    <span class="comment">// 返回 401 清除token信息并跳转到登录页面</span></div><div class="line">                    store.commit(types.LOGOUT);</div><div class="line">                    router.replace(&#123;</div><div class="line">                        <span class="attr">path</span>: <span class="string">'login'</span>,</div><div class="line">                        <span class="attr">query</span>: &#123;<span class="attr">redirect</span>: router.currentRoute.fullPath&#125;</div><div class="line">                    &#125;)</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> <span class="built_in">Promise</span>.reject(error.response.data)   <span class="comment">// 返回接口返回的错误信息</span></div><div class="line">    &#125;);</div></pre></td></tr></table></figure>
 <p>嗯！debugger一波找到原因在第五行，添加了一个新的请求头<code>Authorization</code>。</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">config.headers.Authorization = <span class="string">`token <span class="subst">$&#123;store.state.token&#125;</span>`</span>;</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">config.headers.Authorization = <span class="string">`token <span class="subst">$&#123;store.state.token&#125;</span>`</span>;</div></pre></td></tr></table></figure>
 <p>然而，在前端的请求中并没有看到<code>Authorization</code>这个头。。</p>
 <h2 id="分析请求"><a href="#分析请求" class="headerlink" title="分析请求"></a>分析请求</h2><p>在查看请求详情的时候发现一条重要信息：</p>
 <p><img src="../images/options_request.png" alt="options request"></p>
 <p>options请求过后没有请求接口，那么就证明是服务端拒绝了访问。</p>
 <blockquote>
-<p>跨域资源共享标准新增了一组 HTTP 首部字段，允许服务器声明哪些源站有权限访问哪些资源。另外，规范要求，对那些可能对服务器数据产生副作用的 HTTP 请求方法（特别是 <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/GET" target="_blank" rel="noopener"><code>GET</code></a> 以外的 HTTP 请求，或者搭配某些 MIME 类型的 <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/POST" target="_blank" rel="noopener"><code>POST</code></a> 请求），浏览器必须首先使用 <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/OPTIONS" target="_blank" rel="noopener"><code>OPTIONS</code></a> 方法发起一个预检请求（preflight request），从而获知服务端是否允许该跨域请求。服务器确认允许之后，才发起实际的 HTTP 请求。在预检请求的返回中，服务器端也可以通知客户端，是否需要携带身份凭证（包括 <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Cookies" target="_blank" rel="noopener">Cookies </a>和 HTTP 认证相关数据）。</p>
-<p>— 来自 <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Access_control_CORS" target="_blank" rel="noopener">MDN web docs</a></p>
+<p>跨域资源共享标准新增了一组 HTTP 首部字段，允许服务器声明哪些源站有权限访问哪些资源。另外，规范要求，对那些可能对服务器数据产生副作用的 HTTP 请求方法（特别是 <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/GET" target="_blank" rel="external"><code>GET</code></a> 以外的 HTTP 请求，或者搭配某些 MIME 类型的 <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/POST" target="_blank" rel="external"><code>POST</code></a> 请求），浏览器必须首先使用 <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/OPTIONS" target="_blank" rel="external"><code>OPTIONS</code></a> 方法发起一个预检请求（preflight request），从而获知服务端是否允许该跨域请求。服务器确认允许之后，才发起实际的 HTTP 请求。在预检请求的返回中，服务器端也可以通知客户端，是否需要携带身份凭证（包括 <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Cookies" target="_blank" rel="external">Cookies </a>和 HTTP 认证相关数据）。</p>
+<p>— 来自 <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Access_control_CORS" target="_blank" rel="external">MDN web docs</a></p>
 </blockquote>
 <h1 id="填坑"><a href="#填坑" class="headerlink" title="填坑"></a>填坑</h1><p>解决的办法也很简单，在服务端的跨域拦截器中给<code>OPTIONS</code>方法放行。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 新增一个 Authorization 请求头</span></span><br><span class="line">response.setHeader(<span class="string">"Access-Control-Allow-Headers"</span>, <span class="string">"Origin, X-Requested-With, Content-Type, Accept, Authorization"</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 放行 OPTIONS 请求方法</span></span><br><span class="line"><span class="keyword">if</span> (request.getMethod().equals(<span class="string">"OPTIONS"</span>)) &#123;</span><br><span class="line">  response.setStatus(HttpServletResponse.SC_OK);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 新增一个 Authorization 请求头</span></div><div class="line">response.setHeader(<span class="string">"Access-Control-Allow-Headers"</span>, <span class="string">"Origin, X-Requested-With, Content-Type, Accept, Authorization"</span>);</div><div class="line"></div><div class="line"><span class="comment">// 放行 OPTIONS 请求方法</span></div><div class="line"><span class="keyword">if</span> (request.getMethod().equals(<span class="string">"OPTIONS"</span>)) &#123;</div><div class="line">  response.setStatus(HttpServletResponse.SC_OK);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>服务端放行<code>OPTIONS</code>方法后，再次请求，就可以看到同一个请求发送了两次。第一条为 options 方法，第二条请求就是 post 或 get 请求啦，并且在 header 中也可以看到 axios 拦截器设置的 Authorization 了。</p>
 <hr>
 <p>参考链接</p>
-<p><a href="https://github.com/superman66/vue-axios-github" target="_blank" rel="noopener">axios 登录拦截器</a></p>
-<p><a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Access_control_CORS" target="_blank" rel="noopener">Access control CORS</a></p>
+<p><a href="https://github.com/superman66/vue-axios-github" target="_blank" rel="external">axios 登录拦截器</a></p>
+<p><a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Access_control_CORS" target="_blank" rel="external">Access control CORS</a></p>
 
           
         
@@ -531,39 +1220,39 @@
             <h1 id="简单介绍-Docker"><a href="#简单介绍-Docker" class="headerlink" title="简单介绍 Docker"></a>简单介绍 Docker</h1><p>Docker 真是个好东西，很好的降低了不同环境发版的兼容性问题。无论是 Linux, Windows 或是 Mac OS，再也不用怕系统环境不同，软件版本不同导致的项目无法启动。这些问题只需要自定义 Docker 镜像，并在 Docker 中启动，就能搞定部署啦。</p>
 <h1 id="部署-Vue-项目"><a href="#部署-Vue-项目" class="headerlink" title="部署 Vue 项目"></a>部署 Vue 项目</h1><p>传统的部署一般为编译后放在 Nginx 目录下，或者放在 Tomcat 目录下。玩了有一阵子 Docker 了，就试试用 Docker 来部署吧。</p>
 <h2 id="本地操作"><a href="#本地操作" class="headerlink" title="本地操作"></a>本地操作</h2><p>首先给本地的vue项目打包</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm run build</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">npm run build</div></pre></td></tr></table></figure>
 <p>执行命令之后项目根目录下会出现 dist 文件夹，将其上传至服务器。</p>
 <h2 id="服务器操作"><a href="#服务器操作" class="headerlink" title="服务器操作"></a>服务器操作</h2><h3 id="编写-Dockerfile"><a href="#编写-Dockerfile" class="headerlink" title="编写 Dockerfile"></a>编写 Dockerfile</h3><p>新建 Dockerfile</p>
 <blockquote>
 <p>vi Dockerfile</p>
 </blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">#导入nginx镜像</span><br><span class="line">FROM nginx:1.13.7</span><br><span class="line">MAINTAINER amosannn &lt;amosannn@gmail.com&gt;</span><br><span class="line">#把当前打包工程的html复制到虚拟地址</span><br><span class="line">COPY dist/ /usr/share/nginx/html/</span><br><span class="line">#使用自定义nginx.conf配置端口和监听</span><br><span class="line">RUN rm /etc/nginx/conf.d/default.conf</span><br><span class="line">ADD default.conf /etc/nginx/conf.d/</span><br><span class="line"></span><br><span class="line">RUN /bin/bash -c &apos;echo init ok!!!&apos;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">#导入nginx镜像</div><div class="line">FROM nginx:1.13.7</div><div class="line">MAINTAINER amosannn &lt;amosannn@gmail.com&gt;</div><div class="line">#把当前打包工程的html复制到虚拟地址</div><div class="line">COPY dist/ /usr/share/nginx/html/</div><div class="line">#使用自定义nginx.conf配置端口和监听</div><div class="line">RUN rm /etc/nginx/conf.d/default.conf</div><div class="line">ADD default.conf /etc/nginx/conf.d/</div><div class="line"></div><div class="line">RUN /bin/bash -c &apos;echo init ok!!!&apos;</div></pre></td></tr></table></figure>
 <h3 id="Nginx配置"><a href="#Nginx配置" class="headerlink" title="Nginx配置"></a>Nginx配置</h3><p>新建<code>default.conf</code></p>
 <blockquote>
 <p>vi default.conf</p>
 </blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line"># 项目中定义的端口号</span><br><span class="line">    listen       8000; </span><br><span class="line">    server_name  localhost;</span><br><span class="line"></span><br><span class="line">    #charset koi8-r;</span><br><span class="line">    #access_log  /var/log/nginx/log/host.access.log  main;</span><br><span class="line"></span><br><span class="line">    location / &#123;</span><br><span class="line">        root   /usr/share/nginx/html;</span><br><span class="line">        index  index.html index.htm;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    #error_page  404              /404.html;</span><br><span class="line"></span><br><span class="line">    # redirect server error pages to the static page /50x.html</span><br><span class="line">    #</span><br><span class="line">    error_page   500 502 503 504  /50x.html;</span><br><span class="line">    location = /50x.html &#123;</span><br><span class="line">        root   html;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">server &#123;</div><div class="line"># 项目中定义的端口号</div><div class="line">    listen       8000; </div><div class="line">    server_name  localhost;</div><div class="line"></div><div class="line">    #charset koi8-r;</div><div class="line">    #access_log  /var/log/nginx/log/host.access.log  main;</div><div class="line"></div><div class="line">    location / &#123;</div><div class="line">        root   /usr/share/nginx/html;</div><div class="line">        index  index.html index.htm;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    #error_page  404              /404.html;</div><div class="line"></div><div class="line">    # redirect server error pages to the static page /50x.html</div><div class="line">    #</div><div class="line">    error_page   500 502 503 504  /50x.html;</div><div class="line">    location = /50x.html &#123;</div><div class="line">        root   html;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <h3 id="Docker-打包"><a href="#Docker-打包" class="headerlink" title="Docker 打包"></a>Docker 打包</h3><p>打包前项目目录下应该有这几个文件(夹)：<code>default.conf</code>,<code>dist</code>,<code>Dockerfile</code></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t zhiliao:v1 .</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker build -t zhiliao:v1 .</div></pre></td></tr></table></figure>
 <p>别忘了末尾的小点点</p>
 <p>最后出现这两条提示即为打包成功</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Successfully built 6f656946fde3</span><br><span class="line">Successfully tagged zhiliao:v1</span><br></pre></td></tr></table></figure>
-<h3 id="查看镜像"><a href="#查看镜像" class="headerlink" title="查看镜像"></a>查看镜像</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker images</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Successfully built 6f656946fde3</div><div class="line">Successfully tagged zhiliao:v1</div></pre></td></tr></table></figure>
+<h3 id="查看镜像"><a href="#查看镜像" class="headerlink" title="查看镜像"></a>查看镜像</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker images</div></pre></td></tr></table></figure>
 <p>如果在结果中看到，则为打包成功</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">zhiliao             latest              c5d9c47be079        17 minutes ago      111MB</span><br></pre></td></tr></table></figure>
-<h3 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 80:8000 zhiliao:v1</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</div><div class="line">zhiliao             latest              c5d9c47be079        17 minutes ago      111MB</div></pre></td></tr></table></figure>
+<h3 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker run -d -p 80:8000 zhiliao:v1</div></pre></td></tr></table></figure>
 <p>命令中的<code>-d</code>意为后台运行</p>
 <p>-p 为端口号，前半部分为外网访问的端口，后半部分为 Nginx 反向代理寻找的内部端口</p>
-<h3 id="查看运行结果"><a href="#查看运行结果" class="headerlink" title="查看运行结果"></a>查看运行结果</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker ps</span><br></pre></td></tr></table></figure>
+<h3 id="查看运行结果"><a href="#查看运行结果" class="headerlink" title="查看运行结果"></a>查看运行结果</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker ps</div></pre></td></tr></table></figure>
 <p>这条命令等价于<code>docker container ls</code>，加上 -a 则可显示全部</p>
- <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_108_54_centos zhiliao-vue]# docker ps -a</span><br><span class="line">CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                      PORTS               NAMES</span><br><span class="line">bdd5842a4cae        zhiliao:v1          "nginx -g 'daemon ..."   42 seconds ago      Exited (1) 41 seconds ago                       frosty_joliot</span><br></pre></td></tr></table></figure>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[root@VM_108_54_centos zhiliao-vue]# docker ps -a</div><div class="line">CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                      PORTS               NAMES</div><div class="line">bdd5842a4cae        zhiliao:v1          &quot;nginx -g &apos;daemon ...&quot;   42 seconds ago      Exited (1) 41 seconds ago                       frosty_joliot</div></pre></td></tr></table></figure>
 <h3 id="查找日志"><a href="#查找日志" class="headerlink" title="查找日志"></a>查找日志</h3><p>如果遇到程序崩溃或者镜像启动失败</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker logs 'CONTAINER ID'</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker logs &apos;CONTAINER ID&apos;</div></pre></td></tr></table></figure>
 <p>使用 ps 命令可以找到到 <code>CONTAINER ID</code></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_108_54_centos zhiliao-vue]# docker logs bdd5842a4cae</span><br><span class="line">2018/03/28 07:11:51 [emerg] 1#1: unknown directive "//这里使用项目中的端口号" in /etc/nginx/conf.d/default.conf:3</span><br><span class="line">nginx: [emerg] unknown directive "//这里使用项目中的端口号" in /etc/nginx/conf.d/default.conf:3</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[root@VM_108_54_centos zhiliao-vue]# docker logs bdd5842a4cae</div><div class="line">2018/03/28 07:11:51 [emerg] 1#1: unknown directive &quot;//这里使用项目中的端口号&quot; in /etc/nginx/conf.d/default.conf:3</div><div class="line">nginx: [emerg] unknown directive &quot;//这里使用项目中的端口号&quot; in /etc/nginx/conf.d/default.conf:3</div></pre></td></tr></table></figure>
 <hr>
 <p>参考链接：</p>
-<p><a href="https://yeasy.gitbooks.io/docker_practice/content/image/build.html" target="_blank" rel="noopener">使用 Dockerfile 定制镜像</a></p>
+<p><a href="https://yeasy.gitbooks.io/docker_practice/content/image/build.html" target="_blank" rel="external">使用 Dockerfile 定制镜像</a></p>
 
           
         
@@ -690,21 +1379,21 @@
 <h1 id="前后端跨域设置"><a href="#前后端跨域设置" class="headerlink" title="前后端跨域设置"></a>前后端跨域设置</h1><h2 id="Vue"><a href="#Vue" class="headerlink" title="Vue"></a>Vue</h2><blockquote>
 <p>main.js 设置</p>
 </blockquote>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> axios <span class="keyword">from</span> <span class="string">'axios'</span></span><br><span class="line"></span><br><span class="line">axios.defaults.withCredentials=<span class="literal">true</span>;</span><br><span class="line">Vue.prototype.$http = axios;</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> axios <span class="keyword">from</span> <span class="string">'axios'</span></div><div class="line"></div><div class="line">axios.defaults.withCredentials=<span class="literal">true</span>;</div><div class="line">Vue.prototype.$http = axios;</div></pre></td></tr></table></figure>
 <blockquote>
 <p>请求需带上withCredentials</p>
 </blockquote>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">getData() &#123;</span><br><span class="line">        <span class="keyword">this</span>.$axios.get(<span class="string">'http://127.0.0.1:8080/xxx/xxxxx'</span>,&#123;</span><br><span class="line">          headers: &#123;</span><br><span class="line">            <span class="string">"Content-Type"</span>:<span class="string">"application/json;charset=utf-8"</span></span><br><span class="line">          &#125;,</span><br><span class="line">          withCredentials : <span class="literal">true</span></span><br><span class="line">        &#125;).then( <span class="function">(<span class="params">response</span>) =&gt;</span> &#123;</span><br><span class="line">          <span class="keyword">if</span>( response.data.code === <span class="string">'0000'</span>)&#123;</span><br><span class="line">            <span class="keyword">this</span>.items = response.data.data.xxx;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="keyword">this</span>.items)</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">getData() &#123;</div><div class="line">        <span class="keyword">this</span>.$axios.get(<span class="string">'http://127.0.0.1:8080/xxx/xxxxx'</span>,&#123;</div><div class="line">          <span class="attr">headers</span>: &#123;</div><div class="line">            <span class="string">"Content-Type"</span>:<span class="string">"application/json;charset=utf-8"</span></div><div class="line">          &#125;,</div><div class="line">          <span class="attr">withCredentials</span> : <span class="literal">true</span></div><div class="line">        &#125;).then( <span class="function">(<span class="params">response</span>) =&gt;</span> &#123;</div><div class="line">          <span class="keyword">if</span>( response.data.code === <span class="string">'0000'</span>)&#123;</div><div class="line">            <span class="keyword">this</span>.items = response.data.data.xxx;</div><div class="line">            <span class="built_in">console</span>.log(<span class="keyword">this</span>.items)</div><div class="line">          &#125;</div><div class="line">        &#125;)</div><div class="line">      &#125;</div></pre></td></tr></table></figure>
 <h2 id="SpringMVC"><a href="#SpringMVC" class="headerlink" title="SpringMVC"></a>SpringMVC</h2><p>加上一个跨域用Interceptor</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CorsInterceptor</span> <span class="keyword">implements</span> <span class="title">HandlerInterceptor</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">preHandle</span><span class="params">(HttpServletRequest request, HttpServletResponse response,</span></span></span><br><span class="line"><span class="function"><span class="params">      Object handler)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    response.setHeader(<span class="string">"Access-Control-Allow-Origin"</span>, <span class="string">"*"</span>);</span><br><span class="line">    response.setHeader(<span class="string">"Access-Control-Allow-Methods"</span>, <span class="string">"*"</span>);</span><br><span class="line">    response.setHeader(<span class="string">"Access-Control-Max-Age"</span>, <span class="string">"3600"</span>);</span><br><span class="line">    response.setHeader(<span class="string">"Access-Control-Allow-Headers"</span>, <span class="string">"Origin, X-Requested-With, Content-Type, Accept"</span>);</span><br><span class="line">    response.setHeader(<span class="string">"Access-Control-Allow-Credentials"</span>,<span class="string">"true"</span>); <span class="comment">//是否允许浏览器携带用户身份信息（cookie）</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">postHandle</span><span class="params">(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, ModelAndView modelAndView)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">afterCompletion</span><span class="params">(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, Exception e)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2 id="可能遇到的问题"><a href="#可能遇到的问题" class="headerlink" title="可能遇到的问题"></a>可能遇到的问题</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">response.setHeader(<span class="string">"Access-Control-Allow-Origin"</span>, <span class="string">"*"</span>);</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Component</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CorsInterceptor</span> <span class="keyword">implements</span> <span class="title">HandlerInterceptor</span> </span>&#123;</div><div class="line"></div><div class="line">  <span class="meta">@Override</span></div><div class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">preHandle</span><span class="params">(HttpServletRequest request, HttpServletResponse response,</span></span></div><div class="line">      Object handler) <span class="keyword">throws</span> Exception &#123;</div><div class="line">    response.setHeader(<span class="string">"Access-Control-Allow-Origin"</span>, <span class="string">"*"</span>);</div><div class="line">    response.setHeader(<span class="string">"Access-Control-Allow-Methods"</span>, <span class="string">"*"</span>);</div><div class="line">    response.setHeader(<span class="string">"Access-Control-Max-Age"</span>, <span class="string">"3600"</span>);</div><div class="line">    response.setHeader(<span class="string">"Access-Control-Allow-Headers"</span>, <span class="string">"Origin, X-Requested-With, Content-Type, Accept"</span>);</div><div class="line">    response.setHeader(<span class="string">"Access-Control-Allow-Credentials"</span>,<span class="string">"true"</span>); <span class="comment">//是否允许浏览器携带用户身份信息（cookie）</span></div><div class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  <span class="meta">@Override</span></div><div class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">postHandle</span><span class="params">(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, ModelAndView modelAndView)</span> <span class="keyword">throws</span> Exception </span>&#123;</div><div class="line"></div><div class="line">  &#125;</div><div class="line"></div><div class="line">  <span class="meta">@Override</span></div><div class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">afterCompletion</span><span class="params">(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, Exception e)</span> <span class="keyword">throws</span> Exception </span>&#123;</div><div class="line"></div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="可能遇到的问题"><a href="#可能遇到的问题" class="headerlink" title="可能遇到的问题"></a>可能遇到的问题</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">response.setHeader(<span class="string">"Access-Control-Allow-Origin"</span>, <span class="string">"*"</span>);</div></pre></td></tr></table></figure>
 <p>请求源地址如果写了<code>*</code>很可能会被拒绝访问。</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Failed to load http://127.0.0.1:8080/zhiliao/login: Response to preflight request doesn't pass access control check: The value of the 'Access-Control-Allow-Origin' header in the response must not be the wildcard '*' when the request's credentials mode is 'include'. Origin 'http://127.0.0.1:8000' is therefore not allowed access. The credentials mode of requests initiated by the XMLHttpRequest is controlled by the withCredentials attribute.</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Failed to load http://127.0.0.1:8080/zhiliao/login: Response to preflight request doesn&apos;t pass access control check: The value of the &apos;Access-Control-Allow-Origin&apos; header in the response must not be the wildcard &apos;*&apos; when the request&apos;s credentials mode is &apos;include&apos;. Origin &apos;http://127.0.0.1:8000&apos; is therefore not allowed access. The credentials mode of requests initiated by the XMLHttpRequest is controlled by the withCredentials attribute.</div></pre></td></tr></table></figure>
 <p>如果出现这样的报错，那就得指定地址啦！    </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">response.setHeader(&quot;Access-Control-Allow-Origin&quot;, &quot;http://127.0.0.1:8000&quot;);</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">response.setHeader(&quot;Access-Control-Allow-Origin&quot;, &quot;http://127.0.0.1:8000&quot;);</div></pre></td></tr></table></figure>
 <p>这里依旧有个小坑：指定地址为<code>http://127.0.0.1:8000</code>的时候前端页面若是<code>localhost</code>是无法访问的。</p>
-<h1 id="看看axios官方文档"><a href="#看看axios官方文档" class="headerlink" title="看看axios官方文档"></a>看看axios官方文档</h1><p><a href="https://github.com/axios/axios#request-config" target="_blank" rel="noopener">axios官方配置说明</a></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">// `timeout` specifies the number of milliseconds before the request times out.</span><br><span class="line">// If the request takes longer than `timeout`, the request will be aborted.</span><br><span class="line">timeout: 1000,</span><br><span class="line"></span><br><span class="line">// `withCredentials` indicates whether or not cross-site Access-Control requests</span><br><span class="line">// should be made using credentials</span><br><span class="line">withCredentials: false, // default</span><br><span class="line"></span><br><span class="line">// `adapter` allows custom handling of requests which makes testing easier.</span><br><span class="line">// Return a promise and supply a valid response (see lib/adapters/README.md).</span><br><span class="line">adapter: function (config) &#123;</span><br><span class="line">  /* ... */</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+<h1 id="看看axios官方文档"><a href="#看看axios官方文档" class="headerlink" title="看看axios官方文档"></a>看看axios官方文档</h1><p><a href="https://github.com/axios/axios#request-config" target="_blank" rel="external">axios官方配置说明</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">// `timeout` specifies the number of milliseconds before the request times out.</div><div class="line">// If the request takes longer than `timeout`, the request will be aborted.</div><div class="line">timeout: 1000,</div><div class="line"></div><div class="line">// `withCredentials` indicates whether or not cross-site Access-Control requests</div><div class="line">// should be made using credentials</div><div class="line">withCredentials: false, // default</div><div class="line"></div><div class="line">// `adapter` allows custom handling of requests which makes testing easier.</div><div class="line">// Return a promise and supply a valid response (see lib/adapters/README.md).</div><div class="line">adapter: function (config) &#123;</div><div class="line">  /* ... */</div><div class="line">&#125;,</div></pre></td></tr></table></figure>
 <p>配置文件中<code>withCredentials</code>默认是关闭的，手动修改配置文件或在项目中重定义即可。</p>
 
           
@@ -1034,14 +1723,14 @@
             <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>本着更深入地使用注解来开发，慢慢地发现脱离了XML的MyBatis好多好多的坑。我觉得很大的原因还是来自于官方文档的不完善，以及使用注解开发持久层的人并不多见，导致网络上的相关讨论过于贫瘠并重复化，毕竟对于复杂查询的支持，我认为还没有在XML里写一条SQL方便呢～  </p>
 <p>所以这篇文章用于补充一语带过的官方文档，记录下自己趟过的坑。</p>
 <h1 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h1><h2 id="一对一映射"><a href="#一对一映射" class="headerlink" title="一对一映射"></a>一对一映射</h2><p>注解化一对一映射其实就是将XML中的<code>ResultType</code>属性对应的实体写在<code>@Results</code>注解中。其中的<code>@Result</code>填入实体的属性，而若该属性为实体中的实体，则需要@One注解引入。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Select</span>(<span class="string">"select answer_id, answer_content, liked_count, create_time, question_id, user_id from answer where create_time &gt; #&#123;createTime&#125; order by liked_count desc, create_time desc limit 0,10"</span>)</span><br><span class="line"><span class="meta">@Results</span>(&#123;</span><br><span class="line">    <span class="meta">@Result</span>(id = <span class="keyword">true</span>, column = <span class="string">"answer_id"</span>, property = <span class="string">"answerId"</span>, javaType = Integer.class),</span><br><span class="line">    <span class="meta">@Result</span>(column = <span class="string">"answer_content"</span>, property = <span class="string">"answerContent"</span>),</span><br><span class="line">    <span class="meta">@Result</span>(column = <span class="string">"liked_count"</span>, property = <span class="string">"likedCount"</span>, javaType = Integer.class, jdbcType = JdbcType.INTEGER),</span><br><span class="line">    <span class="meta">@Result</span>(column = <span class="string">"create_time"</span>, property = <span class="string">"createTime"</span>),</span><br><span class="line">    <span class="meta">@Result</span>(column = <span class="string">"question_id"</span>, property = <span class="string">"question"</span>, javaType = Question.class,</span><br><span class="line">        one = <span class="meta">@One</span>(select = <span class="string">"selectQuestionById"</span>)),</span><br><span class="line">    <span class="meta">@Result</span>(column = <span class="string">"user_id"</span>, property = <span class="string">"user"</span>,</span><br><span class="line">        one = <span class="meta">@One</span>(select = <span class="string">"selectUserById"</span>))</span><br><span class="line">&#125;)</span><br><span class="line"><span class="function">List&lt;Answer&gt; <span class="title">listAnswerByCreateTime</span><span class="params">(@Param(<span class="string">"createTime"</span>)</span> <span class="keyword">long</span> createTime)</span>;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Select</span>(<span class="string">"select answer_id, answer_content, liked_count, create_time, question_id, user_id from answer where create_time &gt; #&#123;createTime&#125; order by liked_count desc, create_time desc limit 0,10"</span>)</div><div class="line"><span class="meta">@Results</span>(&#123;</div><div class="line">    <span class="meta">@Result</span>(id = <span class="keyword">true</span>, column = <span class="string">"answer_id"</span>, property = <span class="string">"answerId"</span>, javaType = Integer.class),</div><div class="line">    <span class="meta">@Result</span>(column = <span class="string">"answer_content"</span>, property = <span class="string">"answerContent"</span>),</div><div class="line">    <span class="meta">@Result</span>(column = <span class="string">"liked_count"</span>, property = <span class="string">"likedCount"</span>, javaType = Integer.class, jdbcType = JdbcType.INTEGER),</div><div class="line">    <span class="meta">@Result</span>(column = <span class="string">"create_time"</span>, property = <span class="string">"createTime"</span>),</div><div class="line">    <span class="meta">@Result</span>(column = <span class="string">"question_id"</span>, property = <span class="string">"question"</span>, javaType = Question.class,</div><div class="line">        one = <span class="meta">@One</span>(select = <span class="string">"selectQuestionById"</span>)),</div><div class="line">    <span class="meta">@Result</span>(column = <span class="string">"user_id"</span>, property = <span class="string">"user"</span>,</div><div class="line">        one = <span class="meta">@One</span>(select = <span class="string">"selectUserById"</span>))</div><div class="line">&#125;)</div><div class="line"><span class="function">List&lt;Answer&gt; <span class="title">listAnswerByCreateTime</span><span class="params">(@Param(<span class="string">"createTime"</span>)</span> <span class="keyword">long</span> createTime)</span>;</div></pre></td></tr></table></figure>
 <p>值得注意的是，映射中的<code>property</code>属性的值不可和其他实体属性一样，应该填写所返回的实体名称。</p>
 <p>例如下面代码，我返回的实体为<code>Answer</code>类下的<code>Question</code>类，则<code>property</code>中不可写<code>questionId</code>，而得写<code>question</code>。同时@One中select属性对应的方法若在不同类，则需要写出完整的包名（com.xxx.xxx.getxxxByxx）。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Result</span>(column = <span class="string">"question_id"</span>, property = <span class="string">"question"</span>, javaType = Question.class,</span><br><span class="line">        one = <span class="meta">@One</span>(select = <span class="string">"selectQuestionById"</span>))</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Result</span>(column = <span class="string">"question_id"</span>, property = <span class="string">"question"</span>, javaType = Question.class,</div><div class="line">        one = <span class="meta">@One</span>(select = <span class="string">"selectQuestionById"</span>))</div></pre></td></tr></table></figure>
 <p>需要注意的是，从@One传递过来的查询条件也需要在主查询语句中查询出来，也就是上面的<code>listAnswerByCreateTime</code>方法需要查询出question_id和user_id，千万别漏了。否则报你错哦！</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Select</span>(<span class="string">"select question_id, question_title from question where question_id = #&#123;questionId&#125;"</span>)</span><br><span class="line"><span class="meta">@ResultType</span>(Question.class)</span><br><span class="line"><span class="function">Question <span class="title">selectQuestionById</span><span class="params">(@Param(<span class="string">"questionId"</span>)</span> Integer questionId)</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Select</span>(<span class="string">"select user_id, username, avatar_url, simple_desc from user where user_id = #&#123;userId&#125;"</span>)</span><br><span class="line"><span class="meta">@ResultType</span>(User.class)</span><br><span class="line"><span class="function">User <span class="title">selectUserById</span><span class="params">(@Param(<span class="string">"userId"</span>)</span> Integer userId)</span>;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Select</span>(<span class="string">"select question_id, question_title from question where question_id = #&#123;questionId&#125;"</span>)</div><div class="line"><span class="meta">@ResultType</span>(Question.class)</div><div class="line"><span class="function">Question <span class="title">selectQuestionById</span><span class="params">(@Param(<span class="string">"questionId"</span>)</span> Integer questionId)</span>;</div><div class="line"></div><div class="line"><span class="meta">@Select</span>(<span class="string">"select user_id, username, avatar_url, simple_desc from user where user_id = #&#123;userId&#125;"</span>)</div><div class="line"><span class="meta">@ResultType</span>(User.class)</div><div class="line"><span class="function">User <span class="title">selectUserById</span><span class="params">(@Param(<span class="string">"userId"</span>)</span> Integer userId)</span>;</div></pre></td></tr></table></figure>
 <p>由此查询得出的结果集为</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">"answerList": [</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="attr">"answerId"</span>: <span class="number">42</span>,</span><br><span class="line">                <span class="attr">"answerContent"</span>: <span class="string">"这是回答！"</span>,</span><br><span class="line">                <span class="attr">"likedCount"</span>: <span class="number">3</span>,</span><br><span class="line">                <span class="attr">"createTime"</span>: <span class="number">1520508016650</span>,</span><br><span class="line">                <span class="attr">"userId"</span>: <span class="literal">null</span>,</span><br><span class="line">                <span class="attr">"questionId"</span>: <span class="literal">null</span>,</span><br><span class="line">                <span class="attr">"likeState"</span>: <span class="literal">null</span>,</span><br><span class="line">                <span class="attr">"commentCount"</span>: <span class="literal">null</span>,</span><br><span class="line">                <span class="attr">"question"</span>: &#123;</span><br><span class="line">                    <span class="attr">"questionId"</span>: <span class="number">1</span>,</span><br><span class="line">                    <span class="attr">"questionTitle"</span>: <span class="string">"Spring，Django，Rails，Express这些框架技术的出现都是为了解决什么问题，现在这些框架都应用在哪些方面？"</span>,</span><br><span class="line">                    <span class="attr">"createTime"</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">"userId"</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">"user"</span>: <span class="literal">null</span></span><br><span class="line">                &#125;,</span><br><span class="line">                <span class="attr">"user"</span>: &#123;</span><br><span class="line">                    <span class="attr">"userId"</span>: <span class="number">11218</span>,</span><br><span class="line">                    <span class="attr">"weiboUserId"</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">"email"</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">"username"</span>: <span class="string">"amosamos"</span>,</span><br><span class="line">                    <span class="attr">"password"</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">"joinTime"</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">"avatarUrl"</span>: <span class="string">"https://avatars3.githubusercontent.com/u/16012509?s=400&amp;u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&amp;v=4"</span></span><br><span class="line">                &#125;,</span><br><span class="line">                <span class="attr">"answerCommentList"</span>: <span class="literal">null</span></span><br><span class="line">            &#125;</span><br><span class="line">        ]</span><br></pre></td></tr></table></figure>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">"answerList": [</div><div class="line">            &#123;</div><div class="line">                "answerId": 42,</div><div class="line">                "answerContent": "这是回答！",</div><div class="line">                "likedCount": 3,</div><div class="line">                "createTime": 1520508016650,</div><div class="line">                "userId": null,</div><div class="line">                "questionId": null,</div><div class="line">                "likeState": null,</div><div class="line">                "commentCount": null,</div><div class="line">                "question": &#123;</div><div class="line">                    "questionId": 1,</div><div class="line">                    "questionTitle": "Spring，Django，Rails，Express这些框架技术的出现都是为了解决什么问题，现在这些框架都应用在哪些方面？",</div><div class="line">                    "createTime": null,</div><div class="line">                    "userId": null,</div><div class="line">                    "user": null</div><div class="line">                &#125;,</div><div class="line">                "user": &#123;</div><div class="line">                    "userId": 11218,</div><div class="line">                    "weiboUserId": null,</div><div class="line">                    "email": null,</div><div class="line">                    "username": "amosamos",</div><div class="line">                    "password": null,</div><div class="line">                    "joinTime": null,</div><div class="line">                    "avatarUrl": "https://avatars3.githubusercontent.com/u/16012509?s=400&amp;u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&amp;v=4"</div><div class="line">                &#125;,</div><div class="line">                "answerCommentList": null</div><div class="line">            &#125;</div><div class="line">        ]</div></pre></td></tr></table></figure>
 
           
         
@@ -1167,542 +1856,13 @@
             <p>最近开发中尝试使用注解来代替xml完成Mybatis的sql编写，实现更完(装)整(逼)的无xml编程。结果没写多久就跌进大坑了Orz</p>
 <p>总所周知的是Mybatis支持的注解中有@Select、@Insert、@Update、@Delete这四个基本操作。使用这些注解你可以非常快的完成基础操作，如果想执行一些复杂操作，例如包含where、foreach等xml中一个标签即可完成的操作，便需要用到另一个注解 –&gt; @SelectProvider</p>
 <p>如果你的需求只是传递一些基础类型，那你学习使用SelectProvider的曲线还是很平滑的。如果你的需求是传递一些复杂类型，例如List，那就可能会尴尬了。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Mapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">QuestionMapper</span> </span>&#123;</span><br><span class="line">  <span class="meta">@SelectProvider</span>(type = QuestionSqlProvider.class, method = <span class="string">"listQuestionByQuestionId"</span>)</span><br><span class="line">  <span class="function">List&lt;Question&gt; <span class="title">listQuestionByQuestionId</span><span class="params">(@Param(<span class="string">"idList"</span>)</span> List&lt;Integer&gt; idList)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>一开始我理所当然的把List<integer>作为输入参数。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">listQuestionByQuestionId</span><span class="params">(<span class="keyword">final</span> List&lt;Integer&gt; idList)</span> </span>&#123;</span><br><span class="line">    StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">    sb.append(<span class="string">"("</span>);</span><br><span class="line">    <span class="keyword">for</span> (Integer questionId : idList) &#123;</span><br><span class="line">      sb.append(<span class="string">" '"</span> + questionId + <span class="string">"',"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    sb.deleteCharAt(sb.length() - <span class="number">1</span>);</span><br><span class="line">    sb.append(<span class="string">")"</span>);</span><br><span class="line">    System.out.println(sb.toString());</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> SQL() &#123;&#123;</span><br><span class="line">      SELECT(<span class="string">" question_id,question_title,create_time "</span>);</span><br><span class="line">      FROM(<span class="string">" question "</span>);</span><br><span class="line">      WHERE(<span class="string">" question_id in "</span> + sb.toString());</span><br><span class="line">    &#125;&#125;.toString();</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></integer></p>
-<p>燃鹅。。jvm很无情的抛了个错误出来<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">00:29:39.814 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Could not complete request</span><br><span class="line">org.mybatis.spring.MyBatisSystemException: nested exception is org.apache.ibatis.builder.BuilderException: Error invoking SqlProvider method (com.amosannn.mapper.QuestionSqlProvider.listQuestionByQuestionId).  Cause: org.apache.ibatis.binding.BindingException: Parameter &apos;arg0&apos; not found. Available parameters are [idList, param1]</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Mapper</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">QuestionMapper</span> </span>&#123;</div><div class="line">  <span class="meta">@SelectProvider</span>(type = QuestionSqlProvider.class, method = <span class="string">"listQuestionByQuestionId"</span>)</div><div class="line">  <span class="function">List&lt;Question&gt; <span class="title">listQuestionByQuestionId</span><span class="params">(@Param(<span class="string">"idList"</span>)</span> List&lt;Integer&gt; idList)</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>一开始我理所当然的把List<integer>作为输入参数。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> String <span class="title">listQuestionByQuestionId</span><span class="params">(<span class="keyword">final</span> List&lt;Integer&gt; idList)</span> </span>&#123;</div><div class="line">    StringBuilder sb = <span class="keyword">new</span> StringBuilder();</div><div class="line">    sb.append(<span class="string">"("</span>);</div><div class="line">    <span class="keyword">for</span> (Integer questionId : idList) &#123;</div><div class="line">      sb.append(<span class="string">" '"</span> + questionId + <span class="string">"',"</span>);</div><div class="line">    &#125;</div><div class="line">    sb.deleteCharAt(sb.length() - <span class="number">1</span>);</div><div class="line">    sb.append(<span class="string">")"</span>);</div><div class="line">    System.out.println(sb.toString());</div><div class="line">    <span class="keyword">return</span> <span class="keyword">new</span> SQL() &#123;&#123;</div><div class="line">      SELECT(<span class="string">" question_id,question_title,create_time "</span>);</div><div class="line">      FROM(<span class="string">" question "</span>);</div><div class="line">      WHERE(<span class="string">" question_id in "</span> + sb.toString());</div><div class="line">    &#125;&#125;.toString();</div><div class="line">  &#125;</div></pre></td></tr></table></figure></integer></p>
+<p>燃鹅。。jvm很无情的抛了个错误出来<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">00:29:39.814 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Could not complete request</div><div class="line">org.mybatis.spring.MyBatisSystemException: nested exception is org.apache.ibatis.builder.BuilderException: Error invoking SqlProvider method (com.amosannn.mapper.QuestionSqlProvider.listQuestionByQuestionId).  Cause: org.apache.ibatis.binding.BindingException: Parameter &apos;arg0&apos; not found. Available parameters are [idList, param1]</div></pre></td></tr></table></figure></p>
 <p>很难受，Mybatis的官方文档里并没有针对@SelectProvider有更多的demo，翻遍了各大门户网站也没见到有相关的讨论。兜兜转转依旧没有眉目，想到多参数的传递会被Mybatis自动封装进Map，该不会List也是同样被封装进Map吧。结果一试还真是这样。。</p>
-<p>终于摸索出问题的关键，只需把形参由List<integer>类型替换为Map类型就能接收到前面传来的List了。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QuestionSqlProvider</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> String <span class="title">listQuestionByQuestionId</span><span class="params">(<span class="keyword">final</span> Map&lt;String, Object&gt; map)</span> </span>&#123;</span><br><span class="line">    List&lt;Integer&gt; idList = (List&lt;Integer&gt;)map.get(<span class="string">"idList"</span>);</span><br><span class="line">    StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">    sb.append(<span class="string">"("</span>);</span><br><span class="line">    <span class="keyword">for</span> (Integer questionId : idList) &#123;</span><br><span class="line">      sb.append(<span class="string">" '"</span> + questionId + <span class="string">"',"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    sb.deleteCharAt(sb.length() - <span class="number">1</span>);</span><br><span class="line">    sb.append(<span class="string">")"</span>);</span><br><span class="line">    System.out.println(sb.toString());</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> SQL() &#123;&#123;</span><br><span class="line">      SELECT(<span class="string">" question_id,question_title,create_time "</span>);</span><br><span class="line">      FROM(<span class="string">" question "</span>);</span><br><span class="line">      WHERE(<span class="string">" question_id in "</span> + sb.toString());</span><br><span class="line">    &#125;&#125;.toString();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></integer></p>
+<p>终于摸索出问题的关键，只需把形参由List<integer>类型替换为Map类型就能接收到前面传来的List了。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QuestionSqlProvider</span> </span>&#123;</div><div class="line">  <span class="function"><span class="keyword">public</span> String <span class="title">listQuestionByQuestionId</span><span class="params">(<span class="keyword">final</span> Map&lt;String, Object&gt; map)</span> </span>&#123;</div><div class="line">    List&lt;Integer&gt; idList = (List&lt;Integer&gt;)map.get(<span class="string">"idList"</span>);</div><div class="line">    StringBuilder sb = <span class="keyword">new</span> StringBuilder();</div><div class="line">    sb.append(<span class="string">"("</span>);</div><div class="line">    <span class="keyword">for</span> (Integer questionId : idList) &#123;</div><div class="line">      sb.append(<span class="string">" '"</span> + questionId + <span class="string">"',"</span>);</div><div class="line">    &#125;</div><div class="line">    sb.deleteCharAt(sb.length() - <span class="number">1</span>);</div><div class="line">    sb.append(<span class="string">")"</span>);</div><div class="line">    System.out.println(sb.toString());</div><div class="line">    <span class="keyword">return</span> <span class="keyword">new</span> SQL() &#123;&#123;</div><div class="line">      SELECT(<span class="string">" question_id,question_title,create_time "</span>);</div><div class="line">      FROM(<span class="string">" question "</span>);</div><div class="line">      WHERE(<span class="string">" question_id in "</span> + sb.toString());</div><div class="line">    &#125;&#125;.toString();</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></integer></p>
 
           
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/01/30/jedispool-could-not-return-resource-error/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Amosannn">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Amosannn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/01/30/jedispool-could-not-return-resource-error/" itemprop="url">JedisPool报错：Could not return the resource to the pool</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-30T15:08:45+08:00">
-                2018-01-30
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/01/30/jedispool-could-not-return-resource-error/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2018/01/30/jedispool-could-not-return-resource-error/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="Bug的起源和解法"><a href="#Bug的起源和解法" class="headerlink" title="Bug的起源和解法"></a>Bug的起源和解法</h1><p>这个错误来的实在猝不及防，第一次请求可以成功使用<code>JedisPool</code>，而第二次请求便会报错，在翻遍了所有相关博客后一度以为是自己的配置出了错，于是不断修改配置文件中的redis连接池参数。<br>折腾老半天之后，没有帮助TAT<br>这时，我想起10年前的某个午后，蝉鸣的空气中传来的几分安定，出神地趴在窗边看麻雀扑腾的我，被一声厉呵带回现实。之后便到了标准环节–”下课到办公室找我”。之后的事情便记不太清了，只是我深深地记得当时的心境，想不出的问题换个角度想，一定会有不同的发现。<br>那就回归报错吧，“无法将资源返回到池”，再回想到我的jedisPool对象，旷的一声，仿佛天旋地转一般，一切的一切突然都变透彻了。</p>
-<h2 id="错误根源及出错原因"><a href="#错误根源及出错原因" class="headerlink" title="错误根源及出错原因"></a>错误根源及出错原因</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">followUser</span><span class="params">(Integer localUserId, Integer userId)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">try</span> (Jedis jedis = jedisPool.getResource()) &#123;</span><br><span class="line">    jedis.zadd(localUserId + RedisKey.FOLLOW_USER, System.currentTimeMillis(),</span><br><span class="line">        String.valueOf(userId));</span><br><span class="line">    jedis.zadd(userId + RedisKey.FOLLOWED_USER, System.currentTimeMillis(),</span><br><span class="line">        String.valueOf(localUserId));</span><br><span class="line">  &#125; <span class="keyword">catch</span> (JedisException e) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  jedisPool.close();<span class="comment">// 问题就出在这里</span></span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>JedisPool在configuration类中初始化（项目启动时有spring自动扫描）<br>然而在每个业务类调用完之后就被手动关闭，自然执行完第一次后就不再能取出resource的，也无法return。<br>解决这个bug只需把每个service实现类中的<code>jedisPool.close()</code>删去即可。</p>
-<h2 id="为什么会出现这种写法"><a href="#为什么会出现这种写法" class="headerlink" title="为什么会出现这种写法"></a>为什么会出现这种写法</h2><p>说到这个就不得不提起Jedis的wiki<br>官方po出的demo是这样使用jedis的：  </p>
-<h3 id="首先引入pom"><a href="#首先引入pom" class="headerlink" title="首先引入pom"></a>首先引入pom</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;dependency&gt;</span><br><span class="line">    &lt;groupId&gt;redis.clients&lt;/groupId&gt;</span><br><span class="line">    &lt;artifactId&gt;jedis&lt;/artifactId&gt;</span><br><span class="line">    &lt;version&gt;2.9.0&lt;/version&gt;</span><br><span class="line">    &lt;type&gt;jar&lt;/type&gt;</span><br><span class="line">    &lt;scope&gt;compile&lt;/scope&gt;</span><br><span class="line">&lt;/dependency&gt;</span><br></pre></td></tr></table></figure>
-<h3 id="然后实例化JedisPool"><a href="#然后实例化JedisPool" class="headerlink" title="然后实例化JedisPool"></a>然后实例化JedisPool</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">JedisPool pool = <span class="keyword">new</span> JedisPool(<span class="keyword">new</span> JedisPoolConfig(), <span class="string">"localhost"</span>);</span><br></pre></td></tr></table></figure>
-<h3 id="接着实例化jedis有两种方法"><a href="#接着实例化jedis有两种方法" class="headerlink" title="接着实例化jedis有两种方法"></a>接着实例化jedis有两种方法</h3><ol>
-<li><p>try-with-resource法</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// Jedis implements Closeable. Hence, the jedis instance will be auto-closed after the last statement.</span></span><br><span class="line"><span class="keyword">try</span> (Jedis jedis = pool.getResource()) &#123;</span><br><span class="line">  <span class="comment">/// ... do stuff here ... for example</span></span><br><span class="line">  jedis.set(<span class="string">"foo"</span>, <span class="string">"bar"</span>);</span><br><span class="line">  String foobar = jedis.get(<span class="string">"foo"</span>);</span><br><span class="line">  jedis.zadd(<span class="string">"sose"</span>, <span class="number">0</span>, <span class="string">"car"</span>); jedis.zadd(<span class="string">"sose"</span>, <span class="number">0</span>, <span class="string">"bike"</span>); </span><br><span class="line">  Set&lt;String&gt; sose = jedis.zrange(<span class="string">"sose"</span>, <span class="number">0</span>, -<span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/// ... when closing your application:</span></span><br><span class="line">pool.close();<span class="comment">// 这便是原罪</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>手动关闭jedis法</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">Jedis jedis = <span class="keyword">null</span>;</span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">  jedis = pool.getResource();</span><br><span class="line">  <span class="comment">/// ... do stuff here ... for example</span></span><br><span class="line">  jedis.set(<span class="string">"foo"</span>, <span class="string">"bar"</span>);</span><br><span class="line">  String foobar = jedis.get(<span class="string">"foo"</span>);</span><br><span class="line">  jedis.zadd(<span class="string">"sose"</span>, <span class="number">0</span>, <span class="string">"car"</span>); jedis.zadd(<span class="string">"sose"</span>, <span class="number">0</span>, <span class="string">"bike"</span>); </span><br><span class="line">  Set&lt;String&gt; sose = jedis.zrange(<span class="string">"sose"</span>, <span class="number">0</span>, -<span class="number">1</span>);</span><br><span class="line">&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">  <span class="comment">// You have to close jedis object. If you don't close then</span></span><br><span class="line">  <span class="comment">// it doesn't release back to pool and you can't get a new</span></span><br><span class="line">  <span class="comment">// resource from pool.</span></span><br><span class="line">  <span class="keyword">if</span> (jedis != <span class="keyword">null</span>) &#123;</span><br><span class="line">    jedis.close();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/// ... when closing your application:</span></span><br><span class="line">pool.close();</span><br></pre></td></tr></table></figure>
-</li>
-</ol>
-<p>虽然不在报错了，但是现在不关的话又不知道在哪能关的了它了。。。</p>
-<hr>
-<p>双手奉上： <a href="https://github.com/xetorthio/jedis/wiki/Getting-started" target="_blank" rel="noopener">Jedis官方指引</a></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/01/24/vue-error-collection/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Amosannn">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Amosannn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/01/24/vue-error-collection/" itemprop="url">Vue开发路上遇到的坑儿们</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-24T10:52:06+08:00">
-                2018-01-24
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/01/24/vue-error-collection/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2018/01/24/vue-error-collection/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="开篇"><a href="#开篇" class="headerlink" title="开篇"></a>开篇</h1><p>此文仅用于记录vue开发中遇到的各种奇葩事。</p>
-<h1 id="错误"><a href="#错误" class="headerlink" title="错误"></a>错误</h1><h2 id="项目不报错但是路由不加载"><a href="#项目不报错但是路由不加载" class="headerlink" title="项目不报错但是路由不加载"></a>项目不报错但是路由不加载</h2><p>前方预警：这是个低级错误Orz<br>index.js<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">routes: [</span><br><span class="line">    &#123;</span><br><span class="line">      path: &apos;/&apos;,</span><br><span class="line">      name: &apos;Index&apos;,</span><br><span class="line">      component: &#123;</span><br><span class="line">        nav: Navv,</span><br><span class="line">        main: Index,</span><br><span class="line">        footer: Footter</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure></p>
-<p>App.vue<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;template&gt;</span><br><span class="line">  &lt;div id=&quot;app&quot;&gt;</span><br><span class="line">    &lt;router-view name=&quot;nav&quot;&gt;&lt;/router-view&gt;</span><br><span class="line">    &lt;router-view name=&quot;main&quot;&gt;&lt;/router-view&gt;</span><br><span class="line">    &lt;router-view name=&quot;footer&quot;&gt;&lt;/router-view&gt;</span><br><span class="line">  &lt;/div&gt;</span><br><span class="line">&lt;/template&gt;</span><br></pre></td></tr></table></figure></p>
-<p>如果你和我一样是只小白菜，可能咋一看会发现没什么毛病，仔细一看就会发现路由配置里的<code>components</code>被我写成了·component·。。<br>vue中到目前为止我知道的两种路由配置方式:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">// 第一种</span><br><span class="line">...</span><br><span class="line">component: navv</span><br><span class="line">...</span><br><span class="line">// 第二种</span><br><span class="line">components: &#123;</span><br><span class="line">	navv</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>over, 经验值 +1</p>
-<h2 id="Failed-to-execute-‘setAttribute’-on-‘Element’-‘method-’-is-not-a-valid-attribute-name"><a href="#Failed-to-execute-‘setAttribute’-on-‘Element’-‘method-’-is-not-a-valid-attribute-name" class="headerlink" title="Failed to execute ‘setAttribute’ on ‘Element’: ‘method+’ is not a valid attribute name."></a>Failed to execute ‘setAttribute’ on ‘Element’: ‘method+’ is not a valid attribute name.</h2><p>由于项目中引入了饿了么开发的组件库·element-ui·，所以一度以为是和我引入的css文件起了冲突？？甚至我还去执行了<code>npm uninstall element-ui</code>这条命令。最后实在没办法了，一段一段代码排查问题，找到一个诡异的地方。。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;form action=&quot;/listTopic&quot; method+=&quot;post&quot;&gt;</span><br><span class="line">  &lt;input name=&quot;topicName&quot; type=&quot;text&quot; class=&quot;search-input&quot; placeholder=&quot;搜索你感兴趣的内容...&quot;&gt;</span><br><span class="line">  &lt;button type=&quot;submit&quot; class=&quot;search-button&quot;&gt;&lt;i class=&quot;sprite-search&quot;&gt;&lt;/i&gt;&lt;/button&gt;</span><br><span class="line">&lt;/form&gt;</span><br></pre></td></tr></table></figure></p>
-<p>噗。。form标签下的method方法多了个+号。。。想拿头去撞豆腐了。<br>ok，经验值 +1</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/12/24/remove-your-own-python/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Amosannn">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Amosannn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/12/24/remove-your-own-python/" itemprop="url">如何删除自己安装的python(干净、无残留)</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-24T21:27:15+08:00">
-                2017-12-24
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2017/12/24/remove-your-own-python/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/12/24/remove-your-own-python/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>最近又折腾起了python，于是发现很久以前的自己在各个地方留下了python的足迹，简直就是个更新日志。。<br>既然习惯了brew这个管家，那就把以前的坑都填好吧！</p>
-<p>安装软件的时候很快活，卸载的时候就难受的不行，不熟悉系统目录，你就根本卸不干净。<br>当然市面上有很多pkg卸载软件，但是强迫症的自己总觉得它卸不干净~。~</p>
-<p>搜了一票国内论坛。。还是跑去StackOverFlow，找到了一个靠谱回答。<br>答主提供了python官网的反馈页面，是一位不知如何完整卸载python的网友提交的反馈。<br>一个叫<code>Ned Deily</code>的朋友提取了安装目录并将其制成卸载脚本（详情见参考链接）<br>知道了该删哪就可以动手了…</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/12/24/remove-your-own-python/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/11/29/redis-install/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Amosannn">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Amosannn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/11/29/redis-install/" itemprop="url">Redis从安装到踩坑</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-29T16:13:02+08:00">
-                2017-11-29
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2017/11/29/redis-install/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/11/29/redis-install/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>先贴Redis官网：<a href="https://redis.io/download" target="_blank" rel="noopener">https://redis.io/download</a></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> wget http://download.redis.io/releases/redis-4.0.2.tar.gz</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> tar xzf redis-4.0.2.tar.gz</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> <span class="built_in">cd</span> redis-4.0.2</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> make</span></span><br></pre></td></tr></table></figure>
-<p>如果没有安装gcc，则会抛出这样的错误：<br><img src="/images/redis_install/redis_install_error.png" alt=""><br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> yum install gcc</span></span><br></pre></td></tr></table></figure></p>
-<p>在执行一次make可能会再抛出这样一个错误：<br><img src="/images/redis_install/redis_install_error2.png" alt=""></p>
-<p>这样的话便在make后加上参数<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> make MALLOC=libc</span></span><br></pre></td></tr></table></figure></p>
-<p>编译完成后<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> src/redis-server  redis.conf</span></span><br></pre></td></tr></table></figure></p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/11/29/redis-install/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
         
       
     </div>
@@ -1784,7 +1944,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-count">28</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -1806,7 +1966,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">28</span>
+                <span class="site-state-item-count">30</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

