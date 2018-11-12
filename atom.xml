@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://amosannn.github.io/"/>
-  <updated>2018-11-06T07:54:34.227Z</updated>
+  <updated>2018-11-12T11:53:40.490Z</updated>
   <id>https://amosannn.github.io/</id>
   
   <author>
@@ -14,6 +14,180 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Impala 优化之统计数据预存储「compute stats」</title>
+    <link href="https://amosannn.github.io/2018/11/12/impala-compute-stats/"/>
+    <id>https://amosannn.github.io/2018/11/12/impala-compute-stats/</id>
+    <published>2018-11-12T04:25:42.000Z</published>
+    <updated>2018-11-12T11:53:40.490Z</updated>
+    
+    <content type="html"><![CDATA[<p>由于大表关联，分析同学的执行操作要得出结果往往需要好几分钟，这在千万级、亿级数据量的表之间关联得出结果，不能说是很慢，但是依旧有着可提升的空间。</p>
+<h2 id="探索"><a href="#探索" class="headerlink" title="探索"></a>探索</h2><p>在 <code>Impala</code> 中，有一个神秘指令，COMPUTE STATS</p>
+<p>它可以预先分析表和列的的结构，并将其存储在元数据中。等到执行查询的时候， <code>Impala</code> 便会根据存储的元数据做出相应的查询优化。</p>
+<p>也就是下面这条语句:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">COMPUTE STATS t1;</div></pre></td></tr></table></figure>
+<h3 id="执行前"><a href="#执行前" class="headerlink" title="执行前"></a>执行前</h3><blockquote>
+<p>show table stats t1;</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>#Rows</th>
+<th>#Files</th>
+<th>Size</th>
+<th>Bytes Cached</th>
+<th>Cache Replication</th>
+<th>Format</th>
+<th>Incremental stats</th>
+<th>Location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-1</td>
+<td>4</td>
+<td>1.72GB</td>
+<td>NOT CACHED</td>
+<td>NOT CACHED</td>
+<td>PARQUET</td>
+<td>false</td>
+<td>hdfs://nameservice1/user/hive/warehouse/t1</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>show column stats t1;</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>#Distinct Values</th>
+<th>#Nulls</th>
+<th>Max Size</th>
+<th>Avg Size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>BIGINT</td>
+<td>-1</td>
+<td>-1</td>
+<td>8</td>
+<td>8</td>
+</tr>
+<tr>
+<td>type</td>
+<td>INT</td>
+<td>-1</td>
+<td>-1</td>
+<td>4</td>
+<td>4</td>
+</tr>
+<tr>
+<td>uid</td>
+<td>BIGINT</td>
+<td>-1</td>
+<td>-1</td>
+<td>8</td>
+<td>8</td>
+</tr>
+</tbody>
+</table>
+<h3 id="执行后"><a href="#执行后" class="headerlink" title="执行后"></a>执行后</h3><blockquote>
+<p>show table stats t1;</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>#Rows</th>
+<th>#Files</th>
+<th>Size</th>
+<th>Bytes Cached</th>
+<th>Cache Replication</th>
+<th>Format</th>
+<th>Incremental stats</th>
+<th>Location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>32233129</td>
+<td>4</td>
+<td>1.72GB</td>
+<td>NOT CACHED</td>
+<td>NOT CACHED</td>
+<td>PARQUET</td>
+<td>false</td>
+<td>hdfs://nameservice1/user/hive/warehouse/t1</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>show column stats t1;</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>#Distinct Values</th>
+<th>#Nulls</th>
+<th>Max Size</th>
+<th>Avg Size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>BIGINT</td>
+<td>45300013</td>
+<td>0</td>
+<td>8</td>
+<td>8</td>
+</tr>
+<tr>
+<td>type</td>
+<td>INT</td>
+<td>14</td>
+<td>0</td>
+<td>4</td>
+<td>4</td>
+</tr>
+<tr>
+<td>uid</td>
+<td>BIGINT</td>
+<td>2831250</td>
+<td>0</td>
+<td>8</td>
+<td>8</td>
+</tr>
+</tbody>
+</table>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>从上面的表格可以看出，<code>compute stats</code> 为我们缓存了几个较为常用的 count 值，不要小看这几个值。</p>
+<p>在大型连表查询中，相比未经过 <code>compute stats</code> 优化的速度提升是几倍甚至十几倍，而相对 hive 的相同查询操作，速度差距将会达到几十倍。</p>
+<h2 id="Hive-依然适用"><a href="#Hive-依然适用" class="headerlink" title="Hive 依然适用"></a>Hive 依然适用</h2><p>如果想在 hive 中执行，Impala 中查询，也可在 Hive 中执行操作</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">ANALYZE TABLE Table1 COMPUTE STATISTICS;</div><div class="line">ANALYZE TABLE Table1 COMPUTE STATISTICS FOR COLUMNS;</div></pre></td></tr></table></figure>
+<hr>
+<h2 id="了解更多"><a href="#了解更多" class="headerlink" title="了解更多"></a>了解更多</h2><p><a href="https://www.cloudera.com/documentation/enterprise/5-9-x/topics/impala_compute_stats.html" target="_blank" rel="external">COMPUTE STATS Statement</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;由于大表关联，分析同学的执行操作要得出结果往往需要好几分钟，这在千万级、亿级数据量的表之间关联得出结果，不能说是很慢，但是依旧有着可提升的空间。&lt;/p&gt;
+&lt;h2 id=&quot;探索&quot;&gt;&lt;a href=&quot;#探索&quot; class=&quot;headerlink&quot; title=&quot;探索&quot;&gt;&lt;/a&gt;
+    
+    </summary>
+    
+      <category term="技术一路走到黑" scheme="https://amosannn.github.io/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
+    
+    
+      <category term="Impala" scheme="https://amosannn.github.io/tags/Impala/"/>
+    
+  </entry>
   
   <entry>
     <title>Airflow 居然趁服务器不注意卡在 running 状态不执行</title>
@@ -502,9 +676,9 @@
     </summary>
     
     
-      <category term="SpringBoot" scheme="https://amosannn.github.io/tags/SpringBoot/"/>
-    
       <category term="MyBatis" scheme="https://amosannn.github.io/tags/MyBatis/"/>
+    
+      <category term="SpringBoot" scheme="https://amosannn.github.io/tags/SpringBoot/"/>
     
   </entry>
   
@@ -873,58 +1047,6 @@
     
     
       <category term="java" scheme="https://amosannn.github.io/tags/java/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>mac下的hexo安装出现异常</title>
-    <link href="https://amosannn.github.io/2017/06/22/hexo-installation-error-on-mac/"/>
-    <id>https://amosannn.github.io/2017/06/22/hexo-installation-error-on-mac/</id>
-    <published>2017-06-22T10:16:59.000Z</published>
-    <updated>2017-06-22T19:18:48.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>将hexo从win迁移到mac时发生了安装错误。</p>
-<p>没有保留报错截图，就从日志文件中截取了关键段落。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">5751 error code ELIFECYCLE</div><div class="line">5752 error errno 1</div><div class="line">5753 error hexo-util@0.6.0 postinstall: `npm run build:highlight`</div><div class="line">5753 error Exit status 1</div><div class="line">5754 error Failed at the hexo-util@0.6.0 postinstall script.</div><div class="line">5754 error This is probably not a problem with npm. There is likely additional logging output above.</div><div class="line">5755 verbose exit [ 1, true ]</div></pre></td></tr></table></figure>
-<p>按照网上的几种解法都没能完成安装</p>
-<blockquote>
-<p>sudo npm install -g hexo-cli</p>
-<p>sudo npm install hexo –no-optional</p>
-<p>sudo npm install -g hexo-cli –registry=<a href="https://registry.npm.taobao.org" target="_blank" rel="external">https://registry.npm.taobao.org</a></p>
-</blockquote>
-<p>最后尝试进入root权限中执行npm命令，即</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">sudo -s</div><div class="line">npm install -g hexo-cli</div></pre></td></tr></table></figure>
-<p>安装成功。<br><a id="more"></a><br>若不知道如何退出root权限，可以使用以下任意一个命令。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">exit</div><div class="line">logout</div><div class="line">ctrl+D</div></pre></td></tr></table></figure>
-<p>启动hexo后又出现了新的报错</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div></pre></td><td class="code"><pre><div class="line">&#123; Error: Cannot find module &apos;./build/Release/DTraceProviderBindings&apos;</div><div class="line">    at Function.Module._resolveFilename (module.js:485:15)</div><div class="line">    at Function.Module._load (module.js:437:25)</div><div class="line">    at Module.require (module.js:513:17)</div><div class="line">    at require (internal/module.js:11:18)</div><div class="line">    at Object.&lt;anonymous&gt; (/usr/local/lib/node_modules/hexo-cli/node_modules/dtrace-provider/dtrace-provider.js:17:23)</div><div class="line">    at Module._compile (module.js:569:30)</div><div class="line">    at Object.Module._extensions..js (module.js:580:10)</div><div class="line">    at Module.load (module.js:503:32)</div><div class="line">    at tryModuleLoad (module.js:466:12)</div><div class="line">    at Function.Module._load (module.js:458:3)</div><div class="line">    at Module.require (module.js:513:17)</div><div class="line">    at require (internal/module.js:11:18)</div><div class="line">    at Object.&lt;anonymous&gt; (/usr/local/lib/node_modules/hexo-cli/node_modules/bunyan/lib/bunyan.js:79:18)</div><div class="line">    at Module._compile (module.js:569:30)</div><div class="line">    at Object.Module._extensions..js (module.js:580:10)</div><div class="line">    at Module.load (module.js:503:32) code: &apos;MODULE_NOT_FOUND&apos; &#125;</div><div class="line">&#123; Error: Cannot find module &apos;./build/default/DTraceProviderBindings&apos;</div><div class="line">    at Function.Module._resolveFilename (module.js:485:15)</div><div class="line">    at Function.Module._load (module.js:437:25)</div><div class="line">    at Module.require (module.js:513:17)</div><div class="line">    at require (internal/module.js:11:18)</div><div class="line">    at Object.&lt;anonymous&gt; (/usr/local/lib/node_modules/hexo-cli/node_modules/dtrace-provider/dtrace-provider.js:17:23)</div><div class="line">    at Module._compile (module.js:569:30)</div><div class="line">    at Object.Module._extensions..js (module.js:580:10)</div><div class="line">    at Module.load (module.js:503:32)</div><div class="line">    at tryModuleLoad (module.js:466:12)</div><div class="line">    at Function.Module._load (module.js:458:3)</div><div class="line">    at Module.require (module.js:513:17)</div><div class="line">    at require (internal/module.js:11:18)</div><div class="line">    at Object.&lt;anonymous&gt; (/usr/local/lib/node_modules/hexo-cli/node_modules/bunyan/lib/bunyan.js:79:18)</div><div class="line">    at Module._compile (module.js:569:30)</div><div class="line">    at Object.Module._extensions..js (module.js:580:10)</div><div class="line">    at Module.load (module.js:503:32) code: &apos;MODULE_NOT_FOUND&apos; &#125;</div><div class="line">&#123; Error: Cannot find module &apos;./build/Debug/DTraceProviderBindings&apos;</div><div class="line">    at Function.Module._resolveFilename (module.js:485:15)</div><div class="line">    at Function.Module._load (module.js:437:25)</div><div class="line">    at Module.require (module.js:513:17)</div><div class="line">    at require (internal/module.js:11:18)</div><div class="line">    at Object.&lt;anonymous&gt; (/usr/local/lib/node_modules/hexo-cli/node_modules/dtrace-provider/dtrace-provider.js:17:23)</div><div class="line">    at Module._compile (module.js:569:30)</div><div class="line">    at Object.Module._extensions..js (module.js:580:10)</div><div class="line">    at Module.load (module.js:503:32)</div><div class="line">    at tryModuleLoad (module.js:466:12)</div><div class="line">    at Function.Module._load (module.js:458:3)</div><div class="line">    at Module.require (module.js:513:17)</div><div class="line">    at require (internal/module.js:11:18)</div><div class="line">    at Object.&lt;anonymous&gt; (/usr/local/lib/node_modules/hexo-cli/node_modules/bunyan/lib/bunyan.js:79:18)</div><div class="line">    at Module._compile (module.js:569:30)</div><div class="line">    at Object.Module._extensions..js (module.js:580:10)</div><div class="line">    at Module.load (module.js:503:32) code: &apos;MODULE_NOT_FOUND&apos; &#125;</div><div class="line">(node:3413) [DEP0061] DeprecationWarning: fs.SyncWriteStream is deprecated.</div></pre></td></tr></table></figure>
-<p>虽不影响使用却看着难受，然而并没有找到能解决它的方法</p>
-<p>╮(╯▽╰)╭</p>
-<p>能找到的依旧是这条命令，无非是重装hexo</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo npm install hexo --no-optional</div></pre></td></tr></table></figure>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;将hexo从win迁移到mac时发生了安装错误。&lt;/p&gt;
-&lt;p&gt;没有保留报错截图，就从日志文件中截取了关键段落。&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;6&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;7&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;5751 error code ELIFECYCLE&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5752 error errno 1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5753 error hexo-util@0.6.0 postinstall: `npm run build:highlight`&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5753 error Exit status 1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5754 error Failed at the hexo-util@0.6.0 postinstall script.&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5754 error This is probably not a problem with npm. There is likely additional logging output above.&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5755 verbose exit [ 1, true ]&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;p&gt;按照网上的几种解法都没能完成安装&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;sudo npm install -g hexo-cli&lt;/p&gt;
-&lt;p&gt;sudo npm install hexo –no-optional&lt;/p&gt;
-&lt;p&gt;sudo npm install -g hexo-cli –registry=&lt;a href=&quot;https://registry.npm.taobao.org&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;https://registry.npm.taobao.org&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;最后尝试进入root权限中执行npm命令，即&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;sudo -s&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;npm install -g hexo-cli&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;p&gt;安装成功。&lt;br&gt;
-    
-    </summary>
-    
-      <category term="技术一路走到黑" scheme="https://amosannn.github.io/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
-    
-    
-      <category term="hexo" scheme="https://amosannn.github.io/tags/hexo/"/>
     
   </entry>
   
