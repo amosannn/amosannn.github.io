@@ -1,0 +1,1170 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="fonts.lug.ustc.edu.cn/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="MySQL,Sqoop,Hive,CDH," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Amosannn" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="Sqoop 的功能十分强大，可以帮助你完成不同数据库或数据仓库之间的数据同步任务。 总所周知的是 Sqoop 有两个版本  1.4.x  1.99.x  它们一个代表着 sqoop1，一个代表着sqoop2，它们功能性上的异同可简单归纳为以下几点，其余差异不在本文做过多的赘述。    功能 Sqoop 1 Sqoop 2     用于所有主要 RDBMS 的连接器 支持 不支持解决办法： 使用已在">
+<meta name="keywords" content="MySQL,Sqoop,Hive,CDH">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Sqoop 之常用命令与防坑指南">
+<meta property="og:url" content="https://amosannn.github.io/2018/11/13/sqoop-common-command/index.html">
+<meta property="og:site_name" content="Amosannn">
+<meta property="og:description" content="Sqoop 的功能十分强大，可以帮助你完成不同数据库或数据仓库之间的数据同步任务。 总所周知的是 Sqoop 有两个版本  1.4.x  1.99.x  它们一个代表着 sqoop1，一个代表着sqoop2，它们功能性上的异同可简单归纳为以下几点，其余差异不在本文做过多的赘述。    功能 Sqoop 1 Sqoop 2     用于所有主要 RDBMS 的连接器 支持 不支持解决办法： 使用已在">
+<meta property="og:updated_time" content="2018-11-13T10:16:02.060Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Sqoop 之常用命令与防坑指南">
+<meta name="twitter:description" content="Sqoop 的功能十分强大，可以帮助你完成不同数据库或数据仓库之间的数据同步任务。 总所周知的是 Sqoop 有两个版本  1.4.x  1.99.x  它们一个代表着 sqoop1，一个代表着sqoop2，它们功能性上的异同可简单归纳为以下几点，其余差异不在本文做过多的赘述。    功能 Sqoop 1 Sqoop 2     用于所有主要 RDBMS 的连接器 支持 不支持解决办法： 使用已在">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '6IQVLUE04L',
+      apiKey: 'b3cf2353e1956cf39bb8fdf838e117f1',
+      indexName: 'amos_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://amosannn.github.io/2018/11/13/sqoop-common-command/"/>
+
+
+
+
+
+  <title>Sqoop 之常用命令与防坑指南 | Amosannn</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Amosannn</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">Amo's binary space</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/11/13/sqoop-common-command/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Amosannn">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Amosannn">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Sqoop 之常用命令与防坑指南</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-13T14:26:55+08:00">
+                2018-11-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术一路走到黑/" itemprop="url" rel="index">
+                    <span itemprop="name">技术一路走到黑</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/11/13/sqoop-common-command/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/11/13/sqoop-common-command/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><code>Sqoop</code> 的功能十分强大，可以帮助你完成不同数据库或数据仓库之间的数据同步任务。</p>
+<p>总所周知的是 Sqoop 有两个版本</p>
+<ul>
+<li>1.4.x </li>
+<li>1.99.x</li>
+</ul>
+<p>它们一个代表着 sqoop1，一个代表着sqoop2，它们功能性上的异同可简单归纳为以下几点，其余差异不在本文做过多的赘述。</p>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>Sqoop 1</th>
+<th>Sqoop 2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用于所有主要 RDBMS 的连接器</td>
+<td>支持</td>
+<td>不支持<br>解决办法： 使用已在以下数据库上执行测试的通用 JDBC 连接器： Microsoft SQL Server 、 PostgreSQL 、 MySQL 和 Oracle 。</td>
+</tr>
+<tr>
+<td>Kerberos 安全集成</td>
+<td>支持</td>
+<td>不支持</td>
+</tr>
+<tr>
+<td>数据从 RDBMS 传输至 Hive 或 HBase</td>
+<td>支持</td>
+<td>不支持<br>解决办法： 按照此两步方法操作。 将数据从 RDBMS 导入 HDFS 在 Hive 中使用相应的工具和命令（例如 LOAD DATA 语句），手动将数据载入 Hive 或 HBase</td>
+</tr>
+<tr>
+<td>数据从 Hive 或 HBase 传输至 RDBMS</td>
+<td>不支持 <br>解决办法： 按照此两步方法操作。 从 Hive 或 HBase 将数据提取至 HDFS （作为文本或 Avro 文件） 使用 Sqoop 将上一步的输出导出至 RDBMS</td>
+<td>不支持<br> 按照与 Sqoop 1 相同的解决方法操作</td>
+</tr>
+</tbody>
+</table>
+<p>关于两者在其他方面的异同可以参考此文：<a href="https://blog.csdn.net/Gamer_gyt/article/details/55225700" target="_blank" rel="external">Sqoop1和Sqoop2的刨析对比</a></p>
+<h1 id="出发"><a href="#出发" class="headerlink" title="出发"></a>出发</h1><p>本文的背景环境为 <code>sqoop 1.4.6</code></p>
+<p>sqoop 的命令格式十分简单，只需要往上累加需要的参数即可</p>
+<a id="more"></a>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">$ sqoop help</div><div class="line">usage: sqoop COMMAND [ARGS]</div><div class="line"></div><div class="line">Available commands:</div><div class="line">  codegen            Generate code to interact with database records</div><div class="line">  create-hive-table  Import a table definition into Hive</div><div class="line">  eval               Evaluate a SQL statement and display the results</div><div class="line">  export             Export an HDFS directory to a database table</div><div class="line">  help               List available commands</div><div class="line">  import             Import a table from a database to HDFS</div><div class="line">  import-all-tables  Import tables from a database to HDFS</div><div class="line">  import-mainframe   Import mainframe datasets to HDFS</div><div class="line">  list-databases     List available databases on a server</div><div class="line">  list-tables        List available tables in a database</div><div class="line">  version            Display version information</div><div class="line"></div><div class="line">See &apos;sqoop help COMMAND&apos; for information on a specific command.</div></pre></td></tr></table></figure>
+<p>这篇文章叙述的主要对象为 <code>create hive table</code>、<code>sqoop import</code> ，它们不仅仅是我最为常用的命令，也是 sqoop 家族里使用频率比较高的命令。</p>
+<h1 id="通用命令参数"><a href="#通用命令参数" class="headerlink" title="通用命令参数"></a>通用命令参数</h1><p> 该表格记录了一些命令的通用操作选项：</p>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--connect &lt;jdbc-uri&gt;</code></td>
+<td>Specify JDBC connect string</td>
+</tr>
+<tr>
+<td><code>--connection-manager &lt;class-name&gt;</code></td>
+<td>Specify connection manager class to use</td>
+</tr>
+<tr>
+<td><code>--driver &lt;class-name&gt;</code></td>
+<td>Manually specify JDBC driver class to use</td>
+</tr>
+<tr>
+<td><code>--hadoop-mapred-home &lt;dir&gt;</code></td>
+<td>Override $HADOOP_MAPRED_HOME</td>
+</tr>
+<tr>
+<td><code>--help</code></td>
+<td>Print usage instructions</td>
+</tr>
+<tr>
+<td><code>--password-file</code></td>
+<td>Set path for a file containing the authentication password</td>
+</tr>
+<tr>
+<td><code>-P</code></td>
+<td>Read password from console</td>
+</tr>
+<tr>
+<td><code>--password &lt;password&gt;</code></td>
+<td>Set authentication password</td>
+</tr>
+<tr>
+<td><code>--username &lt;username&gt;</code></td>
+<td>Set authentication username</td>
+</tr>
+<tr>
+<td><code>--verbose</code></td>
+<td>Print more information while working</td>
+</tr>
+<tr>
+<td><code>--connection-param-file &lt;filename&gt;</code></td>
+<td>Optional properties file that provides connection parameters</td>
+</tr>
+<tr>
+<td><code>--relaxed-isolation</code></td>
+<td>Set connection transaction isolation to read uncommitted for the mappers.</td>
+</tr>
+</tbody>
+</table>
+<p> 从参数名也可以看出，都是访问过程中必要的连接信息。</p>
+<h1 id="Sqoop-Create-Hive-Table"><a href="#Sqoop-Create-Hive-Table" class="headerlink" title="Sqoop Create Hive Table"></a>Sqoop Create Hive Table</h1><p>如果你想复制源数据库的表结构至目标库，那就试试这条指令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sqoop create-hive-table (generic-args) (create-hive-table-args)</div></pre></td></tr></table></figure>
+<h2 id="Hive-参数"><a href="#Hive-参数" class="headerlink" title="Hive 参数"></a>Hive 参数</h2><table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--hive-home &lt;dir&gt;</code></td>
+<td>Override <code>$HIVE_HOME</code></td>
+</tr>
+<tr>
+<td><code>--hive-overwrite</code></td>
+<td>Overwrite existing data in the Hive table.</td>
+</tr>
+<tr>
+<td><code>--create-hive-table</code></td>
+<td>If set, then the job will fail if the target hive</td>
+</tr>
+<tr>
+<td></td>
+<td>table exits. By default this property is false.</td>
+</tr>
+<tr>
+<td><code>--hive-table &lt;table-name&gt;</code></td>
+<td>Sets the table name to use when importing to Hive.</td>
+</tr>
+<tr>
+<td><code>--table</code></td>
+<td>The database table to read the definition from.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="输出格式定义参数"><a href="#输出格式定义参数" class="headerlink" title="输出格式定义参数"></a>输出格式定义参数</h2><table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--enclosed-by &lt;char&gt;</code></td>
+<td>Sets a required field enclosing character</td>
+</tr>
+<tr>
+<td><code>--escaped-by &lt;char&gt;</code></td>
+<td>Sets the escape character</td>
+</tr>
+<tr>
+<td><code>--fields-terminated-by &lt;char&gt;</code></td>
+<td>Sets the field separator character</td>
+</tr>
+<tr>
+<td><code>--lines-terminated-by &lt;char&gt;</code></td>
+<td>Sets the end-of-line character</td>
+</tr>
+<tr>
+<td><code>--mysql-delimiters</code></td>
+<td>Uses MySQL’s default delimiter set: fields: <code>,</code> lines: <code>\n</code> escaped-by: <code>\</code> optionally-enclosed-by: <code>&#39;</code></td>
+</tr>
+<tr>
+<td><code>--optionally-enclosed-by &lt;char&gt;</code></td>
+<td>Sets a field enclosing character</td>
+</tr>
+</tbody>
+</table>
+<h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><p>其实也只需要指定相关数据库库的库名表名也就可以了</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">$ sqoop create-hive-table </div><div class="line">    --connect jdbc:mysql://127.0.0.1:3306/tmp \</div><div class="line">    --table employees \</div><div class="line">    --hive-table emps \</div></pre></td></tr></table></figure>
+<h1 id="Sqoop-import"><a href="#Sqoop-import" class="headerlink" title="Sqoop import"></a>Sqoop import</h1><p>一个完整的 <code>Sqoop</code> 命令需要由多个参数拼接而成，包括 jdbc-uri、输入输出的数据存储地址、用户名、密码以及更为复杂的可选参数等等。</p>
+<h2 id="Import-参数"><a href="#Import-参数" class="headerlink" title="Import 参数"></a>Import 参数</h2><p>数据导入是个相对复杂的操作，所以参数也比单纯建表多一些：</p>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--append</code></td>
+<td>Append data to an existing dataset in HDFS</td>
+</tr>
+<tr>
+<td><code>--as-avrodatafile</code></td>
+<td>Imports data to Avro Data Files</td>
+</tr>
+<tr>
+<td><code>--as-sequencefile</code></td>
+<td>Imports data to SequenceFiles</td>
+</tr>
+<tr>
+<td><code>--as-textfile</code></td>
+<td>Imports data as plain text (default)</td>
+</tr>
+<tr>
+<td><code>--as-parquetfile</code></td>
+<td>Imports data to Parquet Files</td>
+</tr>
+<tr>
+<td><code>--boundary-query &lt;statement&gt;</code></td>
+<td>Boundary query to use for creating splits</td>
+</tr>
+<tr>
+<td><code>--columns &lt;col,col,col…&gt;</code></td>
+<td>Columns to import from table</td>
+</tr>
+<tr>
+<td><code>--delete-target-dir</code></td>
+<td>Delete the import target directory if it exists</td>
+</tr>
+<tr>
+<td><code>--direct</code></td>
+<td>Use direct connector if exists for the database</td>
+</tr>
+<tr>
+<td><code>--fetch-size &lt;n&gt;</code></td>
+<td>Number of entries to read from database at once.</td>
+</tr>
+<tr>
+<td><code>--inline-lob-limit &lt;n&gt;</code></td>
+<td>Set the maximum size for an inline LOB</td>
+</tr>
+<tr>
+<td><code>-m,--num-mappers &lt;n&gt;</code></td>
+<td>Use <em>n</em> map tasks to import in parallel</td>
+</tr>
+<tr>
+<td><code>-e,--query &lt;statement&gt;</code></td>
+<td>Import the results of <em>statement</em>.</td>
+</tr>
+<tr>
+<td><code>--split-by &lt;column-name&gt;</code></td>
+<td>Column of the table used to split work units. Cannot be used with <code>--autoreset-to-one-mapper</code> option.</td>
+</tr>
+<tr>
+<td><code>--autoreset-to-one-mapper</code></td>
+<td>Import should use one mapper if a table has no primary key and no split-by column is provided. Cannot be used with <code>--split-by &lt;col&gt;</code> option.</td>
+</tr>
+<tr>
+<td><code>--table &lt;table-name&gt;</code></td>
+<td>Table to read</td>
+</tr>
+<tr>
+<td><code>--target-dir &lt;dir&gt;</code></td>
+<td>HDFS destination dir</td>
+</tr>
+<tr>
+<td><code>--warehouse-dir &lt;dir&gt;</code></td>
+<td>HDFS parent for table destination</td>
+</tr>
+<tr>
+<td><code>--where &lt;where clause&gt;</code></td>
+<td>WHERE clause to use during import</td>
+</tr>
+<tr>
+<td><code>-z,--compress</code></td>
+<td>Enable compression</td>
+</tr>
+<tr>
+<td><code>--compression-codec &lt;c&gt;</code></td>
+<td>Use Hadoop codec (default gzip)</td>
+</tr>
+<tr>
+<td><code>--null-string &lt;null-string&gt;</code></td>
+<td>The string to be written for a null value for string columns</td>
+</tr>
+<tr>
+<td><code>--null-non-string &lt;null-string&gt;</code></td>
+<td>The string to be written for a null value for non-string columns</td>
+</tr>
+</tbody>
+</table>
+<h2 id="说说几个比较关键的参数解读"><a href="#说说几个比较关键的参数解读" class="headerlink" title="说说几个比较关键的参数解读"></a>说说几个比较关键的参数解读</h2><blockquote>
+<p>–split-by</p>
+</blockquote>
+<p>若源数据表中没有制定主键，将会导致执行失败，若是指定 <code>--split-by</code> 参数，程序便可根据所指定的字段进行 <code>map reduce</code> 切分。当然，由于 <code>--split-by</code> 指定的字段可能是无序甚至重复或不连续的，所以做分片的时间会非常久。</p>
+<blockquote>
+<p>–as-parquetfile</p>
+</blockquote>
+<ul>
+<li>textfile</li>
+<li>avrodatafile</li>
+<li>sequencefile</li>
+<li>parquetfile</li>
+</ul>
+<p>这个参数和其他几个参数一样，主要是选择存储文件的格式</p>
+<p>关于 Hive 文件格式的区别，可以参考这篇文章</p>
+<p><a href="http://dwgeek.com/hive-different-file-formats-text-sequence-rc-avro-orc-parquet-file.html/" target="_blank" rel="external">Apache Hive Different File Formats:TextFile,SequenceFile,RCFile,AVRO,ORC,Parquet</a></p>
+<blockquote>
+<p>–compression-codec</p>
+</blockquote>
+<p>选择压缩解码器，若是选用 <code>Snappy Compression</code> 可使用这个参数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">--compression-codec org.apache.hadoop.io.compress.SnappyCodec</div></pre></td></tr></table></figure>
+<p>可参考 <code>CDH</code> 的官方文档</p>
+<p><a href="https://www.cloudera.com/documentation/enterprise/5-6-x/topics/cdh_ig_snappy_sqoop.html" target="_blank" rel="external">Using Snappy Compression in Sqoop 1 and Sqoop 2 Imports</a></p>
+<blockquote>
+<p>–fields-terminated-by <char></char></p>
+</blockquote>
+<p>字段分隔符，数据传输难免会遇到字符串类型，这便会造成很多令你感到奇怪的事情</p>
+<p>比如说字符串中自带换行符或其他字符，这些字符可能你看的见，也可能看不见</p>
+<p>导致的后果是行数多了几行或者翻了几倍，这种情况很大可能就是换行符搞的鬼</p>
+<p>这时你可以尝试使用下面的参数，就有很大可能可以解决你的燃眉之急</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">--fields-terminated-by &apos;\001&apos;</div><div class="line">--fields-terminated-by &apos;\0001&apos;</div></pre></td></tr></table></figure>
+<p>关于换行符对 Hive 造成影响的原因和解决方案强烈推荐参阅这篇文章</p>
+<p><a href="https://www.marcel.is/how-newline-can-ruin-your-hive/" target="_blank" rel="external">How a newline can ruin your Hive</a></p>
+<blockquote>
+<p>–lines-terminated-by <char></char></p>
+</blockquote>
+<p>有列分隔符便有行分隔符，直接用 <code>\n</code> 就行了，能 hold 住大部分场景，这也是 <code>Sqoop</code> 默认的选项</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">--lines-terminated-by &apos;\n&apos;</div></pre></td></tr></table></figure>
+<blockquote>
+<p>–hive-overwrite</p>
+</blockquote>
+<p>有了这个参数，就可以覆盖同步了，免去了手动 drop 表的操作</p>
+<h2 id="示例-1"><a href="#示例-1" class="headerlink" title="示例"></a>示例</h2><p>可以做为模板使用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">$ sqoop import --connect jdbc:mysql://127.0.0.1:3306/tmp   \</div><div class="line">  --username amos   \</div><div class="line">  --password amos_tmp   \</div><div class="line">  --table user_account_statement   \</div><div class="line">  --hive-import  --hive-overwrite   \</div><div class="line">  --hive-database tmp   \</div><div class="line">  --hive-table user_account_statement   \</div><div class="line">  --hive-drop-import-delims --fields-terminated-by &apos;\001&apos; --lines-terminated-by &apos;\n&apos;  \</div><div class="line">  --compression-codec org.apache.hadoop.io.compress.SnappyCodec   \</div><div class="line">  --as-parquetfile</div></pre></td></tr></table></figure>
+<h2 id="自由格式查询导入"><a href="#自由格式查询导入" class="headerlink" title="自由格式查询导入"></a>自由格式查询导入</h2><p>相比上面的传统做法，还有一种更猛的，可以实现数据的高度定制。</p>
+<p>就是使用 SQL 来实现结果集导入，其实上面部分参数的存在意义也就是拼凑出一段 SQL 而已。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">$ sqoop import \</div><div class="line">  --query &apos;SELECT a.*, b.* FROM a JOIN b on (a.id == b.id) WHERE a.create_time&gt;1542097292&apos; \</div><div class="line">  --split-by a.id \</div><div class="line">  --target-dir /user/amos/joinresults</div></pre></td></tr></table></figure>
+<hr>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/MySQL/" rel="tag"># MySQL</a>
+          
+            <a href="/tags/Sqoop/" rel="tag"># Sqoop</a>
+          
+            <a href="/tags/Hive/" rel="tag"># Hive</a>
+          
+            <a href="/tags/CDH/" rel="tag"># CDH</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/11/12/impala-compute-stats/" rel="next" title="Impala 优化之统计数据预存储「compute stats」">
+                <i class="fa fa-chevron-left"></i> Impala 优化之统计数据预存储「compute stats」
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400"
+               alt="Amosannn" />
+          <p class="site-author-name" itemprop="name">Amosannn</p>
+           
+              <p class="site-description motion-element" itemprop="description">start from zero</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">30</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">34</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/amosannn" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/JasonLamcn" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.zhihu.com/people/lin-jia-sheng-62" target="_blank" title="知乎">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  知乎
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#出发"><span class="nav-number">1.</span> <span class="nav-text">出发</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#通用命令参数"><span class="nav-number">2.</span> <span class="nav-text">通用命令参数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Sqoop-Create-Hive-Table"><span class="nav-number">3.</span> <span class="nav-text">Sqoop Create Hive Table</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive-参数"><span class="nav-number">3.1.</span> <span class="nav-text">Hive 参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#输出格式定义参数"><span class="nav-number">3.2.</span> <span class="nav-text">输出格式定义参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#示例"><span class="nav-number">3.3.</span> <span class="nav-text">示例</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Sqoop-import"><span class="nav-number">4.</span> <span class="nav-text">Sqoop import</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Import-参数"><span class="nav-number">4.1.</span> <span class="nav-text">Import 参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#说说几个比较关键的参数解读"><span class="nav-number">4.2.</span> <span class="nav-text">说说几个比较关键的参数解读</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#示例-1"><span class="nav-number">4.3.</span> <span class="nav-text">示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自由格式查询导入"><span class="nav-number">4.4.</span> <span class="nav-text">自由格式查询导入</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2017 - 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Amosannn</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://amosannn.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'https://amosannn.github.io/2018/11/13/sqoop-common-command/';
+          this.page.identifier = '2018/11/13/sqoop-common-command/';
+          this.page.title = 'Sqoop 之常用命令与防坑指南';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://amosannn.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.1"></script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

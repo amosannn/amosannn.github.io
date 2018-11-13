@@ -304,6 +304,195 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/11/13/sqoop-common-command/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Amosannn">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Amosannn">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/11/13/sqoop-common-command/" itemprop="url">Sqoop 之常用命令与防坑指南</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-13T14:26:55+08:00">
+                2018-11-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术一路走到黑/" itemprop="url" rel="index">
+                    <span itemprop="name">技术一路走到黑</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/11/13/sqoop-common-command/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/11/13/sqoop-common-command/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p><code>Sqoop</code> 的功能十分强大，可以帮助你完成不同数据库或数据仓库之间的数据同步任务。</p>
+<p>总所周知的是 Sqoop 有两个版本</p>
+<ul>
+<li>1.4.x </li>
+<li>1.99.x</li>
+</ul>
+<p>它们一个代表着 sqoop1，一个代表着sqoop2，它们功能性上的异同可简单归纳为以下几点，其余差异不在本文做过多的赘述。</p>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>Sqoop 1</th>
+<th>Sqoop 2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用于所有主要 RDBMS 的连接器</td>
+<td>支持</td>
+<td>不支持<br>解决办法： 使用已在以下数据库上执行测试的通用 JDBC 连接器： Microsoft SQL Server 、 PostgreSQL 、 MySQL 和 Oracle 。</td>
+</tr>
+<tr>
+<td>Kerberos 安全集成</td>
+<td>支持</td>
+<td>不支持</td>
+</tr>
+<tr>
+<td>数据从 RDBMS 传输至 Hive 或 HBase</td>
+<td>支持</td>
+<td>不支持<br>解决办法： 按照此两步方法操作。 将数据从 RDBMS 导入 HDFS 在 Hive 中使用相应的工具和命令（例如 LOAD DATA 语句），手动将数据载入 Hive 或 HBase</td>
+</tr>
+<tr>
+<td>数据从 Hive 或 HBase 传输至 RDBMS</td>
+<td>不支持 <br>解决办法： 按照此两步方法操作。 从 Hive 或 HBase 将数据提取至 HDFS （作为文本或 Avro 文件） 使用 Sqoop 将上一步的输出导出至 RDBMS</td>
+<td>不支持<br> 按照与 Sqoop 1 相同的解决方法操作</td>
+</tr>
+</tbody>
+</table>
+<p>关于两者在其他方面的异同可以参考此文：<a href="https://blog.csdn.net/Gamer_gyt/article/details/55225700" target="_blank" rel="external">Sqoop1和Sqoop2的刨析对比</a></p>
+<h1 id="出发"><a href="#出发" class="headerlink" title="出发"></a>出发</h1><p>本文的背景环境为 <code>sqoop 1.4.6</code></p>
+<p>sqoop 的命令格式十分简单，只需要往上累加需要的参数即可</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2018/11/13/sqoop-common-command/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/11/12/impala-compute-stats/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1927,139 +2116,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/03/08/the-use-and-understanding-of-one-annotated-by-mybatis/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Amosannn">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?v=3&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&s=400">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Amosannn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/03/08/the-use-and-understanding-of-one-annotated-by-mybatis/" itemprop="url">MyBatis一对一映射注解@One的使用及理解</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-08T20:32:21+08:00">
-                2018-03-08
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/03/08/the-use-and-understanding-of-one-annotated-by-mybatis/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2018/03/08/the-use-and-understanding-of-one-annotated-by-mybatis/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>本着更深入地使用注解来开发，慢慢地发现脱离了XML的MyBatis好多好多的坑。我觉得很大的原因还是来自于官方文档的不完善，以及使用注解开发持久层的人并不多见，导致网络上的相关讨论过于贫瘠并重复化，毕竟对于复杂查询的支持，我认为还没有在XML里写一条SQL方便呢～  </p>
-<p>所以这篇文章用于补充一语带过的官方文档，记录下自己趟过的坑。</p>
-<h1 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h1><h2 id="一对一映射"><a href="#一对一映射" class="headerlink" title="一对一映射"></a>一对一映射</h2><p>注解化一对一映射其实就是将XML中的<code>ResultType</code>属性对应的实体写在<code>@Results</code>注解中。其中的<code>@Result</code>填入实体的属性，而若该属性为实体中的实体，则需要@One注解引入。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Select</span>(<span class="string">"select answer_id, answer_content, liked_count, create_time, question_id, user_id from answer where create_time &gt; #&#123;createTime&#125; order by liked_count desc, create_time desc limit 0,10"</span>)</div><div class="line"><span class="meta">@Results</span>(&#123;</div><div class="line">    <span class="meta">@Result</span>(id = <span class="keyword">true</span>, column = <span class="string">"answer_id"</span>, property = <span class="string">"answerId"</span>, javaType = Integer.class),</div><div class="line">    <span class="meta">@Result</span>(column = <span class="string">"answer_content"</span>, property = <span class="string">"answerContent"</span>),</div><div class="line">    <span class="meta">@Result</span>(column = <span class="string">"liked_count"</span>, property = <span class="string">"likedCount"</span>, javaType = Integer.class, jdbcType = JdbcType.INTEGER),</div><div class="line">    <span class="meta">@Result</span>(column = <span class="string">"create_time"</span>, property = <span class="string">"createTime"</span>),</div><div class="line">    <span class="meta">@Result</span>(column = <span class="string">"question_id"</span>, property = <span class="string">"question"</span>, javaType = Question.class,</div><div class="line">        one = <span class="meta">@One</span>(select = <span class="string">"selectQuestionById"</span>)),</div><div class="line">    <span class="meta">@Result</span>(column = <span class="string">"user_id"</span>, property = <span class="string">"user"</span>,</div><div class="line">        one = <span class="meta">@One</span>(select = <span class="string">"selectUserById"</span>))</div><div class="line">&#125;)</div><div class="line"><span class="function">List&lt;Answer&gt; <span class="title">listAnswerByCreateTime</span><span class="params">(@Param(<span class="string">"createTime"</span>)</span> <span class="keyword">long</span> createTime)</span>;</div></pre></td></tr></table></figure>
-<p>值得注意的是，映射中的<code>property</code>属性的值不可和其他实体属性一样，应该填写所返回的实体名称。</p>
-<p>例如下面代码，我返回的实体为<code>Answer</code>类下的<code>Question</code>类，则<code>property</code>中不可写<code>questionId</code>，而得写<code>question</code>。同时@One中select属性对应的方法若在不同类，则需要写出完整的包名（com.xxx.xxx.getxxxByxx）。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Result</span>(column = <span class="string">"question_id"</span>, property = <span class="string">"question"</span>, javaType = Question.class,</div><div class="line">        one = <span class="meta">@One</span>(select = <span class="string">"selectQuestionById"</span>))</div></pre></td></tr></table></figure>
-<p>需要注意的是，从@One传递过来的查询条件也需要在主查询语句中查询出来，也就是上面的<code>listAnswerByCreateTime</code>方法需要查询出question_id和user_id，千万别漏了。否则报你错哦！</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Select</span>(<span class="string">"select question_id, question_title from question where question_id = #&#123;questionId&#125;"</span>)</div><div class="line"><span class="meta">@ResultType</span>(Question.class)</div><div class="line"><span class="function">Question <span class="title">selectQuestionById</span><span class="params">(@Param(<span class="string">"questionId"</span>)</span> Integer questionId)</span>;</div><div class="line"></div><div class="line"><span class="meta">@Select</span>(<span class="string">"select user_id, username, avatar_url, simple_desc from user where user_id = #&#123;userId&#125;"</span>)</div><div class="line"><span class="meta">@ResultType</span>(User.class)</div><div class="line"><span class="function">User <span class="title">selectUserById</span><span class="params">(@Param(<span class="string">"userId"</span>)</span> Integer userId)</span>;</div></pre></td></tr></table></figure>
-<p>由此查询得出的结果集为</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">"answerList": [</div><div class="line">            &#123;</div><div class="line">                "answerId": 42,</div><div class="line">                "answerContent": "这是回答！",</div><div class="line">                "likedCount": 3,</div><div class="line">                "createTime": 1520508016650,</div><div class="line">                "userId": null,</div><div class="line">                "questionId": null,</div><div class="line">                "likeState": null,</div><div class="line">                "commentCount": null,</div><div class="line">                "question": &#123;</div><div class="line">                    "questionId": 1,</div><div class="line">                    "questionTitle": "Spring，Django，Rails，Express这些框架技术的出现都是为了解决什么问题，现在这些框架都应用在哪些方面？",</div><div class="line">                    "createTime": null,</div><div class="line">                    "userId": null,</div><div class="line">                    "user": null</div><div class="line">                &#125;,</div><div class="line">                "user": &#123;</div><div class="line">                    "userId": 11218,</div><div class="line">                    "weiboUserId": null,</div><div class="line">                    "email": null,</div><div class="line">                    "username": "amosamos",</div><div class="line">                    "password": null,</div><div class="line">                    "joinTime": null,</div><div class="line">                    "avatarUrl": "https://avatars3.githubusercontent.com/u/16012509?s=400&amp;u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&amp;v=4"</div><div class="line">                &#125;,</div><div class="line">                "answerCommentList": null</div><div class="line">            &#125;</div><div class="line">        ]</div></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -2109,7 +2165,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">29</span>
+                <span class="site-state-item-count">30</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -2131,7 +2187,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">31</span>
+                <span class="site-state-item-count">34</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
