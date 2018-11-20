@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://amosannn.github.io/"/>
-  <updated>2018-11-13T10:16:02.060Z</updated>
+  <updated>2018-11-20T02:12:35.682Z</updated>
   <id>https://amosannn.github.io/</id>
   
   <author>
@@ -14,6 +14,87 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Sqoop 之 job 工具</title>
+    <link href="https://amosannn.github.io/2018/11/19/sqoop-job-guide/"/>
+    <id>https://amosannn.github.io/2018/11/19/sqoop-job-guide/</id>
+    <published>2018-11-19T03:20:50.000Z</published>
+    <updated>2018-11-20T02:12:35.682Z</updated>
+    
+    <content type="html"><![CDATA[<p>本文成型的历史原因来源于使用 <code>shell</code> 脚本封装单个 <code>sqoop</code> 的脑壳疼操作</p>
+<p>在执行定时任务的时候，如果需要执行的 <code>sqoop</code> 足够多，我们可以将他们封装在一个 <code>shell</code> 脚本中，再使用 <code>crontab</code> 进行定时任务调用。</p>
+<p>而如果同一时间需要执行的 <code>sqoop</code> 数量仅仅只有一两个，那我们完全没有必要为了它写一个 <code>shell</code> 脚本，当然只是按场景选择不同策略，并不代表哪种方法更差。</p>
+<p>对于不想多建 shell 脚本的同学，还有 <code>sqoop job</code> 这条路。</p>
+<h2 id="job-语法"><a href="#job-语法" class="headerlink" title="job 语法"></a>job 语法</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ sqoop job (generic-args) (job-args) [-- [subtool-name] (subtool-args)]</div><div class="line">$ sqoop-job (generic-args) (job-args) [-- [subtool-name] (subtool-args)]</div></pre></td></tr></table></figure>
+<p><code>sqoop job</code> 的语法如上所示，而其后追加的命令参数也无需按顺序堆砌。</p>
+<h2 id="命令参数"><a href="#命令参数" class="headerlink" title="命令参数"></a>命令参数</h2><table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--create &lt;job-id&gt;</code></td>
+<td>Define a new saved job with the specified job-id (name). A second Sqoop command-line, separated by a <code>--</code> should be specified; this defines the saved job.</td>
+</tr>
+<tr>
+<td><code>--delete &lt;job-id&gt;</code></td>
+<td>Delete a saved job.</td>
+</tr>
+<tr>
+<td><code>--exec &lt;job-id&gt;</code></td>
+<td>Given a job defined with <code>--create</code>, run the saved job.</td>
+</tr>
+<tr>
+<td><code>--show &lt;job-id&gt;</code></td>
+<td>Show the parameters for a saved job.</td>
+</tr>
+<tr>
+<td><code>--list</code></td>
+<td>List all saved jobs</td>
+</tr>
+</tbody>
+</table>
+<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><h3 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h3><p>一条同步的命令大致是长这个样子</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">$ sqoop import </div><div class="line">  --connect jdbc:mysql://127.0.0.1:3306/tmp   \</div><div class="line">  --username amos   \</div><div class="line">  --password amos_tmp   \</div><div class="line">  --table user_log   \</div><div class="line">  --hive-import  --hive-overwrite   \</div><div class="line">  --hive-database tmp   \</div><div class="line">  --hive-table user_log   \</div><div class="line">  --hive-drop-import-delims --fields-terminated-by &apos;\001&apos; --lines-terminated-by &apos;\n&apos;  \</div><div class="line">  --compression-codec org.apache.hadoop.io.compress.SnappyCodec   \</div><div class="line">  --as-parquetfile</div></pre></td></tr></table></figure>
+<p>建立 <code>sqoop job</code> 所需要的操作只需要把上面的参数追加在下面这条命令下就可以了</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sqoop job --create user_log -- import</div></pre></td></tr></table></figure>
+<h3 id="删除"><a href="#删除" class="headerlink" title="删除"></a>删除</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sqoop job -delete user_log</div></pre></td></tr></table></figure>
+<h3 id="执行"><a href="#执行" class="headerlink" title="执行"></a>执行</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sqoop job --exec user_log</div></pre></td></tr></table></figure>
+<h3 id="查看详情"><a href="#查看详情" class="headerlink" title="查看详情"></a>查看详情</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sqoop job --show user_log</div></pre></td></tr></table></figure>
+<h3 id="查看-job-列表"><a href="#查看-job-列表" class="headerlink" title="查看 job 列表"></a>查看 job 列表</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">$ sqoop job --list</div><div class="line">18/11/19 02:57:58 INFO sqoop.Sqoop: Running Sqoop version: 1.4.6-cdh5.14.0</div><div class="line">Available jobs:</div><div class="line">  user_log</div></pre></td></tr></table></figure>
+<h2 id="如何制定定时任务？"><a href="#如何制定定时任务？" class="headerlink" title="如何制定定时任务？"></a>如何制定定时任务？</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ crontab -e</div><div class="line">0 0 * * * sqoop job --exec user_log &gt;&gt; /home/amos/sqoop_job/user_log.log 2&gt;&amp;1</div></pre></td></tr></table></figure>
+<p>仅仅是一个 <code>crontab</code> 的调用语句，简单高效。</p>
+<h2 id="每次执行都需要输入数据库密码？"><a href="#每次执行都需要输入数据库密码？" class="headerlink" title="每次执行都需要输入数据库密码？"></a>每次执行都需要输入数据库密码？</h2><p><code>sqoop</code> 将它们存储数据的 <code>metastore</code> 定义为不安全的地方，所以它并没有将数据库密码存入 <code>metastore</code>，这十分合理，但如果你觉得这无所谓，可以开启存储密码的选项。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ vi $&#123;SQOOP_HOME&#125;/conf/sqoop-site.xml</div></pre></td></tr></table></figure>
+<p>增加如下内容</p>
+<blockquote>
+<property><br>    <name>sqoop.metastore.client.record.password</name><br>    <value>true</value><br>    <description>If true, allow saved passwords in the metastore.<br>    </description><br></property>
+
+</blockquote>
+<p>只需要在第一次执行时输入密码，之后密码就存储在 <code>metastore</code> 中了。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a href="https://sqoop.apache.org/docs/1.4.6/SqoopUserGuide.html#_literal_sqoop_job_literal" target="_blank" rel="external">sqoop-job</a></p>
+<p><a href="https://sqoop.apache.org/docs/1.4.6/SqoopUserGuide.html#_saved_jobs_and_passwords" target="_blank" rel="external">Saved jobs and passwords</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;本文成型的历史原因来源于使用 &lt;code&gt;shell&lt;/code&gt; 脚本封装单个 &lt;code&gt;sqoop&lt;/code&gt; 的脑壳疼操作&lt;/p&gt;
+&lt;p&gt;在执行定时任务的时候，如果需要执行的 &lt;code&gt;sqoop&lt;/code&gt; 足够多，我们可以将他们封装在一个 &lt;code&gt;sh
+    
+    </summary>
+    
+      <category term="技术一路走到黑" scheme="https://amosannn.github.io/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
+    
+    
+      <category term="Sqoop" scheme="https://amosannn.github.io/tags/Sqoop/"/>
+    
+      <category term="Crontab" scheme="https://amosannn.github.io/tags/Crontab/"/>
+    
+  </entry>
   
   <entry>
     <title>Sqoop 之常用命令与防坑指南</title>
@@ -1372,41 +1453,6 @@
     
       &lt;p&gt;记得前阵子面试金山时碰到了这样一个问题&lt;/p&gt;
 &lt;p&gt;1）下面哪一种写法更好，为什么？&lt;br&gt;2）请写出另一种单例模式。&lt;br&gt;&lt;figure class=&quot;highlight java&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div cl
-    
-    </summary>
-    
-      <category term="技术一路走到黑" scheme="https://amosannn.github.io/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
-    
-    
-      <category term="java" scheme="https://amosannn.github.io/tags/java/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Java mail 报错 trying to connect to host &quot;*.*.com&quot;, port 587, isSSL true的另一种解决办法</title>
-    <link href="https://amosannn.github.io/2017/07/18/trying-to-connect-to-host/"/>
-    <id>https://amosannn.github.io/2017/07/18/trying-to-connect-to-host/</id>
-    <published>2017-07-18T09:06:19.000Z</published>
-    <updated>2017-08-02T23:44:24.000Z</updated>
-    
-    <content type="html"><![CDATA[<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">DEBUG SMTP: trying to connect to host &quot;xxx.xxx.com&quot;, port 587, isSSL true</div><div class="line">send failed... the exception is javax.mail.MessagingException: Could not connect to SMTP host: xxx.xxx.com, port: 587;</div><div class="line">  nested exception is:</div><div class="line">javax.net.ssl.SSLException: Unrecognized SSL message, plaintext connection?</div></pre></td></tr></table></figure>
-<p>如果你遇到了这种报错，而其它办法又解决不了。<br>不妨试试调整properties的put()方法放置顺序吧。<br>起初我也觉得put()顺序并不会影响到后续的其他方法块对它的读取啊。<br>然而当我调转了它们的位置时，不再报错了。。<br>邮件成功的发送出去了。</p>
-<p>这是我放置properties的方法块</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">MailSSLSocketFactory mssf = <span class="keyword">null</span>;</div><div class="line">  <span class="keyword">try</span> &#123;</div><div class="line">  mssf = <span class="keyword">new</span> MailSSLSocketFactory();</div><div class="line">  mssf.setTrustAllHosts(<span class="keyword">true</span>);</div><div class="line">  properties.put(<span class="string">"mail.smtp.ssl.socketFactory"</span>, mssf);</div><div class="line">  properties.put(<span class="string">"mail.smtp.ssl.enable"</span>, <span class="string">"true"</span>);</div><div class="line">  properties.put(<span class="string">"mail.smtp.port"</span>, <span class="string">"587"</span>);</div><div class="line">  properties.put(<span class="string">"mail.smtp.ssl.socketFactory.port"</span>, <span class="string">"587"</span>);</div><div class="line">  properties.setProperty(<span class="string">"mail.imap.ssl.socketFactory.class"</span>, <span class="string">"DummySSLSocketFactory"</span>);</div><div class="line">  properties.setProperty(<span class="string">"mail.imap.ssl.socketFactory.fallback"</span>, <span class="string">"false"</span>);</div><div class="line"><span class="comment">// properties.setProperty("mail.smtp.port", "587");</span></div><div class="line"><span class="comment">// properties.setProperty("mail.smtp.socketFactory.port", "587");</span></div><div class="line"><span class="comment">// properties.setProperty("mail.imap.ssl.enable", "true");</span></div><div class="line"><span class="comment">// properties.setProperty("mail.imap.ssl.socketFactory.class", "DummySSLSocketFactory");</span></div><div class="line"><span class="comment">// properties.setProperty("mail.imap.ssl.socketFactory.fallback", "false");</span></div><div class="line">  &#125; <span class="keyword">catch</span> (<span class="keyword">final</span> GeneralSecurityException e) &#123;</div><div class="line">  e.printStackTrace();</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
-<p>而你需要做的便是把</p>
-<blockquote>
-<p>properties.put(“mail.smtp.ssl.enable”, “true”);</p>
-</blockquote>
-<p>放在</p>
-<blockquote>
-<p>properties.put(“mail.smtp.port”, “587”);<br>properties.put(“mail.smtp.ssl.socketFactory.port”, “587”);</p>
-</blockquote>
-<p>的下面。</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/di
     
     </summary>
     

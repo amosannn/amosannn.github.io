@@ -347,6 +347,272 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/11/19/sqoop-job-guide/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Amosannn">
+      <meta itemprop="description" content="start from zero">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?s=400&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&v=4">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Amosannn">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2018/11/19/sqoop-job-guide/" class="post-title-link" itemprop="https://amosannn.github.io/index.html">Sqoop 之 job 工具</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-11-19 11:20:50" itemprop="dateCreated datePublished" datetime="2018-11-19T11:20:50+08:00">2018-11-19</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2018-11-20 10:12:35" itemprop="dateModified" datetime="2018-11-20T10:12:35+08:00">2018-11-20</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/技术一路走到黑/" itemprop="url" rel="index"><span itemprop="name">技术一路走到黑</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/11/19/sqoop-job-guide/" class="leancloud_visitors" data-flag-title="Sqoop 之 job 工具">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">2.1k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">2 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>本文成型的历史原因来源于使用 <code>shell</code> 脚本封装单个 <code>sqoop</code> 的脑壳疼操作</p>
+<p>在执行定时任务的时候，如果需要执行的 <code>sqoop</code> 足够多，我们可以将他们封装在一个 <code>shell</code> 脚本中，再使用 <code>crontab</code> 进行定时任务调用。</p>
+<p>而如果同一时间需要执行的 <code>sqoop</code> 数量仅仅只有一两个，那我们完全没有必要为了它写一个 <code>shell</code> 脚本，当然只是按场景选择不同策略，并不代表哪种方法更差。</p>
+<p>对于不想多建 shell 脚本的同学，还有 <code>sqoop job</code> 这条路。</p>
+<h2 id="job-语法"><a href="#job-语法" class="headerlink" title="job 语法"></a>job 语法</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ sqoop job (generic-args) (job-args) [-- [subtool-name] (subtool-args)]</div><div class="line">$ sqoop-job (generic-args) (job-args) [-- [subtool-name] (subtool-args)]</div></pre></td></tr></table></figure>
+<p><code>sqoop job</code> 的语法如上所示，而其后追加的命令参数也无需按顺序堆砌。</p>
+<h2 id="命令参数"><a href="#命令参数" class="headerlink" title="命令参数"></a>命令参数</h2><table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--create &lt;job-id&gt;</code></td>
+<td>Define a new saved job with the specified job-id (name). A second Sqoop command-line, separated by a <code>--</code> should be specified; this defines the saved job.</td>
+</tr>
+<tr>
+<td><code>--delete &lt;job-id&gt;</code></td>
+<td>Delete a saved job.</td>
+</tr>
+<tr>
+<td><code>--exec &lt;job-id&gt;</code></td>
+<td>Given a job defined with <code>--create</code>, run the saved job.</td>
+</tr>
+<tr>
+<td><code>--show &lt;job-id&gt;</code></td>
+<td>Show the parameters for a saved job.</td>
+</tr>
+<tr>
+<td><code>--list</code></td>
+<td>List all saved jobs</td>
+</tr>
+</tbody>
+</table>
+<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><h3 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h3><p>一条同步的命令大致是长这个样子</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">$ sqoop import </div><div class="line">  --connect jdbc:mysql://127.0.0.1:3306/tmp   \</div><div class="line">  --username amos   \</div><div class="line">  --password amos_tmp   \</div><div class="line">  --table user_log   \</div><div class="line">  --hive-import  --hive-overwrite   \</div><div class="line">  --hive-database tmp   \</div><div class="line">  --hive-table user_log   \</div><div class="line">  --hive-drop-import-delims --fields-terminated-by &apos;\001&apos; --lines-terminated-by &apos;\n&apos;  \</div><div class="line">  --compression-codec org.apache.hadoop.io.compress.SnappyCodec   \</div><div class="line">  --as-parquetfile</div></pre></td></tr></table></figure>
+<p>建立 <code>sqoop job</code> 所需要的操作只需要把上面的参数追加在下面这条命令下就可以了</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sqoop job --create user_log -- import</div></pre></td></tr></table></figure>
+<h3 id="删除"><a href="#删除" class="headerlink" title="删除"></a>删除</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sqoop job -delete user_log</div></pre></td></tr></table></figure>
+<h3 id="执行"><a href="#执行" class="headerlink" title="执行"></a>执行</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sqoop job --exec user_log</div></pre></td></tr></table></figure>
+<h3 id="查看详情"><a href="#查看详情" class="headerlink" title="查看详情"></a>查看详情</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sqoop job --show user_log</div></pre></td></tr></table></figure>
+<h3 id="查看-job-列表"><a href="#查看-job-列表" class="headerlink" title="查看 job 列表"></a>查看 job 列表</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">$ sqoop job --list</div><div class="line">18/11/19 02:57:58 INFO sqoop.Sqoop: Running Sqoop version: 1.4.6-cdh5.14.0</div><div class="line">Available jobs:</div><div class="line">  user_log</div></pre></td></tr></table></figure>
+<h2 id="如何制定定时任务？"><a href="#如何制定定时任务？" class="headerlink" title="如何制定定时任务？"></a>如何制定定时任务？</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ crontab -e</div><div class="line">0 0 * * * sqoop job --exec user_log &gt;&gt; /home/amos/sqoop_job/user_log.log 2&gt;&amp;1</div></pre></td></tr></table></figure>
+<p>仅仅是一个 <code>crontab</code> 的调用语句，简单高效。</p>
+<h2 id="每次执行都需要输入数据库密码？"><a href="#每次执行都需要输入数据库密码？" class="headerlink" title="每次执行都需要输入数据库密码？"></a>每次执行都需要输入数据库密码？</h2><p><code>sqoop</code> 将它们存储数据的 <code>metastore</code> 定义为不安全的地方，所以它并没有将数据库密码存入 <code>metastore</code>，这十分合理，但如果你觉得这无所谓，可以开启存储密码的选项。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ vi $&#123;SQOOP_HOME&#125;/conf/sqoop-site.xml</div></pre></td></tr></table></figure>
+<p>增加如下内容</p>
+<blockquote>
+<property><br>    <name>sqoop.metastore.client.record.password</name><br>    <value>true</value><br>    <description>If true, allow saved passwords in the metastore.<br>    </description><br></property>
+
+</blockquote>
+<p>只需要在第一次执行时输入密码，之后密码就存储在 <code>metastore</code> 中了。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a href="https://sqoop.apache.org/docs/1.4.6/SqoopUserGuide.html#_literal_sqoop_job_literal" target="_blank" rel="external">sqoop-job</a></p>
+<p><a href="https://sqoop.apache.org/docs/1.4.6/SqoopUserGuide.html#_saved_jobs_and_passwords" target="_blank" rel="external">Saved jobs and passwords</a></p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+       
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/11/13/sqoop-common-command/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2522,284 +2788,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/03/19/simple-to-understand-transaction/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Amosannn">
-      <meta itemprop="description" content="start from zero">
-      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?s=400&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&v=4">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Amosannn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2018/03/19/simple-to-understand-transaction/" class="post-title-link" itemprop="https://amosannn.github.io/index.html">什么是分布式事务</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2018-03-19 17:27:21" itemprop="dateCreated datePublished" datetime="2018-03-19T17:27:21+08:00">2018-03-19</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2018-03-20 02:46:44" itemprop="dateModified" datetime="2018-03-20T02:46:44+08:00">2018-03-20</time>
-              
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/2018/03/19/simple-to-understand-transaction/" class="leancloud_visitors" data-flag-title="什么是分布式事务">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数：</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-            <div class="post-symbolscount">
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-file-word-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">本文字数：</span>
-                
-                <span title="本文字数">1.8k</span>
-              
-
-              
-                <span class="post-meta-divider">|</span>
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-clock-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
-                
-                <span title="阅读时长">2 分钟</span>
-              
-            </div>
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body han-init-context" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="简单说一下事务"><a href="#简单说一下事务" class="headerlink" title="简单说一下事务"></a>简单说一下事务</h1><p>事务就是单个逻辑执行的一系列操作，要么全部成功，要么全部失败。<br>事务包含4个特性（<strong>ACID</strong>）：</p>
-<ol>
-<li>Atomicity（原子性）：事务中包含的所有操作要么全做，要么全不做。</li>
-<li>Consistency（一致性）：事务开始以前，数据库处于一致性的状态，事务结束后，数据库也必须处于一致性的状态。</li>
-<li>Isolation（隔离性）：系统必须保证事务不受其他并发执行的事务的影响。</li>
-<li>Durability（持久性）：一个事务一旦成功完成，它对数据库的改变必须是永久的，即使是在系统遇到故障的情况下也不会丢失。</li>
-</ol>
-<h1 id="假如没有事务"><a href="#假如没有事务" class="headerlink" title="假如没有事务"></a>假如没有事务</h1><p>我们以银行的ATM机为例子：</p>
-<p>取款操作一般为两个核心步骤：</p>
-<ol>
-<li>余额扣除相应金额</li>
-<li>ATM机吐钞</li>
-</ol>
-<p>如果金额扣除了，而ATM机却因某些原因无法吐钞，那用户就崩溃了。而若是金额没扣除，ATM却吐钞了，那就是银行崩溃了。所以事务（分布式）的重要性在这里就体现的淋漓尽致了，这也正是事务中的一致性。</p>
-<h1 id="说说分布式事务"><a href="#说说分布式事务" class="headerlink" title="说说分布式事务"></a>说说分布式事务</h1><p>分布式事务的体现有很多种，其中最具代表性的是由Oracle Tuxedo系统提出的XA分布式事务协议。</p>
-<p>XA协议包含<strong>两阶段提交（2PC）</strong>和<strong>三阶段提交（3PC</strong>两种实现。</p>
-<h2 id="两阶段提交（2PC）"><a href="#两阶段提交（2PC）" class="headerlink" title="两阶段提交（2PC）"></a>两阶段提交（2PC）</h2><p>两阶段提交就像支持多人游戏的网游游戏模式（可参考近日火热的PUBG）。</p>
-<p>在游戏开始前，一个队伍中会有两种角色，队长与队员，也分别对应着<strong>事务协调者</strong>与<strong>事务参与者</strong>。</p>
-<h3 id="正向流程"><a href="#正向流程" class="headerlink" title="正向流程"></a>正向流程</h3><p>一个XA两阶段提交的正向流程分为这两阶段：</p>
-<blockquote>
-<p>第一阶段：</p>
-</blockquote>
-<ol>
-<li>以发送邀请的玩家A为首，邀请到了呵自己开黑的小伙伴B、C、D进入队伍，并请求他们点击准备按钮。</li>
-<li>小伙伴 B、C、D 全部准备就绪。</li>
-</ol>
-<blockquote>
-<p>第二阶段：</p>
-</blockquote>
-<ol>
-<li>A 大吼一声，「伞兵一号准备就绪！」随即点击开始游戏。</li>
-<li>A 首先进入游戏，等待 B、C、D片刻后，大家都成功进入游戏地图。</li>
-</ol>
-<p>对应到正经的XA中是这样的：</p>
-<blockquote>
-<p>第一阶段：</p>
-</blockquote>
-<ol>
-<li><p>协调者向参与者们发送Prepare请求</p>
-</li>
-<li><p>参与者们各自执行自己与事务有关的数据更新，写入Undo Log和Redo Log。如果参与者执行成功，暂时不提交事务，而是向事务协调节点返回“Done”消息。</p>
-<p>当事务协调者接到了所有参与者的返回消息，整个分布式事务将会进入第二阶段。</p>
-</li>
-</ol>
-<blockquote>
-<p>第二阶段：</p>
-</blockquote>
-<ol>
-<li>如果事务协调节点在之前所收到都是正向返回，那么它将会向所有事务参与者发出Commit请求。</li>
-<li>接到Commit请求之后，事务参与者节点会各自进行本地的事务提交，并释放锁资源。当本地事务完成提交后，将会向事务协调者返回“ACK”消息。</li>
-<li>事务协调者接收到所有事务参与者的“完成”反馈，整个分布式事务完成。</li>
-</ol>
-<h3 id="失败处理"><a href="#失败处理" class="headerlink" title="失败处理"></a>失败处理</h3><ol>
-<li>如果某个事务参与者反馈失败消息，说明该节点的本地事务执行不成功，必须回滚。</li>
-<li>于是在第二阶段，事务协调节点向所有的事务参与者发送Abort请求。接收到Abort请求之后，各个事务参与者节点需要在本地进行事务的回滚操作，回滚操作依照Undo Log来进行。</li>
-</ol>
-<h2 id="XA两阶段提交的不足"><a href="#XA两阶段提交的不足" class="headerlink" title="XA两阶段提交的不足"></a>XA两阶段提交的不足</h2><blockquote>
-<p>性能问题</p>
-</blockquote>
-<p>XA协议遵循强一致性。在事务执行过程中，各个节点占用着数据库资源，只有当所有节点准备完毕，事务协调者才会通知提交，参与者提交后释放资源。这样的过程有着非常明显的性能问题。</p>
-<blockquote>
-<p>协调者单点故障问题</p>
-</blockquote>
-<p>事务协调者是整个XA模型的核心，一旦事务协调者节点挂掉，参与者收不到提交或是回滚通知，参与者会一直处于中间状态无法完成事务。</p>
-<blockquote>
-<p>丢失消息导致的不一致问题</p>
-</blockquote>
-<p>在XA协议的第二个阶段，如果发生局部网络问题，一部分事务参与者收到了提交消息，另一部分事务参与者没收到提交消息，那么就导致了节点之间数据的不一致。</p>
-<h3 id="如何避免XA两阶段提交的种种问题"><a href="#如何避免XA两阶段提交的种种问题" class="headerlink" title="如何避免XA两阶段提交的种种问题"></a>如何避免XA两阶段提交的种种问题</h3><p>有许多其他的分布式事务方案可供选择：</p>
-<blockquote>
-<p>XA三阶段提交</p>
-</blockquote>
-<p>XA三阶段提交在两阶段提交的基础上增加了CanCommit阶段，并且引入了超时机制。一旦事物参与者迟迟没有接到协调者的commit请求，会自动进行本地commit。这样有效解决了协调者单点故障的问题。但是性能问题和不一致的问题仍然没有根本解决。</p>
-<blockquote>
-<p>MQ事务</p>
-</blockquote>
-<p>利用消息中间件来异步完成事务的后一半更新，实现系统的最终一致性。这个方式避免了像XA协议那样的性能问题。</p>
-<blockquote>
-<p>TCC事务</p>
-</blockquote>
-<p>TCC事务是Try、Commit、Cancel三种指令的缩写，其逻辑模式类似于XA两阶段提交，但是实现方式是在代码层面来人为实现。</p>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-       
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -2846,7 +2839,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">30</span>
+                    <span class="site-state-item-count">31</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -2942,7 +2935,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">34</span>
+                      
+                    
+                    <span class="site-state-item-count">35</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -3026,7 +3021,7 @@
       <i class="fa fa-area-chart"></i>
     </span>
     
-    <span title="站点总字数">66k</span>
+    <span title="站点总字数">68k</span>
   
 
   
@@ -3035,7 +3030,7 @@
       <i class="fa fa-coffee"></i>
     </span>
     
-    <span title="站点阅读时长">1:01</span>
+    <span title="站点阅读时长">1:02</span>
   
 </div>
 

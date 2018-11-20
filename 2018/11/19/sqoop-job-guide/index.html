@@ -116,17 +116,17 @@
 
 
 
-  <meta name="description" content="前言本着更深入地使用注解来开发，慢慢地发现脱离了XML的MyBatis好多好多的坑。我觉得很大的原因还是来自于官方文档的不完善，以及使用注解开发持久层的人并不多见，导致网络上的相关讨论过于贫瘠并重复化，毕竟对于复杂查询的支持，我认为还没有在XML里写一条SQL方便呢～   所以这篇文章用于补充一语带过的官方文档，记录下自己趟过的坑。 正文一对一映射注解化一对一映射其实就是将XML中的ResultT">
-<meta name="keywords" content="SpringBoot,MyBatis">
+  <meta name="description" content="本文成型的历史原因来源于使用 shell 脚本封装单个 sqoop 的脑壳疼操作 在执行定时任务的时候，如果需要执行的 sqoop 足够多，我们可以将他们封装在一个 shell 脚本中，再使用 crontab 进行定时任务调用。 而如果同一时间需要执行的 sqoop 数量仅仅只有一两个，那我们完全没有必要为了它写一个 shell 脚本，当然只是按场景选择不同策略，并不代表哪种方法更差。 对于不想多">
+<meta name="keywords" content="Sqoop,Crontab">
 <meta property="og:type" content="article">
-<meta property="og:title" content="MyBatis一对一映射注解@One的使用及理解">
-<meta property="og:url" content="https://amosannn.github.io/2018/03/08/the-use-and-understanding-of-one-annotated-by-mybatis/index.html">
+<meta property="og:title" content="Sqoop 之 job 工具">
+<meta property="og:url" content="https://amosannn.github.io/2018/11/19/sqoop-job-guide/index.html">
 <meta property="og:site_name" content="Amosannn">
-<meta property="og:description" content="前言本着更深入地使用注解来开发，慢慢地发现脱离了XML的MyBatis好多好多的坑。我觉得很大的原因还是来自于官方文档的不完善，以及使用注解开发持久层的人并不多见，导致网络上的相关讨论过于贫瘠并重复化，毕竟对于复杂查询的支持，我认为还没有在XML里写一条SQL方便呢～   所以这篇文章用于补充一语带过的官方文档，记录下自己趟过的坑。 正文一对一映射注解化一对一映射其实就是将XML中的ResultT">
-<meta property="og:updated_time" content="2018-03-08T23:35:12.000Z">
+<meta property="og:description" content="本文成型的历史原因来源于使用 shell 脚本封装单个 sqoop 的脑壳疼操作 在执行定时任务的时候，如果需要执行的 sqoop 足够多，我们可以将他们封装在一个 shell 脚本中，再使用 crontab 进行定时任务调用。 而如果同一时间需要执行的 sqoop 数量仅仅只有一两个，那我们完全没有必要为了它写一个 shell 脚本，当然只是按场景选择不同策略，并不代表哪种方法更差。 对于不想多">
+<meta property="og:updated_time" content="2018-11-20T02:12:35.682Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="MyBatis一对一映射注解@One的使用及理解">
-<meta name="twitter:description" content="前言本着更深入地使用注解来开发，慢慢地发现脱离了XML的MyBatis好多好多的坑。我觉得很大的原因还是来自于官方文档的不完善，以及使用注解开发持久层的人并不多见，导致网络上的相关讨论过于贫瘠并重复化，毕竟对于复杂查询的支持，我认为还没有在XML里写一条SQL方便呢～   所以这篇文章用于补充一语带过的官方文档，记录下自己趟过的坑。 正文一对一映射注解化一对一映射其实就是将XML中的ResultT">
+<meta name="twitter:title" content="Sqoop 之 job 工具">
+<meta name="twitter:description" content="本文成型的历史原因来源于使用 shell 脚本封装单个 sqoop 的脑壳疼操作 在执行定时任务的时候，如果需要执行的 sqoop 足够多，我们可以将他们封装在一个 shell 脚本中，再使用 crontab 进行定时任务调用。 而如果同一时间需要执行的 sqoop 数量仅仅只有一两个，那我们完全没有必要为了它写一个 shell 脚本，当然只是按场景选择不同策略，并不代表哪种方法更差。 对于不想多">
 
 
 
@@ -135,7 +135,7 @@
 
 
 
-  <link rel="canonical" href="https://amosannn.github.io/2018/03/08/the-use-and-understanding-of-one-annotated-by-mybatis/"/>
+  <link rel="canonical" href="https://amosannn.github.io/2018/11/19/sqoop-job-guide/"/>
 
 
 
@@ -145,7 +145,7 @@
   };
 </script>
 
-  <title>MyBatis一对一映射注解@One的使用及理解 | Amosannn</title>
+  <title>Sqoop 之 job 工具 | Amosannn</title>
   
 
 
@@ -348,7 +348,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/03/08/the-use-and-understanding-of-one-annotated-by-mybatis/">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/11/19/sqoop-job-guide/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Amosannn">
@@ -365,7 +365,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">MyBatis一对一映射注解@One的使用及理解
+          <h1 class="post-title" itemprop="name headline">Sqoop 之 job 工具
               
             
           </h1>
@@ -390,7 +390,7 @@
                 
               
 
-              <time title="创建时间：2018-03-08 20:32:21" itemprop="dateCreated datePublished" datetime="2018-03-08T20:32:21+08:00">2018-03-08</time>
+              <time title="创建时间：2018-11-19 11:20:50" itemprop="dateCreated datePublished" datetime="2018-11-19T11:20:50+08:00">2018-11-19</time>
             
 
             
@@ -407,12 +407,30 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2018-03-09 07:35:12" itemprop="dateModified" datetime="2018-03-09T07:35:12+08:00">2018-03-09</time>
+                <time title="修改时间：2018-11-20 10:12:35" itemprop="dateModified" datetime="2018-11-20T10:12:35+08:00">2018-11-20</time>
               
             
           </span>
 
           
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/技术一路走到黑/" itemprop="url" rel="index"><span itemprop="name">技术一路走到黑</span></a></span>
+
+                
+                
+              
+            </span>
+          
 
           
             
@@ -420,7 +438,7 @@
 
           
           
-             <span id="/2018/03/08/the-use-and-understanding-of-one-annotated-by-mybatis/" class="leancloud_visitors" data-flag-title="MyBatis一对一映射注解@One的使用及理解">
+             <span id="/2018/11/19/sqoop-job-guide/" class="leancloud_visitors" data-flag-title="Sqoop 之 job 工具">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -445,7 +463,7 @@
                 
                   <span class="post-meta-item-text">本文字数：</span>
                 
-                <span title="本文字数">3.1k</span>
+                <span title="本文字数">2.1k</span>
               
 
               
@@ -459,7 +477,7 @@
                 
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
-                <span title="阅读时长">3 分钟</span>
+                <span title="阅读时长">2 分钟</span>
               
             </div>
           
@@ -479,17 +497,62 @@
       
 
       
-        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>本着更深入地使用注解来开发，慢慢地发现脱离了XML的MyBatis好多好多的坑。我觉得很大的原因还是来自于官方文档的不完善，以及使用注解开发持久层的人并不多见，导致网络上的相关讨论过于贫瘠并重复化，毕竟对于复杂查询的支持，我认为还没有在XML里写一条SQL方便呢～  </p>
-<p>所以这篇文章用于补充一语带过的官方文档，记录下自己趟过的坑。</p>
-<h1 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h1><h2 id="一对一映射"><a href="#一对一映射" class="headerlink" title="一对一映射"></a>一对一映射</h2><p>注解化一对一映射其实就是将XML中的<code>ResultType</code>属性对应的实体写在<code>@Results</code>注解中。其中的<code>@Result</code>填入实体的属性，而若该属性为实体中的实体，则需要@One注解引入。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Select</span>(<span class="string">"select answer_id, answer_content, liked_count, create_time, question_id, user_id from answer where create_time &gt; #&#123;createTime&#125; order by liked_count desc, create_time desc limit 0,10"</span>)</div><div class="line"><span class="meta">@Results</span>(&#123;</div><div class="line">    <span class="meta">@Result</span>(id = <span class="keyword">true</span>, column = <span class="string">"answer_id"</span>, property = <span class="string">"answerId"</span>, javaType = Integer.class),</div><div class="line">    <span class="meta">@Result</span>(column = <span class="string">"answer_content"</span>, property = <span class="string">"answerContent"</span>),</div><div class="line">    <span class="meta">@Result</span>(column = <span class="string">"liked_count"</span>, property = <span class="string">"likedCount"</span>, javaType = Integer.class, jdbcType = JdbcType.INTEGER),</div><div class="line">    <span class="meta">@Result</span>(column = <span class="string">"create_time"</span>, property = <span class="string">"createTime"</span>),</div><div class="line">    <span class="meta">@Result</span>(column = <span class="string">"question_id"</span>, property = <span class="string">"question"</span>, javaType = Question.class,</div><div class="line">        one = <span class="meta">@One</span>(select = <span class="string">"selectQuestionById"</span>)),</div><div class="line">    <span class="meta">@Result</span>(column = <span class="string">"user_id"</span>, property = <span class="string">"user"</span>,</div><div class="line">        one = <span class="meta">@One</span>(select = <span class="string">"selectUserById"</span>))</div><div class="line">&#125;)</div><div class="line"><span class="function">List&lt;Answer&gt; <span class="title">listAnswerByCreateTime</span><span class="params">(@Param(<span class="string">"createTime"</span>)</span> <span class="keyword">long</span> createTime)</span>;</div></pre></td></tr></table></figure>
-<p>值得注意的是，映射中的<code>property</code>属性的值不可和其他实体属性一样，应该填写所返回的实体名称。</p>
-<p>例如下面代码，我返回的实体为<code>Answer</code>类下的<code>Question</code>类，则<code>property</code>中不可写<code>questionId</code>，而得写<code>question</code>。同时@One中select属性对应的方法若在不同类，则需要写出完整的包名（com.xxx.xxx.getxxxByxx）。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Result</span>(column = <span class="string">"question_id"</span>, property = <span class="string">"question"</span>, javaType = Question.class,</div><div class="line">        one = <span class="meta">@One</span>(select = <span class="string">"selectQuestionById"</span>))</div></pre></td></tr></table></figure>
-<p>需要注意的是，从@One传递过来的查询条件也需要在主查询语句中查询出来，也就是上面的<code>listAnswerByCreateTime</code>方法需要查询出question_id和user_id，千万别漏了。否则报你错哦！</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Select</span>(<span class="string">"select question_id, question_title from question where question_id = #&#123;questionId&#125;"</span>)</div><div class="line"><span class="meta">@ResultType</span>(Question.class)</div><div class="line"><span class="function">Question <span class="title">selectQuestionById</span><span class="params">(@Param(<span class="string">"questionId"</span>)</span> Integer questionId)</span>;</div><div class="line"></div><div class="line"><span class="meta">@Select</span>(<span class="string">"select user_id, username, avatar_url, simple_desc from user where user_id = #&#123;userId&#125;"</span>)</div><div class="line"><span class="meta">@ResultType</span>(User.class)</div><div class="line"><span class="function">User <span class="title">selectUserById</span><span class="params">(@Param(<span class="string">"userId"</span>)</span> Integer userId)</span>;</div></pre></td></tr></table></figure>
-<p>由此查询得出的结果集为</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">"answerList": [</div><div class="line">            &#123;</div><div class="line">                "answerId": 42,</div><div class="line">                "answerContent": "这是回答！",</div><div class="line">                "likedCount": 3,</div><div class="line">                "createTime": 1520508016650,</div><div class="line">                "userId": null,</div><div class="line">                "questionId": null,</div><div class="line">                "likeState": null,</div><div class="line">                "commentCount": null,</div><div class="line">                "question": &#123;</div><div class="line">                    "questionId": 1,</div><div class="line">                    "questionTitle": "Spring，Django，Rails，Express这些框架技术的出现都是为了解决什么问题，现在这些框架都应用在哪些方面？",</div><div class="line">                    "createTime": null,</div><div class="line">                    "userId": null,</div><div class="line">                    "user": null</div><div class="line">                &#125;,</div><div class="line">                "user": &#123;</div><div class="line">                    "userId": 11218,</div><div class="line">                    "weiboUserId": null,</div><div class="line">                    "email": null,</div><div class="line">                    "username": "amosamos",</div><div class="line">                    "password": null,</div><div class="line">                    "joinTime": null,</div><div class="line">                    "avatarUrl": "https://avatars3.githubusercontent.com/u/16012509?s=400&amp;u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&amp;v=4"</div><div class="line">                &#125;,</div><div class="line">                "answerCommentList": null</div><div class="line">            &#125;</div><div class="line">        ]</div></pre></td></tr></table></figure>
+        <p>本文成型的历史原因来源于使用 <code>shell</code> 脚本封装单个 <code>sqoop</code> 的脑壳疼操作</p>
+<p>在执行定时任务的时候，如果需要执行的 <code>sqoop</code> 足够多，我们可以将他们封装在一个 <code>shell</code> 脚本中，再使用 <code>crontab</code> 进行定时任务调用。</p>
+<p>而如果同一时间需要执行的 <code>sqoop</code> 数量仅仅只有一两个，那我们完全没有必要为了它写一个 <code>shell</code> 脚本，当然只是按场景选择不同策略，并不代表哪种方法更差。</p>
+<p>对于不想多建 shell 脚本的同学，还有 <code>sqoop job</code> 这条路。</p>
+<h2 id="job-语法"><a href="#job-语法" class="headerlink" title="job 语法"></a>job 语法</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ sqoop job (generic-args) (job-args) [-- [subtool-name] (subtool-args)]</div><div class="line">$ sqoop-job (generic-args) (job-args) [-- [subtool-name] (subtool-args)]</div></pre></td></tr></table></figure>
+<p><code>sqoop job</code> 的语法如上所示，而其后追加的命令参数也无需按顺序堆砌。</p>
+<h2 id="命令参数"><a href="#命令参数" class="headerlink" title="命令参数"></a>命令参数</h2><table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--create &lt;job-id&gt;</code></td>
+<td>Define a new saved job with the specified job-id (name). A second Sqoop command-line, separated by a <code>--</code> should be specified; this defines the saved job.</td>
+</tr>
+<tr>
+<td><code>--delete &lt;job-id&gt;</code></td>
+<td>Delete a saved job.</td>
+</tr>
+<tr>
+<td><code>--exec &lt;job-id&gt;</code></td>
+<td>Given a job defined with <code>--create</code>, run the saved job.</td>
+</tr>
+<tr>
+<td><code>--show &lt;job-id&gt;</code></td>
+<td>Show the parameters for a saved job.</td>
+</tr>
+<tr>
+<td><code>--list</code></td>
+<td>List all saved jobs</td>
+</tr>
+</tbody>
+</table>
+<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><h3 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h3><p>一条同步的命令大致是长这个样子</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">$ sqoop import </div><div class="line">  --connect jdbc:mysql://127.0.0.1:3306/tmp   \</div><div class="line">  --username amos   \</div><div class="line">  --password amos_tmp   \</div><div class="line">  --table user_log   \</div><div class="line">  --hive-import  --hive-overwrite   \</div><div class="line">  --hive-database tmp   \</div><div class="line">  --hive-table user_log   \</div><div class="line">  --hive-drop-import-delims --fields-terminated-by &apos;\001&apos; --lines-terminated-by &apos;\n&apos;  \</div><div class="line">  --compression-codec org.apache.hadoop.io.compress.SnappyCodec   \</div><div class="line">  --as-parquetfile</div></pre></td></tr></table></figure>
+<p>建立 <code>sqoop job</code> 所需要的操作只需要把上面的参数追加在下面这条命令下就可以了</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sqoop job --create user_log -- import</div></pre></td></tr></table></figure>
+<h3 id="删除"><a href="#删除" class="headerlink" title="删除"></a>删除</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sqoop job -delete user_log</div></pre></td></tr></table></figure>
+<h3 id="执行"><a href="#执行" class="headerlink" title="执行"></a>执行</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sqoop job --exec user_log</div></pre></td></tr></table></figure>
+<h3 id="查看详情"><a href="#查看详情" class="headerlink" title="查看详情"></a>查看详情</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sqoop job --show user_log</div></pre></td></tr></table></figure>
+<h3 id="查看-job-列表"><a href="#查看-job-列表" class="headerlink" title="查看 job 列表"></a>查看 job 列表</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">$ sqoop job --list</div><div class="line">18/11/19 02:57:58 INFO sqoop.Sqoop: Running Sqoop version: 1.4.6-cdh5.14.0</div><div class="line">Available jobs:</div><div class="line">  user_log</div></pre></td></tr></table></figure>
+<h2 id="如何制定定时任务？"><a href="#如何制定定时任务？" class="headerlink" title="如何制定定时任务？"></a>如何制定定时任务？</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ crontab -e</div><div class="line">0 0 * * * sqoop job --exec user_log &gt;&gt; /home/amos/sqoop_job/user_log.log 2&gt;&amp;1</div></pre></td></tr></table></figure>
+<p>仅仅是一个 <code>crontab</code> 的调用语句，简单高效。</p>
+<h2 id="每次执行都需要输入数据库密码？"><a href="#每次执行都需要输入数据库密码？" class="headerlink" title="每次执行都需要输入数据库密码？"></a>每次执行都需要输入数据库密码？</h2><p><code>sqoop</code> 将它们存储数据的 <code>metastore</code> 定义为不安全的地方，所以它并没有将数据库密码存入 <code>metastore</code>，这十分合理，但如果你觉得这无所谓，可以开启存储密码的选项。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ vi $&#123;SQOOP_HOME&#125;/conf/sqoop-site.xml</div></pre></td></tr></table></figure>
+<p>增加如下内容</p>
+<blockquote>
+<property><br>    <name>sqoop.metastore.client.record.password</name><br>    <value>true</value><br>    <description>If true, allow saved passwords in the metastore.<br>    </description><br></property>
+
+</blockquote>
+<p>只需要在第一次执行时输入密码，之后密码就存储在 <code>metastore</code> 中了。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a href="https://sqoop.apache.org/docs/1.4.6/SqoopUserGuide.html#_literal_sqoop_job_literal" target="_blank" rel="external">sqoop-job</a></p>
+<p><a href="https://sqoop.apache.org/docs/1.4.6/SqoopUserGuide.html#_saved_jobs_and_passwords" target="_blank" rel="external">Saved jobs and passwords</a></p>
 
       
     </div>
@@ -513,9 +576,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/SpringBoot/" rel="tag"># SpringBoot</a>
+            <a href="/tags/Sqoop/" rel="tag"># Sqoop</a>
           
-            <a href="/tags/MyBatis/" rel="tag"># MyBatis</a>
+            <a href="/tags/Crontab/" rel="tag"># Crontab</a>
           
         </div>
       
@@ -528,8 +591,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/03/03/SelectProvider-use-List-parameter/" rel="next" title="在SelectProvider注解中使用复杂类型参数（List）">
-                <i class="fa fa-chevron-left"></i> 在SelectProvider注解中使用复杂类型参数（List）
+              <a href="/2018/11/13/sqoop-common-command/" rel="next" title="Sqoop 之常用命令与防坑指南">
+                <i class="fa fa-chevron-left"></i> Sqoop 之常用命令与防坑指南
               </a>
             
           </div>
@@ -537,10 +600,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/03/19/simple-to-understand-transaction/" rel="prev" title="什么是分布式事务">
-                什么是分布式事务 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -780,7 +839,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#正文"><span class="nav-number">2.</span> <span class="nav-text">正文</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#一对一映射"><span class="nav-number">2.1.</span> <span class="nav-text">一对一映射</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#job-语法"><span class="nav-number">1.</span> <span class="nav-text">job 语法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#命令参数"><span class="nav-number">2.</span> <span class="nav-text">命令参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#用法"><span class="nav-number">3.</span> <span class="nav-text">用法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建"><span class="nav-number">3.1.</span> <span class="nav-text">创建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#删除"><span class="nav-number">3.2.</span> <span class="nav-text">删除</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#执行"><span class="nav-number">3.3.</span> <span class="nav-text">执行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看详情"><span class="nav-number">3.4.</span> <span class="nav-text">查看详情</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看-job-列表"><span class="nav-number">3.5.</span> <span class="nav-text">查看 job 列表</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何制定定时任务？"><span class="nav-number">4.</span> <span class="nav-text">如何制定定时任务？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#每次执行都需要输入数据库密码？"><span class="nav-number">5.</span> <span class="nav-text">每次执行都需要输入数据库密码？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料"><span class="nav-number">6.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
             
 
           </div>
