@@ -123,7 +123,7 @@
 <meta property="og:url" content="https://amosannn.github.io/2018/10/30/airflow-concept-combing/index.html">
 <meta property="og:site_name" content="Amosannn">
 <meta property="og:description" content="有向无环图Airflow 基于一个重要的数据结构，DAG。 为什么依赖 DAG？ LInux 与 WIndows 的 crontab 与任务计划，只可以配置定时任务或间隔任务，无法配置作业间的依赖关系。 一个很大的弊端是，如果我们需要在作业 A 执行之后才有供作业 B 执行的数据，而出现了不可因素导致轮到作业 B 执行的时候作业 A 还未执行完毕。这必定会导致数据缺失，或作业 B 执行失败。 所以">
-<meta property="og:updated_time" content="2018-11-06T07:51:19.058Z">
+<meta property="og:updated_time" content="2018-11-26T07:44:59.247Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Airflow 概念梳理">
 <meta name="twitter:description" content="有向无环图Airflow 基于一个重要的数据结构，DAG。 为什么依赖 DAG？ LInux 与 WIndows 的 crontab 与任务计划，只可以配置定时任务或间隔任务，无法配置作业间的依赖关系。 一个很大的弊端是，如果我们需要在作业 A 执行之后才有供作业 B 执行的数据，而出现了不可因素导致轮到作业 B 执行的时候作业 A 还未执行完毕。这必定会导致数据缺失，或作业 B 执行失败。 所以">
@@ -407,7 +407,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2018-11-06 15:51:19" itemprop="dateModified" datetime="2018-11-06T15:51:19+08:00">2018-11-06</time>
+                <time title="修改时间：2018-11-26 15:44:59" itemprop="dateModified" datetime="2018-11-26T15:44:59+08:00">2018-11-26</time>
               
             
           </span>
@@ -536,7 +536,7 @@
 </ul>
 <p>他们的作用都像字面意思说的那样，可完成相应的操作或调用。</p>
 <p>值得注意的是 DummyOperator，是个空操作，相当于标记和中转节点。</p>
-<p>当然，他们有一个共同的爸爸「BaseOperator」，全部首其控制，从中继承的功能也会因为他一人的修改而相应改变。</p>
+<p>当然，他们有一个共同的爸爸「BaseOperator」，中央集权，他一人的修改会改变儿子们继承到的功能。</p>
 <h2 id="Timezone"><a href="#Timezone" class="headerlink" title="Timezone"></a>Timezone</h2><p>在 1.9 版本及以前，Airflow 使用的是本地时间，不同服务器时区不同容易产生运行错误。</p>
 <p>而在 1.10 中，加入了自定义的时区配置（1.9 的时区配置无法生效，大坑。。）</p>
 <h2 id="预警与监控"><a href="#预警与监控" class="headerlink" title="预警与监控"></a>预警与监控</h2><p>当任务执行失败或状态异常时，发送短信或邮件。</p>
@@ -664,7 +664,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">31</span>
+                    <span class="site-state-item-count">33</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -762,7 +762,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">35</span>
+                      
+                    
+                    <span class="site-state-item-count">36</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -862,7 +864,7 @@
       <i class="fa fa-area-chart"></i>
     </span>
     
-    <span title="站点总字数">68k</span>
+    <span title="站点总字数">75k</span>
   
 
   
@@ -871,7 +873,7 @@
       <i class="fa fa-coffee"></i>
     </span>
     
-    <span title="站点阅读时长">1:02</span>
+    <span title="站点阅读时长">1:08</span>
   
 </div>
 

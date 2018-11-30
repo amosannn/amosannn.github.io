@@ -123,7 +123,7 @@
 <meta property="og:url" content="https://amosannn.github.io/2018/11/19/sqoop-job-guide/index.html">
 <meta property="og:site_name" content="Amosannn">
 <meta property="og:description" content="本文成型的历史原因来源于使用 shell 脚本封装单个 sqoop 的脑壳疼操作 在执行定时任务的时候，如果需要执行的 sqoop 足够多，我们可以将他们封装在一个 shell 脚本中，再使用 crontab 进行定时任务调用。 而如果同一时间需要执行的 sqoop 数量仅仅只有一两个，那我们完全没有必要为了它写一个 shell 脚本，当然只是按场景选择不同策略，并不代表哪种方法更差。 对于不想多">
-<meta property="og:updated_time" content="2018-11-20T02:12:35.682Z">
+<meta property="og:updated_time" content="2018-11-20T03:56:07.243Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Sqoop 之 job 工具">
 <meta name="twitter:description" content="本文成型的历史原因来源于使用 shell 脚本封装单个 sqoop 的脑壳疼操作 在执行定时任务的时候，如果需要执行的 sqoop 足够多，我们可以将他们封装在一个 shell 脚本中，再使用 crontab 进行定时任务调用。 而如果同一时间需要执行的 sqoop 数量仅仅只有一两个，那我们完全没有必要为了它写一个 shell 脚本，当然只是按场景选择不同策略，并不代表哪种方法更差。 对于不想多">
@@ -407,7 +407,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2018-11-20 10:12:35" itemprop="dateModified" datetime="2018-11-20T10:12:35+08:00">2018-11-20</time>
+                <time title="修改时间：2018-11-20 11:56:07" itemprop="dateModified" datetime="2018-11-20T11:56:07+08:00">2018-11-20</time>
               
             
           </span>
@@ -501,6 +501,7 @@
 <p>在执行定时任务的时候，如果需要执行的 <code>sqoop</code> 足够多，我们可以将他们封装在一个 <code>shell</code> 脚本中，再使用 <code>crontab</code> 进行定时任务调用。</p>
 <p>而如果同一时间需要执行的 <code>sqoop</code> 数量仅仅只有一两个，那我们完全没有必要为了它写一个 <code>shell</code> 脚本，当然只是按场景选择不同策略，并不代表哪种方法更差。</p>
 <p>对于不想多建 shell 脚本的同学，还有 <code>sqoop job</code> 这条路。</p>
+<a id="more"></a>
 <h2 id="job-语法"><a href="#job-语法" class="headerlink" title="job 语法"></a>job 语法</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ sqoop job (generic-args) (job-args) [-- [subtool-name] (subtool-args)]</div><div class="line">$ sqoop-job (generic-args) (job-args) [-- [subtool-name] (subtool-args)]</div></pre></td></tr></table></figure>
 <p><code>sqoop job</code> 的语法如上所示，而其后追加的命令参数也无需按顺序堆砌。</p>
 <h2 id="命令参数"><a href="#命令参数" class="headerlink" title="命令参数"></a>命令参数</h2><table>
@@ -601,6 +602,10 @@
 
           <div class="post-nav-prev post-nav-item">
             
+              <a href="/2018/11/29/install-graphite/" rel="prev" title="Graphite 之把它装起来">
+                Graphite 之把它装起来 <i class="fa fa-chevron-right"></i>
+              </a>
+            
           </div>
         </div>
       
@@ -673,7 +678,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">31</span>
+                    <span class="site-state-item-count">33</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -771,7 +776,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">35</span>
+                      
+                    
+                    <span class="site-state-item-count">36</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -871,7 +878,7 @@
       <i class="fa fa-area-chart"></i>
     </span>
     
-    <span title="站点总字数">68k</span>
+    <span title="站点总字数">75k</span>
   
 
   
@@ -880,7 +887,7 @@
       <i class="fa fa-coffee"></i>
     </span>
     
-    <span title="站点阅读时长">1:02</span>
+    <span title="站点阅读时长">1:08</span>
   
 </div>
 

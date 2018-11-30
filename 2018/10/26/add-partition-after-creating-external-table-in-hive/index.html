@@ -116,24 +116,16 @@
 
 
 
-  <meta name="description" content="先贴Redis官网：https://redis.io/download 1234$ wget http://download.redis.io/releases/redis-4.0.2.tar.gz$ tar xzf redis-4.0.2.tar.gz$ cd redis-4.0.2$ make 如果没有安装gcc，则会抛出这样的错误：1$ yum install gcc 在执行一次make可能">
+  <meta name="description" content="首先，我们有一个数据量很大的表。其次，对他进行条件查询或其他操作就像看着一只小蜗牛在爬。 是可忍，孰不可忍！ 0x01 原理关于分区为什么能提升查询速度，这就值得你仔细想想了。 既然 hive 基于文件系统，那么我们可以把它类比成很多个桶。 假设现在有 100 个桶，分别存放不同的海鲜，其中 2 个桶里有我们想要的桂花鱼，1 个桶里有阿根廷大红虾，那如何才能在最快的速度找出这 3 个桶？ 按照默认">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Redis从安装到踩坑">
-<meta property="og:url" content="https://amosannn.github.io/2017/11/29/redis-install/index.html">
+<meta property="og:title" content="Hive 优化之为外部表创建分区">
+<meta property="og:url" content="https://amosannn.github.io/2018/10/26/add-partition-after-creating-external-table-in-hive/index.html">
 <meta property="og:site_name" content="Amosannn">
-<meta property="og:description" content="先贴Redis官网：https://redis.io/download 1234$ wget http://download.redis.io/releases/redis-4.0.2.tar.gz$ tar xzf redis-4.0.2.tar.gz$ cd redis-4.0.2$ make 如果没有安装gcc，则会抛出这样的错误：1$ yum install gcc 在执行一次make可能">
-<meta property="og:image" content="https://amosannn.github.io/images/redis_install/redis_install_error.png">
-<meta property="og:image" content="https://amosannn.github.io/images/redis_install/redis_install_error2.png">
-<meta property="og:image" content="https://amosannn.github.io/images/redis_install/redis_running.png">
-<meta property="og:image" content="https://amosannn.github.io/images/redis_install/redis_test.png">
-<meta property="og:image" content="https://amosannn.github.io/images/redis_install/denied_of_protected_mode.png">
-<meta property="og:image" content="https://amosannn.github.io/images/redis_install/denied_of_127_binded.png">
-<meta property="og:image" content="https://amosannn.github.io/images/redis_install/external_access_success.png">
-<meta property="og:updated_time" content="2017-12-24T22:28:56.000Z">
+<meta property="og:description" content="首先，我们有一个数据量很大的表。其次，对他进行条件查询或其他操作就像看着一只小蜗牛在爬。 是可忍，孰不可忍！ 0x01 原理关于分区为什么能提升查询速度，这就值得你仔细想想了。 既然 hive 基于文件系统，那么我们可以把它类比成很多个桶。 假设现在有 100 个桶，分别存放不同的海鲜，其中 2 个桶里有我们想要的桂花鱼，1 个桶里有阿根廷大红虾，那如何才能在最快的速度找出这 3 个桶？ 按照默认">
+<meta property="og:updated_time" content="2018-11-26T07:41:28.022Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Redis从安装到踩坑">
-<meta name="twitter:description" content="先贴Redis官网：https://redis.io/download 1234$ wget http://download.redis.io/releases/redis-4.0.2.tar.gz$ tar xzf redis-4.0.2.tar.gz$ cd redis-4.0.2$ make 如果没有安装gcc，则会抛出这样的错误：1$ yum install gcc 在执行一次make可能">
-<meta name="twitter:image" content="https://amosannn.github.io/images/redis_install/redis_install_error.png">
+<meta name="twitter:title" content="Hive 优化之为外部表创建分区">
+<meta name="twitter:description" content="首先，我们有一个数据量很大的表。其次，对他进行条件查询或其他操作就像看着一只小蜗牛在爬。 是可忍，孰不可忍！ 0x01 原理关于分区为什么能提升查询速度，这就值得你仔细想想了。 既然 hive 基于文件系统，那么我们可以把它类比成很多个桶。 假设现在有 100 个桶，分别存放不同的海鲜，其中 2 个桶里有我们想要的桂花鱼，1 个桶里有阿根廷大红虾，那如何才能在最快的速度找出这 3 个桶？ 按照默认">
 
 
 
@@ -142,7 +134,7 @@
 
 
 
-  <link rel="canonical" href="https://amosannn.github.io/2017/11/29/redis-install/"/>
+  <link rel="canonical" href="https://amosannn.github.io/2018/10/26/add-partition-after-creating-external-table-in-hive/"/>
 
 
 
@@ -152,7 +144,7 @@
   };
 </script>
 
-  <title>Redis从安装到踩坑 | Amosannn</title>
+  <title>Hive 优化之为外部表创建分区 | Amosannn</title>
   
 
 
@@ -355,7 +347,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/11/29/redis-install/">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/10/26/add-partition-after-creating-external-table-in-hive/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Amosannn">
@@ -372,7 +364,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Redis从安装到踩坑
+          <h1 class="post-title" itemprop="name headline">Hive 优化之为外部表创建分区
               
             
           </h1>
@@ -397,7 +389,7 @@
                 
               
 
-              <time title="创建时间：2017-11-29 16:13:02" itemprop="dateCreated datePublished" datetime="2017-11-29T16:13:02+08:00">2017-11-29</time>
+              <time title="创建时间：2018-10-26 14:18:52" itemprop="dateCreated datePublished" datetime="2018-10-26T14:18:52+08:00">2018-10-26</time>
             
 
             
@@ -414,7 +406,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2017-12-25 06:28:56" itemprop="dateModified" datetime="2017-12-25T06:28:56+08:00">2017-12-25</time>
+                <time title="修改时间：2018-11-26 15:41:28" itemprop="dateModified" datetime="2018-11-26T15:41:28+08:00">2018-11-26</time>
               
             
           </span>
@@ -427,7 +419,7 @@
 
           
           
-             <span id="/2017/11/29/redis-install/" class="leancloud_visitors" data-flag-title="Redis从安装到踩坑">
+             <span id="/2018/10/26/add-partition-after-creating-external-table-in-hive/" class="leancloud_visitors" data-flag-title="Hive 优化之为外部表创建分区">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -452,7 +444,7 @@
                 
                   <span class="post-meta-item-text">本文字数：</span>
                 
-                <span title="本文字数">1k</span>
+                <span title="本文字数">1.2k</span>
               
 
               
@@ -486,23 +478,34 @@
       
 
       
-        <p>先贴Redis官网：<a href="https://redis.io/download" target="_blank" rel="external">https://redis.io/download</a></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">$ wget http://download.redis.io/releases/redis-4.0.2.tar.gz</div><div class="line">$ tar xzf redis-4.0.2.tar.gz</div><div class="line">$ cd redis-4.0.2</div><div class="line">$ make</div></pre></td></tr></table></figure>
-<p>如果没有安装gcc，则会抛出这样的错误：<br><img src="/images/redis_install/redis_install_error.png" alt=""><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ yum install gcc</div></pre></td></tr></table></figure></p>
-<p>在执行一次make可能会再抛出这样一个错误：<br><img src="/images/redis_install/redis_install_error2.png" alt=""></p>
-<p>这样的话便在make后加上参数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ make MALLOC=libc</div></pre></td></tr></table></figure></p>
-<p>编译完成后<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ src/redis-server  redis.conf</div></pre></td></tr></table></figure></p>
-<a id="more"></a>
-<p>当看到这个画面redis就启动完成了<br><img src="/images/redis_install/redis_running.png" alt=""></p>
-<p>新建一个链接（开启新的终端或新的ssh标签页）<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ cd /usr/local/redis-4.0.2</div><div class="line">$ src/redis-cli</div></pre></td></tr></table></figure></p>
-<p><img src="/images/redis_install/redis_test.png" alt=""><br>至此大功告成，如果想学习redis命令，则点击：xxx.xxx/xxx</p>
-<p>二：redis开启外部访问<br>远程连接redis访问被拒绝，初步推断为redis配置问题。<br>开了另一台服务器redis-cli远程连接，发现如下错误<br><img src="/images/redis_install/denied_of_protected_mode.png" alt=""><br>由图中可知，要想外部访问当前redis服务，需关闭安全模式。</p>
-<p>关闭安全模式<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">vi redis.conf</div><div class="line"># 更改protected-mode 由yes 改成 no</div></pre></td></tr></table></figure></p>
-<p>关闭并重启后发现依旧访问被拒。<br><img src="/images/redis_install/denied_of_127_binded.png" alt=""></p>
-<p>一波操作之后发现，需修改默认配置文件中的bind配置<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"># 更改 bind 127.0.0.1 为 bind 0.0.0.0</div><div class="line"># 重启redis后便可使用cmd或terminal测试连接</div><div class="line"></div><div class="line">$ redis-cli -h &#123;redis_host&#125; -p &#123;redis_port&#125;</div></pre></td></tr></table></figure></p>
-<p>其中<code>{redis_host}</code>就是远程的Redis服务所在服务器地址，<code>{redis_port}</code>就是Redis服务端口（默认端口为6379）。<br>例如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@VM_77_16_centos src]# ./redis-cli -h 你的ip -p 6379</div></pre></td></tr></table></figure></p>
-<p>大功告成<br><img src="/images/redis_install/external_access_success.png" alt=""></p>
-<p>三：redis的基本操作<br>关闭redis的两种方法<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"># 无密码</div><div class="line"># redis-cli shutdown</div><div class="line"></div><div class="line"># 有密码</div><div class="line"># redis-cli -a password shutdown</div><div class="line"></div><div class="line"># 查询redis的pid，关闭进程</div><div class="line"># ps aux | grep redis</div><div class="line"># kill -9 pid</div></pre></td></tr></table></figure></p>
+        <p>首先，我们有一个数据量很大的表。其次，对他进行条件查询或其他操作就像看着一只小蜗牛在爬。</p>
+<p>是可忍，孰不可忍！</p>
+<h2 id="0x01-原理"><a href="#0x01-原理" class="headerlink" title="0x01 原理"></a>0x01 原理</h2><p>关于分区为什么能提升查询速度，这就值得你仔细想想了。</p>
+<p>既然 <code>hive</code> 基于文件系统，那么我们可以把它类比成很多个桶。</p>
+<p>假设现在有 100 个桶，分别存放不同的海鲜，其中 2 个桶里有我们想要的桂花鱼，1 个桶里有阿根廷大红虾，那如何才能在最快的速度找出这 3 个桶？</p>
+<p>按照默认的策略，人们会打开盖子一桶一桶找，而如果有 1000、10000 个桶，就会从一个人找演变成一群人一起找。</p>
+<p>有没有改进方式呢？有。</p>
+<p>有一天老板发现，不对啊，这个事我居然叫那么多人来做，感觉自己额外付出了很多成本，亏钱了。不行！这个事情必须改革！于是他思前想后好几天怎么也也想不到更好的办法，也因此懊恼了许久。直到有一天，老板夫人得了风寒，老板十分心急，替夫人去药铺抓药，当它看见郎中拿着方子在药柜抓药的时候，心中的郁结终于揭开了。拍了拍脑瓜子，大叫了声，对呀！我怎么没想到呢！</p>
+<p>于是，从药铺回来后，老板更改了新的存鱼策略。它让员工们把鱼放进桶里的同时，在桶外贴上标签，取鱼的时候只需要远远地扫一眼就能快速定位。</p>
+<p><code>hive</code> 也是如此，你可以粗略地将它的存储系统理解为，将一堆文件放在同一个文件夹里，需要的时候在这堆文件里遍历，最后的效果不言而喻。</p>
+<p>分区的好处便是，将文件按一定的维度，存进不同的文件夹，相当于给他们打好了标签，这样我按这个维度搜索时，便不需要遍历其他无关的文件。数据越多，对查询效率的提升就越大。</p>
+<h2 id="0x02-操作一波"><a href="#0x02-操作一波" class="headerlink" title="0x02 操作一波"></a>0x02 操作一波</h2><p>首先看分区列表，如果结果为空就表示该表下没有分区。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">show</span> <span class="keyword">partitions</span> tmp.tmp_user;</div></pre></td></tr></table></figure>
+<p>给当前表添加分区</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">alter</span> <span class="keyword">table</span> tmp.tmp_user <span class="keyword">add</span> <span class="keyword">partition</span> (<span class="keyword">month</span>=<span class="string">'2018_10'</span>, <span class="keyword">day</span>=<span class="string">'25'</span>) location <span class="string">'/user/amos/tmp_user/month=2018_10/day=25'</span>;</div></pre></td></tr></table></figure>
+<p>将数据迁移至分区中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hdfs dfs -mv /user/amos/tmp_user/data_20181025.csv /user/amos/tmp_user/month=2018_10/day=25</div></pre></td></tr></table></figure>
+<h2 id="物极必反"><a href="#物极必反" class="headerlink" title="物极必反"></a>物极必反</h2><p>为了提升搜索效果，增加分区数是可以的，但是如果分区数太过庞大，而需查询的数据也很多的话，分区带来的提升会被弱化。尤其是在分区中数据较为分散的时候，只要查询数据量达到一定量级便会轻易集中所有分区。</p>
+<p>大量分区带来的不良后果不仅如此，还会在查询之后给磁盘带来更多的小文件。</p>
+<h2 id="说点题外话"><a href="#说点题外话" class="headerlink" title="说点题外话"></a>说点题外话</h2><p>如果是对数据仓库进行优化</p>
+<p>在 <code>hive</code> 中，有几种办法</p>
+<ul>
+<li>分区</li>
+<li>分桶</li>
+<li>索引</li>
+<li>区分活跃用户</li>
+<li>更改数据结构（id - string –&gt; id - list<string>)</string></li>
+</ul>
 
       
     </div>
@@ -533,8 +536,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/11/05/intalled-item2/" rel="next" title="从Terminal过渡到Item2">
-                <i class="fa fa-chevron-left"></i> 从Terminal过渡到Item2
+              <a href="/2018/04/02/axios-intercepter-perflight-response-error/" rel="next" title="axios 添加登录拦截器后出现 preflight response 错误">
+                <i class="fa fa-chevron-left"></i> axios 添加登录拦截器后出现 preflight response 错误
               </a>
             
           </div>
@@ -543,8 +546,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2017/12/24/remove-your-own-python/" rel="prev" title="如何删除自己安装的python(干净、无残留)">
-                如何删除自己安装的python(干净、无残留) <i class="fa fa-chevron-right"></i>
+              <a href="/2018/10/29/airflow_install_and_more/" rel="prev" title="Airflow 安装及跳坑指南">
+                Airflow 安装及跳坑指南 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -590,8 +593,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -768,6 +780,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#0x01-原理"><span class="nav-number">1.</span> <span class="nav-text">0x01 原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x02-操作一波"><span class="nav-number">2.</span> <span class="nav-text">0x02 操作一波</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#物极必反"><span class="nav-number">3.</span> <span class="nav-text">物极必反</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#说点题外话"><span class="nav-number">4.</span> <span class="nav-text">说点题外话</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       

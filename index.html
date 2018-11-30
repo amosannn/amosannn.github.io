@@ -347,6 +347,227 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/11/29/install-graphite/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Amosannn">
+      <meta itemprop="description" content="start from zero">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?s=400&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&v=4">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Amosannn">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2018/11/29/install-graphite/" class="post-title-link" itemprop="https://amosannn.github.io/index.html">Graphite 之把它装起来</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-11-29 16:41:17" itemprop="dateCreated datePublished" datetime="2018-11-29T16:41:17+08:00">2018-11-29</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2018-11-30 18:58:11" itemprop="dateModified" datetime="2018-11-30T18:58:11+08:00">2018-11-30</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/技术一路走到黑/" itemprop="url" rel="index"><span itemprop="name">技术一路走到黑</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/11/29/install-graphite/" class="leancloud_visitors" data-flag-title="Graphite 之把它装起来">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">5.7k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">5 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>Graphite 是一款时序数据库</p>
+<h1 id="初步安装"><a href="#初步安装" class="headerlink" title="初步安装"></a>初步安装</h1><p>安装 <code>Graphite</code> 有 n 种方法，在下选用的是 <code>pip</code> 安装的方式，使用默认安装位置 <code>/opt/graphite</code></p>
+<p>十分简单，只需要分别安装三个组件 <code>graphite-web</code> 、 <code>whisper</code> 、 <code>carbon</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">$ export PYTHONPATH=&quot;/opt/graphite/lib/:/opt/graphite/webapp/&quot;</div><div class="line">$ pip3 install --no-binary=:all: https://github.com/graphite-project/whisper/tarball/master</div><div class="line">$ pip3 install --no-binary=:all: https://github.com/graphite-project/carbon/tarball/master</div><div class="line">$ pip3 install --no-binary=:all: https://github.com/graphite-project/graphite-web/tarball/master</div></pre></td></tr></table></figure>
+<p>如果你希望自己指定安装位置：<a href="https://graphite.readthedocs.io/en/latest/install-pip.html#" target="_blank" rel="external">Installing From Pip</a></p>
+          <!--noindex-->
+          
+            <div class="post-button text-center">
+              <a class="btn" href="/2018/11/29/install-graphite/" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+         
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+       
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/11/19/sqoop-job-guide/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -409,7 +630,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2018-11-20 10:12:35" itemprop="dateModified" datetime="2018-11-20T10:12:35+08:00">2018-11-20</time>
+                <time title="修改时间：2018-11-20 11:56:07" itemprop="dateModified" datetime="2018-11-20T11:56:07+08:00">2018-11-20</time>
               
             
           </span>
@@ -500,65 +721,19 @@
 
       
         
-          
-            <p>本文成型的历史原因来源于使用 <code>shell</code> 脚本封装单个 <code>sqoop</code> 的脑壳疼操作</p>
+          <p>本文成型的历史原因来源于使用 <code>shell</code> 脚本封装单个 <code>sqoop</code> 的脑壳疼操作</p>
 <p>在执行定时任务的时候，如果需要执行的 <code>sqoop</code> 足够多，我们可以将他们封装在一个 <code>shell</code> 脚本中，再使用 <code>crontab</code> 进行定时任务调用。</p>
 <p>而如果同一时间需要执行的 <code>sqoop</code> 数量仅仅只有一两个，那我们完全没有必要为了它写一个 <code>shell</code> 脚本，当然只是按场景选择不同策略，并不代表哪种方法更差。</p>
 <p>对于不想多建 shell 脚本的同学，还有 <code>sqoop job</code> 这条路。</p>
-<h2 id="job-语法"><a href="#job-语法" class="headerlink" title="job 语法"></a>job 语法</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ sqoop job (generic-args) (job-args) [-- [subtool-name] (subtool-args)]</div><div class="line">$ sqoop-job (generic-args) (job-args) [-- [subtool-name] (subtool-args)]</div></pre></td></tr></table></figure>
-<p><code>sqoop job</code> 的语法如上所示，而其后追加的命令参数也无需按顺序堆砌。</p>
-<h2 id="命令参数"><a href="#命令参数" class="headerlink" title="命令参数"></a>命令参数</h2><table>
-<thead>
-<tr>
-<th>Argument</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>--create &lt;job-id&gt;</code></td>
-<td>Define a new saved job with the specified job-id (name). A second Sqoop command-line, separated by a <code>--</code> should be specified; this defines the saved job.</td>
-</tr>
-<tr>
-<td><code>--delete &lt;job-id&gt;</code></td>
-<td>Delete a saved job.</td>
-</tr>
-<tr>
-<td><code>--exec &lt;job-id&gt;</code></td>
-<td>Given a job defined with <code>--create</code>, run the saved job.</td>
-</tr>
-<tr>
-<td><code>--show &lt;job-id&gt;</code></td>
-<td>Show the parameters for a saved job.</td>
-</tr>
-<tr>
-<td><code>--list</code></td>
-<td>List all saved jobs</td>
-</tr>
-</tbody>
-</table>
-<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><h3 id="创建"><a href="#创建" class="headerlink" title="创建"></a>创建</h3><p>一条同步的命令大致是长这个样子</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">$ sqoop import </div><div class="line">  --connect jdbc:mysql://127.0.0.1:3306/tmp   \</div><div class="line">  --username amos   \</div><div class="line">  --password amos_tmp   \</div><div class="line">  --table user_log   \</div><div class="line">  --hive-import  --hive-overwrite   \</div><div class="line">  --hive-database tmp   \</div><div class="line">  --hive-table user_log   \</div><div class="line">  --hive-drop-import-delims --fields-terminated-by &apos;\001&apos; --lines-terminated-by &apos;\n&apos;  \</div><div class="line">  --compression-codec org.apache.hadoop.io.compress.SnappyCodec   \</div><div class="line">  --as-parquetfile</div></pre></td></tr></table></figure>
-<p>建立 <code>sqoop job</code> 所需要的操作只需要把上面的参数追加在下面这条命令下就可以了</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sqoop job --create user_log -- import</div></pre></td></tr></table></figure>
-<h3 id="删除"><a href="#删除" class="headerlink" title="删除"></a>删除</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sqoop job -delete user_log</div></pre></td></tr></table></figure>
-<h3 id="执行"><a href="#执行" class="headerlink" title="执行"></a>执行</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sqoop job --exec user_log</div></pre></td></tr></table></figure>
-<h3 id="查看详情"><a href="#查看详情" class="headerlink" title="查看详情"></a>查看详情</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sqoop job --show user_log</div></pre></td></tr></table></figure>
-<h3 id="查看-job-列表"><a href="#查看-job-列表" class="headerlink" title="查看 job 列表"></a>查看 job 列表</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">$ sqoop job --list</div><div class="line">18/11/19 02:57:58 INFO sqoop.Sqoop: Running Sqoop version: 1.4.6-cdh5.14.0</div><div class="line">Available jobs:</div><div class="line">  user_log</div></pre></td></tr></table></figure>
-<h2 id="如何制定定时任务？"><a href="#如何制定定时任务？" class="headerlink" title="如何制定定时任务？"></a>如何制定定时任务？</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ crontab -e</div><div class="line">0 0 * * * sqoop job --exec user_log &gt;&gt; /home/amos/sqoop_job/user_log.log 2&gt;&amp;1</div></pre></td></tr></table></figure>
-<p>仅仅是一个 <code>crontab</code> 的调用语句，简单高效。</p>
-<h2 id="每次执行都需要输入数据库密码？"><a href="#每次执行都需要输入数据库密码？" class="headerlink" title="每次执行都需要输入数据库密码？"></a>每次执行都需要输入数据库密码？</h2><p><code>sqoop</code> 将它们存储数据的 <code>metastore</code> 定义为不安全的地方，所以它并没有将数据库密码存入 <code>metastore</code>，这十分合理，但如果你觉得这无所谓，可以开启存储密码的选项。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ vi $&#123;SQOOP_HOME&#125;/conf/sqoop-site.xml</div></pre></td></tr></table></figure>
-<p>增加如下内容</p>
-<blockquote>
-<property><br>    <name>sqoop.metastore.client.record.password</name><br>    <value>true</value><br>    <description>If true, allow saved passwords in the metastore.<br>    </description><br></property>
-
-</blockquote>
-<p>只需要在第一次执行时输入密码，之后密码就存储在 <code>metastore</code> 中了。</p>
-<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a href="https://sqoop.apache.org/docs/1.4.6/SqoopUserGuide.html#_literal_sqoop_job_literal" target="_blank" rel="external">sqoop-job</a></p>
-<p><a href="https://sqoop.apache.org/docs/1.4.6/SqoopUserGuide.html#_saved_jobs_and_passwords" target="_blank" rel="external">Saved jobs and passwords</a></p>
-
+          <!--noindex-->
           
+            <div class="post-button text-center">
+              <a class="btn" href="/2018/11/19/sqoop-job-guide/" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+         
+          <!--/noindex-->
         
       
     </div>
@@ -1724,7 +1899,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2018-11-06 15:51:19" itemprop="dateModified" datetime="2018-11-06T15:51:19+08:00">2018-11-06</time>
+                <time title="修改时间：2018-11-26 15:44:59" itemprop="dateModified" datetime="2018-11-26T15:44:59+08:00">2018-11-26</time>
               
             
           </span>
@@ -1855,7 +2030,7 @@
 </ul>
 <p>他们的作用都像字面意思说的那样，可完成相应的操作或调用。</p>
 <p>值得注意的是 DummyOperator，是个空操作，相当于标记和中转节点。</p>
-<p>当然，他们有一个共同的爸爸「BaseOperator」，全部首其控制，从中继承的功能也会因为他一人的修改而相应改变。</p>
+<p>当然，他们有一个共同的爸爸「BaseOperator」，中央集权，他一人的修改会改变儿子们继承到的功能。</p>
 <h2 id="Timezone"><a href="#Timezone" class="headerlink" title="Timezone"></a>Timezone</h2><p>在 1.9 版本及以前，Airflow 使用的是本地时间，不同服务器时区不同容易产生运行错误。</p>
 <p>而在 1.10 中，加入了自定义的时区配置（1.9 的时区配置无法生效，大坑。。）</p>
 <h2 id="预警与监控"><a href="#预警与监控" class="headerlink" title="预警与监控"></a>预警与监控</h2><p>当任务执行失败或状态异常时，发送短信或邮件。</p>
@@ -2161,6 +2336,226 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/10/26/add-partition-after-creating-external-table-in-hive/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Amosannn">
+      <meta itemprop="description" content="start from zero">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?s=400&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&v=4">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Amosannn">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2018/10/26/add-partition-after-creating-external-table-in-hive/" class="post-title-link" itemprop="https://amosannn.github.io/index.html">Hive 优化之为外部表创建分区</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-10-26 14:18:52" itemprop="dateCreated datePublished" datetime="2018-10-26T14:18:52+08:00">2018-10-26</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2018-11-26 15:41:28" itemprop="dateModified" datetime="2018-11-26T15:41:28+08:00">2018-11-26</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/10/26/add-partition-after-creating-external-table-in-hive/" class="leancloud_visitors" data-flag-title="Hive 优化之为外部表创建分区">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">1.2k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">1 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>首先，我们有一个数据量很大的表。其次，对他进行条件查询或其他操作就像看着一只小蜗牛在爬。</p>
+<p>是可忍，孰不可忍！</p>
+<h2 id="0x01-原理"><a href="#0x01-原理" class="headerlink" title="0x01 原理"></a>0x01 原理</h2><p>关于分区为什么能提升查询速度，这就值得你仔细想想了。</p>
+<p>既然 <code>hive</code> 基于文件系统，那么我们可以把它类比成很多个桶。</p>
+<p>假设现在有 100 个桶，分别存放不同的海鲜，其中 2 个桶里有我们想要的桂花鱼，1 个桶里有阿根廷大红虾，那如何才能在最快的速度找出这 3 个桶？</p>
+<p>按照默认的策略，人们会打开盖子一桶一桶找，而如果有 1000、10000 个桶，就会从一个人找演变成一群人一起找。</p>
+<p>有没有改进方式呢？有。</p>
+<p>有一天老板发现，不对啊，这个事我居然叫那么多人来做，感觉自己额外付出了很多成本，亏钱了。不行！这个事情必须改革！于是他思前想后好几天怎么也也想不到更好的办法，也因此懊恼了许久。直到有一天，老板夫人得了风寒，老板十分心急，替夫人去药铺抓药，当它看见郎中拿着方子在药柜抓药的时候，心中的郁结终于揭开了。拍了拍脑瓜子，大叫了声，对呀！我怎么没想到呢！</p>
+<p>于是，从药铺回来后，老板更改了新的存鱼策略。它让员工们把鱼放进桶里的同时，在桶外贴上标签，取鱼的时候只需要远远地扫一眼就能快速定位。</p>
+<p><code>hive</code> 也是如此，你可以粗略地将它的存储系统理解为，将一堆文件放在同一个文件夹里，需要的时候在这堆文件里遍历，最后的效果不言而喻。</p>
+<p>分区的好处便是，将文件按一定的维度，存进不同的文件夹，相当于给他们打好了标签，这样我按这个维度搜索时，便不需要遍历其他无关的文件。数据越多，对查询效率的提升就越大。</p>
+<h2 id="0x02-操作一波"><a href="#0x02-操作一波" class="headerlink" title="0x02 操作一波"></a>0x02 操作一波</h2><p>首先看分区列表，如果结果为空就表示该表下没有分区。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">show</span> <span class="keyword">partitions</span> tmp.tmp_user;</div></pre></td></tr></table></figure>
+<p>给当前表添加分区</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">alter</span> <span class="keyword">table</span> tmp.tmp_user <span class="keyword">add</span> <span class="keyword">partition</span> (<span class="keyword">month</span>=<span class="string">'2018_10'</span>, <span class="keyword">day</span>=<span class="string">'25'</span>) location <span class="string">'/user/amos/tmp_user/month=2018_10/day=25'</span>;</div></pre></td></tr></table></figure>
+<p>将数据迁移至分区中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hdfs dfs -mv /user/amos/tmp_user/data_20181025.csv /user/amos/tmp_user/month=2018_10/day=25</div></pre></td></tr></table></figure>
+<h2 id="物极必反"><a href="#物极必反" class="headerlink" title="物极必反"></a>物极必反</h2><p>为了提升搜索效果，增加分区数是可以的，但是如果分区数太过庞大，而需查询的数据也很多的话，分区带来的提升会被弱化。尤其是在分区中数据较为分散的时候，只要查询数据量达到一定量级便会轻易集中所有分区。</p>
+<p>大量分区带来的不良后果不仅如此，还会在查询之后给磁盘带来更多的小文件。</p>
+<h2 id="说点题外话"><a href="#说点题外话" class="headerlink" title="说点题外话"></a>说点题外话</h2><p>如果是对数据仓库进行优化</p>
+<p>在 <code>hive</code> 中，有几种办法</p>
+<ul>
+<li>分区</li>
+<li>分桶</li>
+<li>索引</li>
+<li>区分活跃用户</li>
+<li>更改数据结构（id - string –&gt; id - list<string>)</string></li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+       
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/04/02/axios-intercepter-perflight-response-error/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2360,434 +2755,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/03/28/deploy-the-vue-project-using-docker-and-nginx/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Amosannn">
-      <meta itemprop="description" content="start from zero">
-      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?s=400&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&v=4">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Amosannn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2018/03/28/deploy-the-vue-project-using-docker-and-nginx/" class="post-title-link" itemprop="https://amosannn.github.io/index.html">Docker + Nginx 镜像部署 Vue 项目</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2018-03-28 15:23:57" itemprop="dateCreated datePublished" datetime="2018-03-28T15:23:57+08:00">2018-03-28</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2018-03-29 01:36:14" itemprop="dateModified" datetime="2018-03-29T01:36:14+08:00">2018-03-29</time>
-              
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/2018/03/28/deploy-the-vue-project-using-docker-and-nginx/" class="leancloud_visitors" data-flag-title="Docker + Nginx 镜像部署 Vue 项目">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数：</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-            <div class="post-symbolscount">
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-file-word-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">本文字数：</span>
-                
-                <span title="本文字数">2.5k</span>
-              
-
-              
-                <span class="post-meta-divider">|</span>
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-clock-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
-                
-                <span title="阅读时长">2 分钟</span>
-              
-            </div>
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body han-init-context" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="简单介绍-Docker"><a href="#简单介绍-Docker" class="headerlink" title="简单介绍 Docker"></a>简单介绍 Docker</h1><p>Docker 真是个好东西，很好的降低了不同环境发版的兼容性问题。无论是 Linux, Windows 或是 Mac OS，再也不用怕系统环境不同，软件版本不同导致的项目无法启动。这些问题只需要自定义 Docker 镜像，并在 Docker 中启动，就能搞定部署啦。</p>
-<h1 id="部署-Vue-项目"><a href="#部署-Vue-项目" class="headerlink" title="部署 Vue 项目"></a>部署 Vue 项目</h1><p>传统的部署一般为编译后放在 Nginx 目录下，或者放在 Tomcat 目录下。玩了有一阵子 Docker 了，就试试用 Docker 来部署吧。</p>
-<h2 id="本地操作"><a href="#本地操作" class="headerlink" title="本地操作"></a>本地操作</h2><p>首先给本地的vue项目打包</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">npm run build</div></pre></td></tr></table></figure>
-<p>执行命令之后项目根目录下会出现 dist 文件夹，将其上传至服务器。</p>
-<h2 id="服务器操作"><a href="#服务器操作" class="headerlink" title="服务器操作"></a>服务器操作</h2><h3 id="编写-Dockerfile"><a href="#编写-Dockerfile" class="headerlink" title="编写 Dockerfile"></a>编写 Dockerfile</h3><p>新建 Dockerfile</p>
-<blockquote>
-<p>vi Dockerfile</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">#导入nginx镜像</div><div class="line">FROM nginx:1.13.7</div><div class="line">MAINTAINER amosannn &lt;amosannn@gmail.com&gt;</div><div class="line">#把当前打包工程的html复制到虚拟地址</div><div class="line">COPY dist/ /usr/share/nginx/html/</div><div class="line">#使用自定义nginx.conf配置端口和监听</div><div class="line">RUN rm /etc/nginx/conf.d/default.conf</div><div class="line">ADD default.conf /etc/nginx/conf.d/</div><div class="line"></div><div class="line">RUN /bin/bash -c &apos;echo init ok!!!&apos;</div></pre></td></tr></table></figure>
-<h3 id="Nginx配置"><a href="#Nginx配置" class="headerlink" title="Nginx配置"></a>Nginx配置</h3><p>新建<code>default.conf</code></p>
-<blockquote>
-<p>vi default.conf</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">server &#123;</div><div class="line"># 项目中定义的端口号</div><div class="line">    listen       8000; </div><div class="line">    server_name  localhost;</div><div class="line"></div><div class="line">    #charset koi8-r;</div><div class="line">    #access_log  /var/log/nginx/log/host.access.log  main;</div><div class="line"></div><div class="line">    location / &#123;</div><div class="line">        root   /usr/share/nginx/html;</div><div class="line">        index  index.html index.htm;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    #error_page  404              /404.html;</div><div class="line"></div><div class="line">    # redirect server error pages to the static page /50x.html</div><div class="line">    #</div><div class="line">    error_page   500 502 503 504  /50x.html;</div><div class="line">    location = /50x.html &#123;</div><div class="line">        root   html;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="Docker-打包"><a href="#Docker-打包" class="headerlink" title="Docker 打包"></a>Docker 打包</h3><p>打包前项目目录下应该有这几个文件(夹)：<code>default.conf</code>,<code>dist</code>,<code>Dockerfile</code></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker build -t zhiliao:v1 .</div></pre></td></tr></table></figure>
-<p>别忘了末尾的小点点</p>
-<p>最后出现这两条提示即为打包成功</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Successfully built 6f656946fde3</div><div class="line">Successfully tagged zhiliao:v1</div></pre></td></tr></table></figure>
-<h3 id="查看镜像"><a href="#查看镜像" class="headerlink" title="查看镜像"></a>查看镜像</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker images</div></pre></td></tr></table></figure>
-<p>如果在结果中看到，则为打包成功</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</div><div class="line">zhiliao             latest              c5d9c47be079        17 minutes ago      111MB</div></pre></td></tr></table></figure>
-<h3 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker run -d -p 80:8000 zhiliao:v1</div></pre></td></tr></table></figure>
-<p>命令中的<code>-d</code>意为后台运行</p>
-<p>-p 为端口号，前半部分为外网访问的端口，后半部分为 Nginx 反向代理寻找的内部端口</p>
-<h3 id="查看运行结果"><a href="#查看运行结果" class="headerlink" title="查看运行结果"></a>查看运行结果</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker ps</div></pre></td></tr></table></figure>
-<p>这条命令等价于<code>docker container ls</code>，加上 -a 则可显示全部</p>
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[root@VM_108_54_centos zhiliao-vue]# docker ps -a</div><div class="line">CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                      PORTS               NAMES</div><div class="line">bdd5842a4cae        zhiliao:v1          &quot;nginx -g &apos;daemon ...&quot;   42 seconds ago      Exited (1) 41 seconds ago                       frosty_joliot</div></pre></td></tr></table></figure>
-<h3 id="查找日志"><a href="#查找日志" class="headerlink" title="查找日志"></a>查找日志</h3><p>如果遇到程序崩溃或者镜像启动失败</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker logs &apos;CONTAINER ID&apos;</div></pre></td></tr></table></figure>
-<p>使用 ps 命令可以找到到 <code>CONTAINER ID</code></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">[root@VM_108_54_centos zhiliao-vue]# docker logs bdd5842a4cae</div><div class="line">2018/03/28 07:11:51 [emerg] 1#1: unknown directive &quot;//这里使用项目中的端口号&quot; in /etc/nginx/conf.d/default.conf:3</div><div class="line">nginx: [emerg] unknown directive &quot;//这里使用项目中的端口号&quot; in /etc/nginx/conf.d/default.conf:3</div></pre></td></tr></table></figure>
-<hr>
-<p>参考链接：</p>
-<p><a href="https://yeasy.gitbooks.io/docker_practice/content/image/build.html" target="_blank" rel="external">使用 Dockerfile 定制镜像</a></p>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-       
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/03/22/solove-vue-cross-domain-problems/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Amosannn">
-      <meta itemprop="description" content="start from zero">
-      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?s=400&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&v=4">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Amosannn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2018/03/22/solove-vue-cross-domain-problems/" class="post-title-link" itemprop="https://amosannn.github.io/index.html">解决Vue前后端分离跨域问题</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2018-03-22 09:11:58 / 修改时间：21:17:12" itemprop="dateCreated datePublished" datetime="2018-03-22T09:11:58+08:00">2018-03-22</time>
-            
-
-            
-              
-
-              
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/2018/03/22/solove-vue-cross-domain-problems/" class="leancloud_visitors" data-flag-title="解决Vue前后端分离跨域问题">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数：</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-            <div class="post-symbolscount">
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-file-word-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">本文字数：</span>
-                
-                <span title="本文字数">3.2k</span>
-              
-
-              
-                <span class="post-meta-divider">|</span>
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-clock-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
-                
-                <span title="阅读时长">3 分钟</span>
-              
-            </div>
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body han-init-context" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>用Vue写了几个页面，发现request传到后端没带上cookies，心想不对劲，Postman明明可以访问啊。再仔细看看，后端已经开放了跨域访问，不需要<code>HttpServletRequest</code>的接口也可以成功请求。一定就是前端请求缺少请求头或是某些参数了。上网查了一下还真是这样，又跳过了一个坑，很开心啦～</p>
-<h1 id="前后端跨域设置"><a href="#前后端跨域设置" class="headerlink" title="前后端跨域设置"></a>前后端跨域设置</h1><h2 id="Vue"><a href="#Vue" class="headerlink" title="Vue"></a>Vue</h2><blockquote>
-<p>main.js 设置</p>
-</blockquote>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> axios <span class="keyword">from</span> <span class="string">'axios'</span></div><div class="line"></div><div class="line">axios.defaults.withCredentials=<span class="literal">true</span>;</div><div class="line">Vue.prototype.$http = axios;</div></pre></td></tr></table></figure>
-<blockquote>
-<p>请求需带上withCredentials</p>
-</blockquote>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">getData() &#123;</div><div class="line">        <span class="keyword">this</span>.$axios.get(<span class="string">'http://127.0.0.1:8080/xxx/xxxxx'</span>,&#123;</div><div class="line">          <span class="attr">headers</span>: &#123;</div><div class="line">            <span class="string">"Content-Type"</span>:<span class="string">"application/json;charset=utf-8"</span></div><div class="line">          &#125;,</div><div class="line">          <span class="attr">withCredentials</span> : <span class="literal">true</span></div><div class="line">        &#125;).then( <span class="function">(<span class="params">response</span>) =&gt;</span> &#123;</div><div class="line">          <span class="keyword">if</span>( response.data.code === <span class="string">'0000'</span>)&#123;</div><div class="line">            <span class="keyword">this</span>.items = response.data.data.xxx;</div><div class="line">            <span class="built_in">console</span>.log(<span class="keyword">this</span>.items)</div><div class="line">          &#125;</div><div class="line">        &#125;)</div><div class="line">      &#125;</div></pre></td></tr></table></figure>
-<h2 id="SpringMVC"><a href="#SpringMVC" class="headerlink" title="SpringMVC"></a>SpringMVC</h2><p>加上一个跨域用Interceptor</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Component</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CorsInterceptor</span> <span class="keyword">implements</span> <span class="title">HandlerInterceptor</span> </span>&#123;</div><div class="line"></div><div class="line">  <span class="meta">@Override</span></div><div class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">preHandle</span><span class="params">(HttpServletRequest request, HttpServletResponse response,</span></span></div><div class="line">      Object handler) <span class="keyword">throws</span> Exception &#123;</div><div class="line">    response.setHeader(<span class="string">"Access-Control-Allow-Origin"</span>, <span class="string">"*"</span>);</div><div class="line">    response.setHeader(<span class="string">"Access-Control-Allow-Methods"</span>, <span class="string">"*"</span>);</div><div class="line">    response.setHeader(<span class="string">"Access-Control-Max-Age"</span>, <span class="string">"3600"</span>);</div><div class="line">    response.setHeader(<span class="string">"Access-Control-Allow-Headers"</span>, <span class="string">"Origin, X-Requested-With, Content-Type, Accept"</span>);</div><div class="line">    response.setHeader(<span class="string">"Access-Control-Allow-Credentials"</span>,<span class="string">"true"</span>); <span class="comment">//是否允许浏览器携带用户身份信息（cookie）</span></div><div class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  <span class="meta">@Override</span></div><div class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">postHandle</span><span class="params">(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, ModelAndView modelAndView)</span> <span class="keyword">throws</span> Exception </span>&#123;</div><div class="line"></div><div class="line">  &#125;</div><div class="line"></div><div class="line">  <span class="meta">@Override</span></div><div class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">afterCompletion</span><span class="params">(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, Exception e)</span> <span class="keyword">throws</span> Exception </span>&#123;</div><div class="line"></div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h2 id="可能遇到的问题"><a href="#可能遇到的问题" class="headerlink" title="可能遇到的问题"></a>可能遇到的问题</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">response.setHeader(<span class="string">"Access-Control-Allow-Origin"</span>, <span class="string">"*"</span>);</div></pre></td></tr></table></figure>
-<p>请求源地址如果写了<code>*</code>很可能会被拒绝访问。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Failed to load http://127.0.0.1:8080/zhiliao/login: Response to preflight request doesn&apos;t pass access control check: The value of the &apos;Access-Control-Allow-Origin&apos; header in the response must not be the wildcard &apos;*&apos; when the request&apos;s credentials mode is &apos;include&apos;. Origin &apos;http://127.0.0.1:8000&apos; is therefore not allowed access. The credentials mode of requests initiated by the XMLHttpRequest is controlled by the withCredentials attribute.</div></pre></td></tr></table></figure>
-<p>如果出现这样的报错，那就得指定地址啦！    </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">response.setHeader(&quot;Access-Control-Allow-Origin&quot;, &quot;http://127.0.0.1:8000&quot;);</div></pre></td></tr></table></figure>
-<p>这里依旧有个小坑：指定地址为<code>http://127.0.0.1:8000</code>的时候前端页面若是<code>localhost</code>是无法访问的。</p>
-<h1 id="看看axios官方文档"><a href="#看看axios官方文档" class="headerlink" title="看看axios官方文档"></a>看看axios官方文档</h1><p><a href="https://github.com/axios/axios#request-config" target="_blank" rel="external">axios官方配置说明</a></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">// `timeout` specifies the number of milliseconds before the request times out.</div><div class="line">// If the request takes longer than `timeout`, the request will be aborted.</div><div class="line">timeout: 1000,</div><div class="line"></div><div class="line">// `withCredentials` indicates whether or not cross-site Access-Control requests</div><div class="line">// should be made using credentials</div><div class="line">withCredentials: false, // default</div><div class="line"></div><div class="line">// `adapter` allows custom handling of requests which makes testing easier.</div><div class="line">// Return a promise and supply a valid response (see lib/adapters/README.md).</div><div class="line">adapter: function (config) &#123;</div><div class="line">  /* ... */</div><div class="line">&#125;,</div></pre></td></tr></table></figure>
-<p>配置文件中<code>withCredentials</code>默认是关闭的，手动修改配置文件或在项目中重定义即可。</p>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-       
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2839,7 +2806,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">31</span>
+                    <span class="site-state-item-count">33</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -2937,7 +2904,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">35</span>
+                      
+                    
+                    <span class="site-state-item-count">36</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -3021,7 +2990,7 @@
       <i class="fa fa-area-chart"></i>
     </span>
     
-    <span title="站点总字数">68k</span>
+    <span title="站点总字数">75k</span>
   
 
   
@@ -3030,7 +2999,7 @@
       <i class="fa fa-coffee"></i>
     </span>
     
-    <span title="站点阅读时长">1:02</span>
+    <span title="站点阅读时长">1:08</span>
   
 </div>
 

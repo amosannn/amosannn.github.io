@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" media="all" href="/lib/Han/dist/han.min.css?v=3.3">
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '6IQVLUE04L',
+      apiKey: 'b3cf2353e1956cf39bb8fdf838e117f1',
+      indexName: 'amos_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Graphite 是一款时序数据库 初步安装安装 Graphite 有 n 种方法，在下选用的是 pip 安装的方式，使用默认安装位置 /opt/graphite 十分简单，只需要分别安装三个组件 graphite-web 、 whisper 、 carbon 1234$ export PYTHONPATH=&amp;quot;/opt/graphite/lib/:/opt/graphite/webapp">
+<meta name="keywords" content="Graphite">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Graphite 之把它装起来">
+<meta property="og:url" content="https://amosannn.github.io/2018/11/29/install-graphite/index.html">
+<meta property="og:site_name" content="Amosannn">
+<meta property="og:description" content="Graphite 是一款时序数据库 初步安装安装 Graphite 有 n 种方法，在下选用的是 pip 安装的方式，使用默认安装位置 /opt/graphite 十分简单，只需要分别安装三个组件 graphite-web 、 whisper 、 carbon 1234$ export PYTHONPATH=&amp;quot;/opt/graphite/lib/:/opt/graphite/webapp">
+<meta property="og:updated_time" content="2018-11-30T10:58:11.820Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Graphite 之把它装起来">
+<meta name="twitter:description" content="Graphite 是一款时序数据库 初步安装安装 Graphite 有 n 种方法，在下选用的是 pip 安装的方式，使用默认安装位置 /opt/graphite 十分简单，只需要分别安装三个组件 graphite-web 、 whisper 、 carbon 1234$ export PYTHONPATH=&amp;quot;/opt/graphite/lib/:/opt/graphite/webapp">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Amosannn" type="application/atom+xml" />
+
+
+
+
+  <link rel="canonical" href="https://amosannn.github.io/2018/11/29/install-graphite/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Graphite 之把它装起来 | Amosannn</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Amosannn</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Amo's binary space</p>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/11/29/install-graphite/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Amosannn">
+      <meta itemprop="description" content="start from zero">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?s=400&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&v=4">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Amosannn">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Graphite 之把它装起来
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-11-29 16:41:17" itemprop="dateCreated datePublished" datetime="2018-11-29T16:41:17+08:00">2018-11-29</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2018-11-30 18:58:11" itemprop="dateModified" datetime="2018-11-30T18:58:11+08:00">2018-11-30</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/技术一路走到黑/" itemprop="url" rel="index"><span itemprop="name">技术一路走到黑</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/11/29/install-graphite/" class="leancloud_visitors" data-flag-title="Graphite 之把它装起来">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">5.7k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">5 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Graphite 是一款时序数据库</p>
+<h1 id="初步安装"><a href="#初步安装" class="headerlink" title="初步安装"></a>初步安装</h1><p>安装 <code>Graphite</code> 有 n 种方法，在下选用的是 <code>pip</code> 安装的方式，使用默认安装位置 <code>/opt/graphite</code></p>
+<p>十分简单，只需要分别安装三个组件 <code>graphite-web</code> 、 <code>whisper</code> 、 <code>carbon</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">$ export PYTHONPATH=&quot;/opt/graphite/lib/:/opt/graphite/webapp/&quot;</div><div class="line">$ pip3 install --no-binary=:all: https://github.com/graphite-project/whisper/tarball/master</div><div class="line">$ pip3 install --no-binary=:all: https://github.com/graphite-project/carbon/tarball/master</div><div class="line">$ pip3 install --no-binary=:all: https://github.com/graphite-project/graphite-web/tarball/master</div></pre></td></tr></table></figure>
+<p>如果你希望自己指定安装位置：<a href="https://graphite.readthedocs.io/en/latest/install-pip.html#" target="_blank" rel="external">Installing From Pip</a></p>
+<a id="more"></a>
+<h2 id="安装过程中可能出现的问题"><a href="#安装过程中可能出现的问题" class="headerlink" title="安装过程中可能出现的问题"></a>安装过程中可能出现的问题</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ pip3 install --no-binary=:all: https://github.com/graphite-project/graphite-web/tarball/master</div></pre></td></tr></table></figure>
+<p>在执行第三条语句的时候</p>
+<p>duang!!!</p>
+<blockquote>
+<p>distutils.errors.CompileError: command ‘x86_64-linux-gnu-gcc’ failed with exit status 1</p>
+<p>……</p>
+<p>distutils.errors.DistutilsError: Setup script exited with error: command ‘x86_64-linux-gnu-gcc’ failed with exit status 1</p>
+</blockquote>
+<p>执行下面语句方可药到病除</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sudo apt-get install libpq-dev python-dev libxml2-dev libxslt1-dev libldap2-dev libsasl2-dev libffi-dev</div></pre></td></tr></table></figure>
+<h1 id="初始化配置"><a href="#初始化配置" class="headerlink" title="初始化配置"></a>初始化配置</h1><h2 id="修改-webapp-元数据库"><a href="#修改-webapp-元数据库" class="headerlink" title="修改 webapp 元数据库"></a>修改 webapp 元数据库</h2><p>Django 元数据默认存储在 SQLite 中，但为了更好的扩展性，在下把它放到 mysql 中</p>
+<blockquote>
+<p>If running multiple Graphite-web instances, a database such as PostgreSQL or MySQL is required so that all instances may share the same data source.</p>
+</blockquote>
+<h3 id="为-Graphite-添加数据库账号"><a href="#为-Graphite-添加数据库账号" class="headerlink" title="为 Graphite 添加数据库账号"></a>为 Graphite 添加数据库账号</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">mysql&gt; create database graphite;</div><div class="line">mysql&gt;  grant all on graphitedb.* to &apos;graphite&apos;@&apos;%&apos; identified by &apos;graphitepass&apos;;</div><div class="line">mysql&gt;  grant all on graphitedb.* to &apos;graphite&apos;@&apos;localhost&apos; identified by &apos;graphitepass&apos;;</div></pre></td></tr></table></figure>
+<h3 id="添加（修改）database-配置"><a href="#添加（修改）database-配置" class="headerlink" title="添加（修改）database 配置"></a>添加（修改）database 配置</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ cd /opt/graphite/webapp/graphite</div><div class="line">$ cp local_settings.py.example local_settings.py</div><div class="line">$ vi local_settings.py</div></pre></td></tr></table></figure>
+<p>数据库配置的格式可参考 <a href="https://docs.djangoproject.com/en/dev/ref/settings/#databases" target="_blank" rel="external">django 文档</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">DATABASES = &#123;</div><div class="line">    &apos;default&apos;: &#123;</div><div class="line">        &apos;NAME&apos;: &apos;graphite&apos;,</div><div class="line">        &apos;ENGINE&apos;: &apos;django.db.backends.mysql&apos;,</div><div class="line">        &apos;USER&apos;: &apos;graphite&apos;,</div><div class="line">        &apos;PASSWORD&apos;: &apos;graphitepass&apos;,</div><div class="line">        &apos;HOST&apos;: &apos;localhost&apos;,</div><div class="line">        &apos;PORT&apos;: &apos;3306&apos;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<blockquote>
+<p> 记得提前建库</p>
+</blockquote>
+<h3 id="重新初始化元数据"><a href="#重新初始化元数据" class="headerlink" title="重新初始化元数据"></a>重新初始化元数据</h3><p>修改了数据库配置之后，需要在 Mysql 中重新初始化元数据</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">PYTHONPATH=$GRAPHITE_ROOT/webapp django-admin.py migrate --settings=graphite.settings --run-syncdb</div></pre></td></tr></table></figure>
+<blockquote>
+<p>注意：需将 <code>$GRAPHITE_ROOT</code> 替换为你的安装位置，如果是默认安装则为 <code>/opt/graphite</code></p>
+</blockquote>
+<h2 id="开始配置-Webapp"><a href="#开始配置-Webapp" class="headerlink" title="开始配置 Webapp"></a>开始配置 Webapp</h2><p>为了让服务器达到高可用、高性能，我们选用 nginx + wsgi，官方提供了三种方案</p>
+<ul>
+<li>nginx + gunicorn</li>
+<li>Apache + mod_wsgi</li>
+<li>Nginx + uWSGI</li>
+</ul>
+<p>此处我们选用第一个方案 nginx + gunicorn</p>
+<p>使用这套组合只是为了让 python 下的 web 服务更加健壮，nginx 负责负载均衡、缓存请求等功能，而 gunicorn 负责接收来自 nginx 的动态请求，处理后返回给 nginx，再由 nginx 返回给用户。</p>
+<h3 id="安装-Gunicorn"><a href="#安装-Gunicorn" class="headerlink" title="安装 Gunicorn"></a>安装 Gunicorn</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ pip3 install gunicorn</div></pre></td></tr></table></figure>
+<h3 id="安装-Nginx"><a href="#安装-Nginx" class="headerlink" title="安装 Nginx"></a>安装 Nginx</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sudo apt install nginx</div></pre></td></tr></table></figure>
+<h4 id="为-Graphite-配置特定的日志文件"><a href="#为-Graphite-配置特定的日志文件" class="headerlink" title="为 Graphite 配置特定的日志文件"></a>为 Graphite 配置特定的日志文件</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">$ sudo touch /var/log/nginx/graphite.access.log</div><div class="line">$ sudo touch /var/log/nginx/graphite.error.log</div><div class="line">$ sudo chmod 640 /var/log/nginx/graphite.*</div><div class="line">$ sudo chown user:user /var/log/nginx/graphite.*</div></pre></td></tr></table></figure>
+<h4 id="定制-Graphite-配置文件"><a href="#定制-Graphite-配置文件" class="headerlink" title="定制 Graphite 配置文件"></a>定制 Graphite 配置文件</h4><blockquote>
+<p>vi /etc/nginx/sites-available/graphite</p>
+</blockquote>
+<p>内容如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">upstream graphite &#123;</div><div class="line">    server 127.0.0.1:8080 fail_timeout=0;</div><div class="line">&#125;</div><div class="line"></div><div class="line">server &#123;</div><div class="line">    listen 80;</div><div class="line"></div><div class="line">    server_name 127.0.0.1;</div><div class="line"></div><div class="line">    root /opt/graphite/webapp;</div><div class="line"></div><div class="line">    access_log /var/log/nginx/graphite.access.log;</div><div class="line">    error_log  /var/log/nginx/graphite.error.log;</div><div class="line"></div><div class="line">    location = /favicon.ico &#123;</div><div class="line">        return 204;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    location /static/ &#123;</div><div class="line">        alias /opt/graphite/static/;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    location / &#123;</div><div class="line">        try_files $uri @graphite;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    location @graphite &#123;</div><div class="line">        proxy_pass_header Server;</div><div class="line">        proxy_set_header Host $http_host;</div><div class="line">        proxy_redirect off;</div><div class="line">        proxy_set_header X-Real-IP $remote_addr;</div><div class="line">        proxy_set_header X-Scheme $scheme;</div><div class="line">        proxy_connect_timeout 10;</div><div class="line">        proxy_read_timeout 10;</div><div class="line">        proxy_pass http://graphite;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>部分配置需要按部署策略修改，例如 <code>server_name</code> 、<code>root</code> 等</p>
+<h4 id="启用配置文件"><a href="#启用配置文件" class="headerlink" title="启用配置文件"></a>启用配置文件</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">$ sudo ln -s /etc/nginx/sites-available/graphite /etc/nginx/sites-enabled</div><div class="line">$ sudo rm -f /etc/nginx/sites-enabled/default</div><div class="line"></div><div class="line">$ sudo service nginx reload</div></pre></td></tr></table></figure>
+<h1 id="启动-Graphite"><a href="#启动-Graphite" class="headerlink" title="启动 Graphite"></a>启动 Graphite</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ PYTHONPATH=/opt/graphite/webapp gunicorn wsgi --workers=4 --bind=127.0.0.1:8080 --log-file=/var/log/gunicorn.log --preload --pythonpath=/opt/graphite/webapp/graphite &amp;</div></pre></td></tr></table></figure>
+<p>上面的命令会让 graphite 启动在 <code>localhost:8080</code> ，记录日志在 <code>/var/log/gunicorn.log</code> ，并且使用 <code>/opt/graphite/webapp/graphite</code> 座位 webapp 的路径。</p>
+<p>由于我们已经在 nginx 中绑定了 8080 端口，所以进入这个地址就 ok 了：<a href="127.0.0.1">127.0.0.1</a></p>
+<h1 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h1><h2 id="修改-Graphite-时区"><a href="#修改-Graphite-时区" class="headerlink" title="修改 Graphite 时区"></a>修改 Graphite 时区</h2><p>如果你需要将时区切到北京时间来</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ vi /opt/graphite/webapp/graphite/local_settings.py</div><div class="line"></div><div class="line">TIME_ZONE = &apos;Asia/Shanghai&apos;</div></pre></td></tr></table></figure>
+<h2 id="配置过程中可能出现的问题"><a href="#配置过程中可能出现的问题" class="headerlink" title="配置过程中可能出现的问题"></a>配置过程中可能出现的问题</h2><h3 id="django-core-exceptions-ImproperlyConfigured-Error-loading-MySQLdb-module"><a href="#django-core-exceptions-ImproperlyConfigured-Error-loading-MySQLdb-module" class="headerlink" title="django.core.exceptions.ImproperlyConfigured: Error loading MySQLdb module."></a>django.core.exceptions.ImproperlyConfigured: Error loading MySQLdb module.</h3><p>给python3 装上MySQL</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">pip3 install mysqlclient</div></pre></td></tr></table></figure>
+<p>小声 bb：mysqlclient 查询比 pymysql 快</p>
+<h3 id="进入-graphite-web-界面却看见一片空白"><a href="#进入-graphite-web-界面却看见一片空白" class="headerlink" title="进入 graphite web 界面却看见一片空白"></a>进入 graphite web 界面却看见一片空白</h3><p>两种情况</p>
+<h4 id="没有找到-static-目录"><a href="#没有找到-static-目录" class="headerlink" title="没有找到 static 目录"></a>没有找到 static 目录</h4><p>注意观察控制台（后台运行则看输出的日志），是否输出类似信息</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">Not Found: /static/img/graphite-logo.png</div><div class="line">Not Found: /static/js/ext/adapter/ext/ext-base-debug.js</div><div class="line">Not Found: /static/js/ext/resources/css/ext-all.css</div><div class="line">Not Found: /static/js/browser.js</div><div class="line">Not Found: /static/js/ext/ext-all-debug.js</div><div class="line">Not Found: /static/js/composer_widgets.js</div><div class="line">Not Found: /static/js/composer.js</div><div class="line">Not Found: /static/js/completer.js</div><div class="line">Not Found: /static/img/carbon-fiber.png</div><div class="line">Not Found: /static/js/browser.js</div><div class="line">Not Found: /static/js/composer_widgets.js</div><div class="line">Not Found: /static/js/composer.js</div><div class="line">Not Found: /static/js/completer.js</div></pre></td></tr></table></figure>
+<p>如果是，则为寻找不到静态文件</p>
+<p>执行下面的命令，注意替换 <code>$GRAPHITE_ROOT</code> 为 graphite 的目录，默认为 <code>/opt/graphite</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ PYTHONPATH=$GRAPHITE_ROOT/webapp django-admin.py collectstatic --noinput --settings=graphite.settings</div></pre></td></tr></table></figure>
+<p>然后在编辑 nginx 配置，并增加如下配置</p>
+<blockquote>
+<p>vi /etc/nginx/sites-available/graphite</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">location /static/ &#123;</div><div class="line">    alias /opt/graphite/static/;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<blockquote>
+<p>注意：上面的修改只有在 nginx 的转发下才可寻找到 static 目录，若不想通过 nginx 访问，参阅下面的文档</p>
+</blockquote>
+<p>关于 static 目录，官方文档给出了解释：<a href="https://graphite.readthedocs.io/en/latest/config-local-settings.html#filesystem-paths" target="_blank" rel="external">Filesystem Paths</a></p>
+<h4 id="试试打开-debug-模式"><a href="#试试打开-debug-模式" class="headerlink" title="试试打开 debug 模式"></a>试试打开 debug 模式</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">$ cd /opt/graphite/webapp/graphite</div><div class="line">$ vi local_settings.py</div><div class="line"></div><div class="line"># 将 DEBUG 设为 True</div><div class="line">DEBUG = True</div></pre></td></tr></table></figure>
+<p>不明白为啥的同学，可以参考这个 issue：<a href="https://github.com/graphite-project/graphite-web/issues/858" target="_blank" rel="external">Static Folder Cannot Found</a></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+       
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Graphite/" rel="tag"># Graphite</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/11/19/sqoop-job-guide/" rel="next" title="Sqoop 之 job 工具">
+                <i class="fa fa-chevron-left"></i> Sqoop 之 job 工具
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="https://avatars3.githubusercontent.com/u/16012509?s=400&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&v=4"
+                alt="Amosannn" />
+            
+              <p class="site-author-name" itemprop="name">Amosannn</p>
+              <p class="site-description motion-element" itemprop="description">start from zero</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">33</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                    <span class="site-state-item-count">1</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">36</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/amosannn" title="GitHub &rarr; https://github.com/amosannn" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:amosannn@gmail.com" title="E-Mail &rarr; mailto:amosannn@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#初步安装"><span class="nav-number">1.</span> <span class="nav-text">初步安装</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#安装过程中可能出现的问题"><span class="nav-number">1.1.</span> <span class="nav-text">安装过程中可能出现的问题</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#初始化配置"><span class="nav-number">2.</span> <span class="nav-text">初始化配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#修改-webapp-元数据库"><span class="nav-number">2.1.</span> <span class="nav-text">修改 webapp 元数据库</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#为-Graphite-添加数据库账号"><span class="nav-number">2.1.1.</span> <span class="nav-text">为 Graphite 添加数据库账号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#添加（修改）database-配置"><span class="nav-number">2.1.2.</span> <span class="nav-text">添加（修改）database 配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#重新初始化元数据"><span class="nav-number">2.1.3.</span> <span class="nav-text">重新初始化元数据</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#开始配置-Webapp"><span class="nav-number">2.2.</span> <span class="nav-text">开始配置 Webapp</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装-Gunicorn"><span class="nav-number">2.2.1.</span> <span class="nav-text">安装 Gunicorn</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#安装-Nginx"><span class="nav-number">2.2.2.</span> <span class="nav-text">安装 Nginx</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#为-Graphite-配置特定的日志文件"><span class="nav-number">2.2.2.1.</span> <span class="nav-text">为 Graphite 配置特定的日志文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#定制-Graphite-配置文件"><span class="nav-number">2.2.2.2.</span> <span class="nav-text">定制 Graphite 配置文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#启用配置文件"><span class="nav-number">2.2.2.3.</span> <span class="nav-text">启用配置文件</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#启动-Graphite"><span class="nav-number">3.</span> <span class="nav-text">启动 Graphite</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#其他"><span class="nav-number">4.</span> <span class="nav-text">其他</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#修改-Graphite-时区"><span class="nav-number">4.1.</span> <span class="nav-text">修改 Graphite 时区</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置过程中可能出现的问题"><span class="nav-number">4.2.</span> <span class="nav-text">配置过程中可能出现的问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#django-core-exceptions-ImproperlyConfigured-Error-loading-MySQLdb-module"><span class="nav-number">4.2.1.</span> <span class="nav-text">django.core.exceptions.ImproperlyConfigured: Error loading MySQLdb module.</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#进入-graphite-web-界面却看见一片空白"><span class="nav-number">4.2.2.</span> <span class="nav-text">进入 graphite web 界面却看见一片空白</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#没有找到-static-目录"><span class="nav-number">4.2.2.1.</span> <span class="nav-text">没有找到 static 目录</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#试试打开-debug-模式"><span class="nav-number">4.2.2.2.</span> <span class="nav-text">试试打开 debug 模式</span></a></li></ol></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Amosannn</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+    <span title="站点总字数">75k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+    <span title="站点阅读时长">1:08</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a></div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.5.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script>
+    
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url }) })
+        .done(function ({ results }) {
+          if (results.length > 0) {
+            var counter = results[0];
+            
+              var $element = $(document.getElementById(url));
+              $element.find('.leancloud-visitors-count').text(counter.time + 1);
+            
+            Counter('put', `/classes/Counter/${counter.objectId}`, JSON.stringify({ time: { "__op":"Increment", "amount":1 } }))
+            
+            .fail(function ({ responseJSON }) {
+                console.log('Failed to save Visitor num, with error message: ' + responseJSON.error);
+            })
+          } else {
+            
+              Counter('post', '/classes/Counter', JSON.stringify({ title: title, url: url, time: 1}))
+                .done(function () {
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(1);
+                })
+                .fail(function () {
+                  console.log('Failed to create');
+                });
+            
+          }
+        })
+      .fail(function ({ responseJSON }) {
+        console.log('LeanCloud Counter Error:' + responseJSON.code + " " + responseJSON.error);
+      });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "PilWbyvjmtvW38jyokTRyGPx-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "PilWbyvjmtvW38jyokTRyGPx-gzGzoHsz",
+                'X-LC-Key': "xIW2tGgWFlR282cbVadt4ikU",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          addCount(Counter);
+          
+        })
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

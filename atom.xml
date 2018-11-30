@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://amosannn.github.io/"/>
-  <updated>2018-11-20T02:12:35.682Z</updated>
+  <updated>2018-11-30T10:58:11.820Z</updated>
   <id>https://amosannn.github.io/</id>
   
   <author>
@@ -16,16 +16,118 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>Graphite 之把它装起来</title>
+    <link href="https://amosannn.github.io/2018/11/29/install-graphite/"/>
+    <id>https://amosannn.github.io/2018/11/29/install-graphite/</id>
+    <published>2018-11-29T08:41:17.000Z</published>
+    <updated>2018-11-30T10:58:11.820Z</updated>
+    
+    <content type="html"><![CDATA[<p>Graphite 是一款时序数据库</p>
+<h1 id="初步安装"><a href="#初步安装" class="headerlink" title="初步安装"></a>初步安装</h1><p>安装 <code>Graphite</code> 有 n 种方法，在下选用的是 <code>pip</code> 安装的方式，使用默认安装位置 <code>/opt/graphite</code></p>
+<p>十分简单，只需要分别安装三个组件 <code>graphite-web</code> 、 <code>whisper</code> 、 <code>carbon</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">$ export PYTHONPATH=&quot;/opt/graphite/lib/:/opt/graphite/webapp/&quot;</div><div class="line">$ pip3 install --no-binary=:all: https://github.com/graphite-project/whisper/tarball/master</div><div class="line">$ pip3 install --no-binary=:all: https://github.com/graphite-project/carbon/tarball/master</div><div class="line">$ pip3 install --no-binary=:all: https://github.com/graphite-project/graphite-web/tarball/master</div></pre></td></tr></table></figure>
+<p>如果你希望自己指定安装位置：<a href="https://graphite.readthedocs.io/en/latest/install-pip.html#" target="_blank" rel="external">Installing From Pip</a></p>
+<a id="more"></a>
+<h2 id="安装过程中可能出现的问题"><a href="#安装过程中可能出现的问题" class="headerlink" title="安装过程中可能出现的问题"></a>安装过程中可能出现的问题</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ pip3 install --no-binary=:all: https://github.com/graphite-project/graphite-web/tarball/master</div></pre></td></tr></table></figure>
+<p>在执行第三条语句的时候</p>
+<p>duang!!!</p>
+<blockquote>
+<p>distutils.errors.CompileError: command ‘x86_64-linux-gnu-gcc’ failed with exit status 1</p>
+<p>……</p>
+<p>distutils.errors.DistutilsError: Setup script exited with error: command ‘x86_64-linux-gnu-gcc’ failed with exit status 1</p>
+</blockquote>
+<p>执行下面语句方可药到病除</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sudo apt-get install libpq-dev python-dev libxml2-dev libxslt1-dev libldap2-dev libsasl2-dev libffi-dev</div></pre></td></tr></table></figure>
+<h1 id="初始化配置"><a href="#初始化配置" class="headerlink" title="初始化配置"></a>初始化配置</h1><h2 id="修改-webapp-元数据库"><a href="#修改-webapp-元数据库" class="headerlink" title="修改 webapp 元数据库"></a>修改 webapp 元数据库</h2><p>Django 元数据默认存储在 SQLite 中，但为了更好的扩展性，在下把它放到 mysql 中</p>
+<blockquote>
+<p>If running multiple Graphite-web instances, a database such as PostgreSQL or MySQL is required so that all instances may share the same data source.</p>
+</blockquote>
+<h3 id="为-Graphite-添加数据库账号"><a href="#为-Graphite-添加数据库账号" class="headerlink" title="为 Graphite 添加数据库账号"></a>为 Graphite 添加数据库账号</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">mysql&gt; create database graphite;</div><div class="line">mysql&gt;  grant all on graphitedb.* to &apos;graphite&apos;@&apos;%&apos; identified by &apos;graphitepass&apos;;</div><div class="line">mysql&gt;  grant all on graphitedb.* to &apos;graphite&apos;@&apos;localhost&apos; identified by &apos;graphitepass&apos;;</div></pre></td></tr></table></figure>
+<h3 id="添加（修改）database-配置"><a href="#添加（修改）database-配置" class="headerlink" title="添加（修改）database 配置"></a>添加（修改）database 配置</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ cd /opt/graphite/webapp/graphite</div><div class="line">$ cp local_settings.py.example local_settings.py</div><div class="line">$ vi local_settings.py</div></pre></td></tr></table></figure>
+<p>数据库配置的格式可参考 <a href="https://docs.djangoproject.com/en/dev/ref/settings/#databases" target="_blank" rel="external">django 文档</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">DATABASES = &#123;</div><div class="line">    &apos;default&apos;: &#123;</div><div class="line">        &apos;NAME&apos;: &apos;graphite&apos;,</div><div class="line">        &apos;ENGINE&apos;: &apos;django.db.backends.mysql&apos;,</div><div class="line">        &apos;USER&apos;: &apos;graphite&apos;,</div><div class="line">        &apos;PASSWORD&apos;: &apos;graphitepass&apos;,</div><div class="line">        &apos;HOST&apos;: &apos;localhost&apos;,</div><div class="line">        &apos;PORT&apos;: &apos;3306&apos;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<blockquote>
+<p> 记得提前建库</p>
+</blockquote>
+<h3 id="重新初始化元数据"><a href="#重新初始化元数据" class="headerlink" title="重新初始化元数据"></a>重新初始化元数据</h3><p>修改了数据库配置之后，需要在 Mysql 中重新初始化元数据</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">PYTHONPATH=$GRAPHITE_ROOT/webapp django-admin.py migrate --settings=graphite.settings --run-syncdb</div></pre></td></tr></table></figure>
+<blockquote>
+<p>注意：需将 <code>$GRAPHITE_ROOT</code> 替换为你的安装位置，如果是默认安装则为 <code>/opt/graphite</code></p>
+</blockquote>
+<h2 id="开始配置-Webapp"><a href="#开始配置-Webapp" class="headerlink" title="开始配置 Webapp"></a>开始配置 Webapp</h2><p>为了让服务器达到高可用、高性能，我们选用 nginx + wsgi，官方提供了三种方案</p>
+<ul>
+<li>nginx + gunicorn</li>
+<li>Apache + mod_wsgi</li>
+<li>Nginx + uWSGI</li>
+</ul>
+<p>此处我们选用第一个方案 nginx + gunicorn</p>
+<p>使用这套组合只是为了让 python 下的 web 服务更加健壮，nginx 负责负载均衡、缓存请求等功能，而 gunicorn 负责接收来自 nginx 的动态请求，处理后返回给 nginx，再由 nginx 返回给用户。</p>
+<h3 id="安装-Gunicorn"><a href="#安装-Gunicorn" class="headerlink" title="安装 Gunicorn"></a>安装 Gunicorn</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ pip3 install gunicorn</div></pre></td></tr></table></figure>
+<h3 id="安装-Nginx"><a href="#安装-Nginx" class="headerlink" title="安装 Nginx"></a>安装 Nginx</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sudo apt install nginx</div></pre></td></tr></table></figure>
+<h4 id="为-Graphite-配置特定的日志文件"><a href="#为-Graphite-配置特定的日志文件" class="headerlink" title="为 Graphite 配置特定的日志文件"></a>为 Graphite 配置特定的日志文件</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">$ sudo touch /var/log/nginx/graphite.access.log</div><div class="line">$ sudo touch /var/log/nginx/graphite.error.log</div><div class="line">$ sudo chmod 640 /var/log/nginx/graphite.*</div><div class="line">$ sudo chown user:user /var/log/nginx/graphite.*</div></pre></td></tr></table></figure>
+<h4 id="定制-Graphite-配置文件"><a href="#定制-Graphite-配置文件" class="headerlink" title="定制 Graphite 配置文件"></a>定制 Graphite 配置文件</h4><blockquote>
+<p>vi /etc/nginx/sites-available/graphite</p>
+</blockquote>
+<p>内容如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">upstream graphite &#123;</div><div class="line">    server 127.0.0.1:8080 fail_timeout=0;</div><div class="line">&#125;</div><div class="line"></div><div class="line">server &#123;</div><div class="line">    listen 80;</div><div class="line"></div><div class="line">    server_name 127.0.0.1;</div><div class="line"></div><div class="line">    root /opt/graphite/webapp;</div><div class="line"></div><div class="line">    access_log /var/log/nginx/graphite.access.log;</div><div class="line">    error_log  /var/log/nginx/graphite.error.log;</div><div class="line"></div><div class="line">    location = /favicon.ico &#123;</div><div class="line">        return 204;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    location /static/ &#123;</div><div class="line">        alias /opt/graphite/static/;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    location / &#123;</div><div class="line">        try_files $uri @graphite;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    location @graphite &#123;</div><div class="line">        proxy_pass_header Server;</div><div class="line">        proxy_set_header Host $http_host;</div><div class="line">        proxy_redirect off;</div><div class="line">        proxy_set_header X-Real-IP $remote_addr;</div><div class="line">        proxy_set_header X-Scheme $scheme;</div><div class="line">        proxy_connect_timeout 10;</div><div class="line">        proxy_read_timeout 10;</div><div class="line">        proxy_pass http://graphite;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>部分配置需要按部署策略修改，例如 <code>server_name</code> 、<code>root</code> 等</p>
+<h4 id="启用配置文件"><a href="#启用配置文件" class="headerlink" title="启用配置文件"></a>启用配置文件</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">$ sudo ln -s /etc/nginx/sites-available/graphite /etc/nginx/sites-enabled</div><div class="line">$ sudo rm -f /etc/nginx/sites-enabled/default</div><div class="line"></div><div class="line">$ sudo service nginx reload</div></pre></td></tr></table></figure>
+<h1 id="启动-Graphite"><a href="#启动-Graphite" class="headerlink" title="启动 Graphite"></a>启动 Graphite</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ PYTHONPATH=/opt/graphite/webapp gunicorn wsgi --workers=4 --bind=127.0.0.1:8080 --log-file=/var/log/gunicorn.log --preload --pythonpath=/opt/graphite/webapp/graphite &amp;</div></pre></td></tr></table></figure>
+<p>上面的命令会让 graphite 启动在 <code>localhost:8080</code> ，记录日志在 <code>/var/log/gunicorn.log</code> ，并且使用 <code>/opt/graphite/webapp/graphite</code> 座位 webapp 的路径。</p>
+<p>由于我们已经在 nginx 中绑定了 8080 端口，所以进入这个地址就 ok 了：<a href="127.0.0.1">127.0.0.1</a></p>
+<h1 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h1><h2 id="修改-Graphite-时区"><a href="#修改-Graphite-时区" class="headerlink" title="修改 Graphite 时区"></a>修改 Graphite 时区</h2><p>如果你需要将时区切到北京时间来</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ vi /opt/graphite/webapp/graphite/local_settings.py</div><div class="line"></div><div class="line">TIME_ZONE = &apos;Asia/Shanghai&apos;</div></pre></td></tr></table></figure>
+<h2 id="配置过程中可能出现的问题"><a href="#配置过程中可能出现的问题" class="headerlink" title="配置过程中可能出现的问题"></a>配置过程中可能出现的问题</h2><h3 id="django-core-exceptions-ImproperlyConfigured-Error-loading-MySQLdb-module"><a href="#django-core-exceptions-ImproperlyConfigured-Error-loading-MySQLdb-module" class="headerlink" title="django.core.exceptions.ImproperlyConfigured: Error loading MySQLdb module."></a>django.core.exceptions.ImproperlyConfigured: Error loading MySQLdb module.</h3><p>给python3 装上MySQL</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">pip3 install mysqlclient</div></pre></td></tr></table></figure>
+<p>小声 bb：mysqlclient 查询比 pymysql 快</p>
+<h3 id="进入-graphite-web-界面却看见一片空白"><a href="#进入-graphite-web-界面却看见一片空白" class="headerlink" title="进入 graphite web 界面却看见一片空白"></a>进入 graphite web 界面却看见一片空白</h3><p>两种情况</p>
+<h4 id="没有找到-static-目录"><a href="#没有找到-static-目录" class="headerlink" title="没有找到 static 目录"></a>没有找到 static 目录</h4><p>注意观察控制台（后台运行则看输出的日志），是否输出类似信息</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">Not Found: /static/img/graphite-logo.png</div><div class="line">Not Found: /static/js/ext/adapter/ext/ext-base-debug.js</div><div class="line">Not Found: /static/js/ext/resources/css/ext-all.css</div><div class="line">Not Found: /static/js/browser.js</div><div class="line">Not Found: /static/js/ext/ext-all-debug.js</div><div class="line">Not Found: /static/js/composer_widgets.js</div><div class="line">Not Found: /static/js/composer.js</div><div class="line">Not Found: /static/js/completer.js</div><div class="line">Not Found: /static/img/carbon-fiber.png</div><div class="line">Not Found: /static/js/browser.js</div><div class="line">Not Found: /static/js/composer_widgets.js</div><div class="line">Not Found: /static/js/composer.js</div><div class="line">Not Found: /static/js/completer.js</div></pre></td></tr></table></figure>
+<p>如果是，则为寻找不到静态文件</p>
+<p>执行下面的命令，注意替换 <code>$GRAPHITE_ROOT</code> 为 graphite 的目录，默认为 <code>/opt/graphite</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ PYTHONPATH=$GRAPHITE_ROOT/webapp django-admin.py collectstatic --noinput --settings=graphite.settings</div></pre></td></tr></table></figure>
+<p>然后在编辑 nginx 配置，并增加如下配置</p>
+<blockquote>
+<p>vi /etc/nginx/sites-available/graphite</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">location /static/ &#123;</div><div class="line">    alias /opt/graphite/static/;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<blockquote>
+<p>注意：上面的修改只有在 nginx 的转发下才可寻找到 static 目录，若不想通过 nginx 访问，参阅下面的文档</p>
+</blockquote>
+<p>关于 static 目录，官方文档给出了解释：<a href="https://graphite.readthedocs.io/en/latest/config-local-settings.html#filesystem-paths" target="_blank" rel="external">Filesystem Paths</a></p>
+<h4 id="试试打开-debug-模式"><a href="#试试打开-debug-模式" class="headerlink" title="试试打开 debug 模式"></a>试试打开 debug 模式</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">$ cd /opt/graphite/webapp/graphite</div><div class="line">$ vi local_settings.py</div><div class="line"></div><div class="line"># 将 DEBUG 设为 True</div><div class="line">DEBUG = True</div></pre></td></tr></table></figure>
+<p>不明白为啥的同学，可以参考这个 issue：<a href="https://github.com/graphite-project/graphite-web/issues/858" target="_blank" rel="external">Static Folder Cannot Found</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;Graphite 是一款时序数据库&lt;/p&gt;
+&lt;h1 id=&quot;初步安装&quot;&gt;&lt;a href=&quot;#初步安装&quot; class=&quot;headerlink&quot; title=&quot;初步安装&quot;&gt;&lt;/a&gt;初步安装&lt;/h1&gt;&lt;p&gt;安装 &lt;code&gt;Graphite&lt;/code&gt; 有 n 种方法，在下选用的是 &lt;code&gt;pip&lt;/code&gt; 安装的方式，使用默认安装位置 &lt;code&gt;/opt/graphite&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;十分简单，只需要分别安装三个组件 &lt;code&gt;graphite-web&lt;/code&gt; 、 &lt;code&gt;whisper&lt;/code&gt; 、 &lt;code&gt;carbon&lt;/code&gt;&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;$ export PYTHONPATH=&amp;quot;/opt/graphite/lib/:/opt/graphite/webapp/&amp;quot;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;$ pip3 install --no-binary=:all: https://github.com/graphite-project/whisper/tarball/master&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;$ pip3 install --no-binary=:all: https://github.com/graphite-project/carbon/tarball/master&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;$ pip3 install --no-binary=:all: https://github.com/graphite-project/graphite-web/tarball/master&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;如果你希望自己指定安装位置：&lt;a href=&quot;https://graphite.readthedocs.io/en/latest/install-pip.html#&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Installing From Pip&lt;/a&gt;&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="技术一路走到黑" scheme="https://amosannn.github.io/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
+    
+    
+      <category term="Graphite" scheme="https://amosannn.github.io/tags/Graphite/"/>
+    
+  </entry>
+  
+  <entry>
     <title>Sqoop 之 job 工具</title>
     <link href="https://amosannn.github.io/2018/11/19/sqoop-job-guide/"/>
     <id>https://amosannn.github.io/2018/11/19/sqoop-job-guide/</id>
     <published>2018-11-19T03:20:50.000Z</published>
-    <updated>2018-11-20T02:12:35.682Z</updated>
+    <updated>2018-11-20T03:56:07.243Z</updated>
     
     <content type="html"><![CDATA[<p>本文成型的历史原因来源于使用 <code>shell</code> 脚本封装单个 <code>sqoop</code> 的脑壳疼操作</p>
 <p>在执行定时任务的时候，如果需要执行的 <code>sqoop</code> 足够多，我们可以将他们封装在一个 <code>shell</code> 脚本中，再使用 <code>crontab</code> 进行定时任务调用。</p>
 <p>而如果同一时间需要执行的 <code>sqoop</code> 数量仅仅只有一两个，那我们完全没有必要为了它写一个 <code>shell</code> 脚本，当然只是按场景选择不同策略，并不代表哪种方法更差。</p>
 <p>对于不想多建 shell 脚本的同学，还有 <code>sqoop job</code> 这条路。</p>
+<a id="more"></a>
 <h2 id="job-语法"><a href="#job-语法" class="headerlink" title="job 语法"></a>job 语法</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ sqoop job (generic-args) (job-args) [-- [subtool-name] (subtool-args)]</div><div class="line">$ sqoop-job (generic-args) (job-args) [-- [subtool-name] (subtool-args)]</div></pre></td></tr></table></figure>
 <p><code>sqoop job</code> 的语法如上所示，而其后追加的命令参数也无需按顺序堆砌。</p>
 <h2 id="命令参数"><a href="#命令参数" class="headerlink" title="命令参数"></a>命令参数</h2><table>
@@ -83,7 +185,9 @@
     <summary type="html">
     
       &lt;p&gt;本文成型的历史原因来源于使用 &lt;code&gt;shell&lt;/code&gt; 脚本封装单个 &lt;code&gt;sqoop&lt;/code&gt; 的脑壳疼操作&lt;/p&gt;
-&lt;p&gt;在执行定时任务的时候，如果需要执行的 &lt;code&gt;sqoop&lt;/code&gt; 足够多，我们可以将他们封装在一个 &lt;code&gt;sh
+&lt;p&gt;在执行定时任务的时候，如果需要执行的 &lt;code&gt;sqoop&lt;/code&gt; 足够多，我们可以将他们封装在一个 &lt;code&gt;shell&lt;/code&gt; 脚本中，再使用 &lt;code&gt;crontab&lt;/code&gt; 进行定时任务调用。&lt;/p&gt;
+&lt;p&gt;而如果同一时间需要执行的 &lt;code&gt;sqoop&lt;/code&gt; 数量仅仅只有一两个，那我们完全没有必要为了它写一个 &lt;code&gt;shell&lt;/code&gt; 脚本，当然只是按场景选择不同策略，并不代表哪种方法更差。&lt;/p&gt;
+&lt;p&gt;对于不想多建 shell 脚本的同学，还有 &lt;code&gt;sqoop job&lt;/code&gt; 这条路。&lt;/p&gt;
     
     </summary>
     
@@ -753,7 +857,7 @@
     <link href="https://amosannn.github.io/2018/10/30/airflow-concept-combing/"/>
     <id>https://amosannn.github.io/2018/10/30/airflow-concept-combing/</id>
     <published>2018-10-30T11:18:16.000Z</published>
-    <updated>2018-11-06T07:51:19.058Z</updated>
+    <updated>2018-11-26T07:44:59.247Z</updated>
     
     <content type="html"><![CDATA[<h1 id="有向无环图"><a href="#有向无环图" class="headerlink" title="有向无环图"></a>有向无环图</h1><p>Airflow 基于一个重要的数据结构，DAG。</p>
 <p>为什么依赖 DAG？</p>
@@ -794,7 +898,7 @@
 </ul>
 <p>他们的作用都像字面意思说的那样，可完成相应的操作或调用。</p>
 <p>值得注意的是 DummyOperator，是个空操作，相当于标记和中转节点。</p>
-<p>当然，他们有一个共同的爸爸「BaseOperator」，全部首其控制，从中继承的功能也会因为他一人的修改而相应改变。</p>
+<p>当然，他们有一个共同的爸爸「BaseOperator」，中央集权，他一人的修改会改变儿子们继承到的功能。</p>
 <h2 id="Timezone"><a href="#Timezone" class="headerlink" title="Timezone"></a>Timezone</h2><p>在 1.9 版本及以前，Airflow 使用的是本地时间，不同服务器时区不同容易产生运行错误。</p>
 <p>而在 1.10 中，加入了自定义的时区配置（1.9 的时区配置无法生效，大坑。。）</p>
 <h2 id="预警与监控"><a href="#预警与监控" class="headerlink" title="预警与监控"></a>预警与监控</h2><p>当任务执行失败或状态异常时，发送短信或邮件。</p>
@@ -870,6 +974,54 @@
     
     
       <category term="airflow" scheme="https://amosannn.github.io/tags/airflow/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Hive 优化之为外部表创建分区</title>
+    <link href="https://amosannn.github.io/2018/10/26/add-partition-after-creating-external-table-in-hive/"/>
+    <id>https://amosannn.github.io/2018/10/26/add-partition-after-creating-external-table-in-hive/</id>
+    <published>2018-10-26T06:18:52.000Z</published>
+    <updated>2018-11-26T07:41:28.022Z</updated>
+    
+    <content type="html"><![CDATA[<p>首先，我们有一个数据量很大的表。其次，对他进行条件查询或其他操作就像看着一只小蜗牛在爬。</p>
+<p>是可忍，孰不可忍！</p>
+<h2 id="0x01-原理"><a href="#0x01-原理" class="headerlink" title="0x01 原理"></a>0x01 原理</h2><p>关于分区为什么能提升查询速度，这就值得你仔细想想了。</p>
+<p>既然 <code>hive</code> 基于文件系统，那么我们可以把它类比成很多个桶。</p>
+<p>假设现在有 100 个桶，分别存放不同的海鲜，其中 2 个桶里有我们想要的桂花鱼，1 个桶里有阿根廷大红虾，那如何才能在最快的速度找出这 3 个桶？</p>
+<p>按照默认的策略，人们会打开盖子一桶一桶找，而如果有 1000、10000 个桶，就会从一个人找演变成一群人一起找。</p>
+<p>有没有改进方式呢？有。</p>
+<p>有一天老板发现，不对啊，这个事我居然叫那么多人来做，感觉自己额外付出了很多成本，亏钱了。不行！这个事情必须改革！于是他思前想后好几天怎么也也想不到更好的办法，也因此懊恼了许久。直到有一天，老板夫人得了风寒，老板十分心急，替夫人去药铺抓药，当它看见郎中拿着方子在药柜抓药的时候，心中的郁结终于揭开了。拍了拍脑瓜子，大叫了声，对呀！我怎么没想到呢！</p>
+<p>于是，从药铺回来后，老板更改了新的存鱼策略。它让员工们把鱼放进桶里的同时，在桶外贴上标签，取鱼的时候只需要远远地扫一眼就能快速定位。</p>
+<p><code>hive</code> 也是如此，你可以粗略地将它的存储系统理解为，将一堆文件放在同一个文件夹里，需要的时候在这堆文件里遍历，最后的效果不言而喻。</p>
+<p>分区的好处便是，将文件按一定的维度，存进不同的文件夹，相当于给他们打好了标签，这样我按这个维度搜索时，便不需要遍历其他无关的文件。数据越多，对查询效率的提升就越大。</p>
+<h2 id="0x02-操作一波"><a href="#0x02-操作一波" class="headerlink" title="0x02 操作一波"></a>0x02 操作一波</h2><p>首先看分区列表，如果结果为空就表示该表下没有分区。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">show</span> <span class="keyword">partitions</span> tmp.tmp_user;</div></pre></td></tr></table></figure>
+<p>给当前表添加分区</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">alter</span> <span class="keyword">table</span> tmp.tmp_user <span class="keyword">add</span> <span class="keyword">partition</span> (<span class="keyword">month</span>=<span class="string">'2018_10'</span>, <span class="keyword">day</span>=<span class="string">'25'</span>) location <span class="string">'/user/amos/tmp_user/month=2018_10/day=25'</span>;</div></pre></td></tr></table></figure>
+<p>将数据迁移至分区中</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hdfs dfs -mv /user/amos/tmp_user/data_20181025.csv /user/amos/tmp_user/month=2018_10/day=25</div></pre></td></tr></table></figure>
+<h2 id="物极必反"><a href="#物极必反" class="headerlink" title="物极必反"></a>物极必反</h2><p>为了提升搜索效果，增加分区数是可以的，但是如果分区数太过庞大，而需查询的数据也很多的话，分区带来的提升会被弱化。尤其是在分区中数据较为分散的时候，只要查询数据量达到一定量级便会轻易集中所有分区。</p>
+<p>大量分区带来的不良后果不仅如此，还会在查询之后给磁盘带来更多的小文件。</p>
+<h2 id="说点题外话"><a href="#说点题外话" class="headerlink" title="说点题外话"></a>说点题外话</h2><p>如果是对数据仓库进行优化</p>
+<p>在 <code>hive</code> 中，有几种办法</p>
+<ul>
+<li>分区</li>
+<li>分桶</li>
+<li>索引</li>
+<li>区分活跃用户</li>
+<li>更改数据结构（id - string –&gt; id - list<string>)</string></li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;首先，我们有一个数据量很大的表。其次，对他进行条件查询或其他操作就像看着一只小蜗牛在爬。&lt;/p&gt;
+&lt;p&gt;是可忍，孰不可忍！&lt;/p&gt;
+&lt;h2 id=&quot;0x01-原理&quot;&gt;&lt;a href=&quot;#0x01-原理&quot; class=&quot;headerlink&quot; title=&quot;0x01 原理&quot;&gt;
+    
+    </summary>
+    
     
   </entry>
   
@@ -1387,79 +1539,6 @@
     
     </summary>
     
-    
-  </entry>
-  
-  <entry>
-    <title>Mybatis传值乱码</title>
-    <link href="https://amosannn.github.io/2017/08/27/mybatis-encoding-garbled/"/>
-    <id>https://amosannn.github.io/2017/08/27/mybatis-encoding-garbled/</id>
-    <published>2017-08-27T15:57:16.000Z</published>
-    <updated>2017-08-28T21:14:22.000Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="分析问题"><a href="#分析问题" class="headerlink" title="分析问题"></a>分析问题</h1><h2 id="前端显示页面"><a href="#前端显示页面" class="headerlink" title="前端显示页面"></a>前端显示页面</h2><p><img src="/images/garbled_page1.png" alt=""></p>
-<h2 id="数据库页面"><a href="#数据库页面" class="headerlink" title="数据库页面"></a>数据库页面</h2><p><img src="/images/garbled_db1.png" alt=""></p>
-<h2 id="目前可以推测出的几种情况："><a href="#目前可以推测出的几种情况：" class="headerlink" title="目前可以推测出的几种情况："></a>目前可以推测出的几种情况：</h2><blockquote>
-<p>数据库表的字符编码与服务端不同<br>字符编码为非utf-8,gbk等能识别中文的编码<br>配置文件出错（读取或编写格式</p>
-</blockquote>
-<a id="more"></a>
-<p>试试手动插入数据<br><img src="/images/garbled_db2.png" alt=""><br>数据库显示正常，页面乱码<br>–&gt;排除数据库编码问题</p>
-<h2 id="查看配置文件"><a href="#查看配置文件" class="headerlink" title="查看配置文件"></a>查看配置文件</h2><p><img src="/images/application_properties.png" alt=""><br>编码与数据库同为UTF-8</p>
-<p>发现一段诡异代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">spring.datasource.url=jdbc:mysql://localhost:3306/toutiao?useUnicode=true&amp;ampcharacterEncoding=UTF-8&amp;ampuseSSL=false</div></pre></td></tr></table></figure></p>
-<h1 id="解决问题"><a href="#解决问题" class="headerlink" title="解决问题"></a>解决问题</h1><p>删除amp<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">spring.datasource.url=jdbc:mysql://localhost:3306/toutiao?useUnicode=true&amp;characterEncoding=utf8&amp;useSSL=false</div></pre></td></tr></table></figure></p>
-<p>重启系统，乱码问题解决.<br><img src="/images/garbled_db3.png" alt=""><br><img src="/images/garbled_page2.png" alt=""></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;分析问题&quot;&gt;&lt;a href=&quot;#分析问题&quot; class=&quot;headerlink&quot; title=&quot;分析问题&quot;&gt;&lt;/a&gt;分析问题&lt;/h1&gt;&lt;h2 id=&quot;前端显示页面&quot;&gt;&lt;a href=&quot;#前端显示页面&quot; class=&quot;headerlink&quot; title=&quot;前端显示页面&quot;&gt;&lt;/a&gt;前端显示页面&lt;/h2&gt;&lt;p&gt;&lt;img src=&quot;/images/garbled_page1.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
-&lt;h2 id=&quot;数据库页面&quot;&gt;&lt;a href=&quot;#数据库页面&quot; class=&quot;headerlink&quot; title=&quot;数据库页面&quot;&gt;&lt;/a&gt;数据库页面&lt;/h2&gt;&lt;p&gt;&lt;img src=&quot;/images/garbled_db1.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
-&lt;h2 id=&quot;目前可以推测出的几种情况：&quot;&gt;&lt;a href=&quot;#目前可以推测出的几种情况：&quot; class=&quot;headerlink&quot; title=&quot;目前可以推测出的几种情况：&quot;&gt;&lt;/a&gt;目前可以推测出的几种情况：&lt;/h2&gt;&lt;blockquote&gt;
-&lt;p&gt;数据库表的字符编码与服务端不同&lt;br&gt;字符编码为非utf-8,gbk等能识别中文的编码&lt;br&gt;配置文件出错（读取或编写格式&lt;/p&gt;
-&lt;/blockquote&gt;
-    
-    </summary>
-    
-      <category term="技术一路走到黑" scheme="https://amosannn.github.io/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
-    
-    
-      <category term="Mybatis" scheme="https://amosannn.github.io/tags/Mybatis/"/>
-    
-      <category term="MySQL" scheme="https://amosannn.github.io/tags/MySQL/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>懒汉式单例中双重检查的好处</title>
-    <link href="https://amosannn.github.io/2017/07/27/benefits-of-singleton-pattern-double-checking/"/>
-    <id>https://amosannn.github.io/2017/07/27/benefits-of-singleton-pattern-double-checking/</id>
-    <published>2017-07-27T02:17:41.000Z</published>
-    <updated>2017-08-02T23:43:34.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>记得前阵子面试金山时碰到了这样一个问题</p>
-<p>1）下面哪一种写法更好，为什么？<br>2）请写出另一种单例模式。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton singleton;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span> </span>&#123;&#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (singleton == <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">synchronized</span> (Singleton.class) &#123;</div><div class="line">                singleton = <span class="keyword">new</span> Singleton();</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> singleton;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">volatile</span> Singleton singleton;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span> </span>&#123;&#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (singleton == <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">synchronized</span> (Singleton.class) &#123;</div><div class="line">                <span class="keyword">if</span> (singleton == <span class="keyword">null</span>) &#123;</div><div class="line">                    singleton = <span class="keyword">new</span> Singleton();</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> singleton;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>很显然，第一种代码块是线程不安全的。<br>比如说这种情况，有一个线程调用了getInstance()，但执行到if(singleton==null)这一步时，另一个线程也进入了这个方法，那么便会造成最终创建了两个Singleton实例。<br>而若是第二种代码块，在同步锁中加入第二次验证，就不怕多个线程同时进入方法体导致的多个实例被创建了。</p>
-<p>以上两个方法块俗称懒汉式单例模式，意为调用时再创建实例对象。</p>
-<p>另一种单例模式称为饿汉式单例模式，不同的点在于类装载时便完成了类实例化，以下两种方法块都是饿汉式的表现方法，是一样的。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">private</span> <span class="keyword">static</span> Singleton instance = <span class="keyword">new</span> Singleton();</div><div class="line"></div><div class="line"><span class="keyword">static</span> &#123;</div><div class="line">     instance = <span class="keyword">new</span> Singleton();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>最后再推荐个与双重检查一样线程安全的，静态内部类实现的懒汉式单例模式。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> class <span class="title">Singleton</span><span class="params">()</span></span>&#123;</div><div class="line">     <span class="keyword">private</span> Singleton&#123;&#125;;</div><div class="line">     <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">LazyHolder</span></span>&#123;</div><div class="line">          <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Singleton INSTANCE = <span class="keyword">new</span> Singleton();</div><div class="line">     &#125;</div><div class="line">     <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</div><div class="line">          <span class="keyword">return</span> LazyHolder.INSTANCE;</div><div class="line">     &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>这种方式跟饿汉式方式采用的机制类似，但又有不同。两者都是采用了类装载的机制来保证初始化实例时只有一个线程。不同的地方在饿汉式方式是只要Singleton类被装载就会实例化，没有Lazy-Loading的作用，而静态内部类方式在Singleton类被装载时并不会立即实例化，而是在需要实例化时，调用getInstance方法，才会装载SingletonInstance类，从而完成Singleton的实例化。</p>
-<p>类的静态属性只会在第一次加载类的时候初始化，所以在这里，JVM帮助我们保证了线程的安全性，在类进行初始化时，别的线程是无法进入的。</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;记得前阵子面试金山时碰到了这样一个问题&lt;/p&gt;
-&lt;p&gt;1）下面哪一种写法更好，为什么？&lt;br&gt;2）请写出另一种单例模式。&lt;br&gt;&lt;figure class=&quot;highlight java&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div cl
-    
-    </summary>
-    
-      <category term="技术一路走到黑" scheme="https://amosannn.github.io/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
-    
-    
-      <category term="java" scheme="https://amosannn.github.io/tags/java/"/>
     
   </entry>
   
