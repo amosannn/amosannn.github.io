@@ -347,6 +347,255 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/12/17/data-alert-by-graphite-and-grafana/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Amosannn">
+      <meta itemprop="description" content="start from zero">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?s=400&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&v=4">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Amosannn">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2018/12/17/data-alert-by-graphite-and-grafana/" class="post-title-link" itemprop="https://amosannn.github.io/index.html">使用 Grafana + Graphite 进行数据预警监控</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-12-17 09:55:25" itemprop="dateCreated datePublished" datetime="2018-12-17T09:55:25+08:00">2018-12-17</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2018-12-18 12:13:21" itemprop="dateModified" datetime="2018-12-18T12:13:21+08:00">2018-12-18</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/技术一路走到黑/" itemprop="url" rel="index"><span itemprop="name">技术一路走到黑</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/12/17/data-alert-by-graphite-and-grafana/" class="leancloud_visitors" data-flag-title="使用 Grafana + Graphite 进行数据预警监控">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">1.7k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">2 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p><img src="../images/grafana/DeepinScrot-0552.png" alt=""></p>
+<h1 id="向-Graphite-写入数据"><a href="#向-Graphite-写入数据" class="headerlink" title="向 Graphite 写入数据"></a>向 Graphite 写入数据</h1><p>Graphite 的数据主要以 <code>whisper</code> 的格式存储在 <code>carbon</code> 这个组件中，而向其中填充数据的话我们有多种方式，这里演示两种常用手段。</p>
+<h2 id="使用-python"><a href="#使用-python" class="headerlink" title="使用 python"></a>使用 python</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ pip3 install graphyte</div></pre></td></tr></table></figure>
+<p>这里使用了 <code>graphyte</code>，用法很简单，只需要指定写入的 series 对应的值即可，写入的时间戳与 tag 是附加选项，可写可不写。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">graphyte.send(series, value, timestamp, &#123;<span class="string">'tag_name'</span>: tag_value, <span class="string">'tag_name'</span>: <span class="string">'tag_value'</span>&#125;)</div></pre></td></tr></table></figure>
+<h2 id="使用-curl"><a href="#使用-curl" class="headerlink" title="使用 curl"></a>使用 curl</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ echo &quot;foo.bar 3 `date +%s`&quot; | nc 127.0.0.1 2003</div></pre></td></tr></table></figure>
+<p>当数据准备好了之后便按你的喜好来设置土星的样式</p>
+<h1 id="设置预警"><a href="#设置预警" class="headerlink" title="设置预警"></a>设置预警</h1><p>进入到 <code>Grafana</code> 中的 Alert 标签下，主要需要设置以下几个参数</p>
+<ol>
+<li>Alert Config</li>
+<li>Conditions</li>
+</ol>
+<p>如果想在设置的阈值触发时发送消息通知，则需要进一步设置 <code>Notifications</code> 以及 <code>Alert Rules</code> 和 <code>Notification channels</code></p>
+<h2 id="Alert-Config"><a href="#Alert-Config" class="headerlink" title="Alert Config"></a>Alert Config</h2><p>主要关注 <code>Evaluate every</code> 这个选项</p>
+<p>我猜想 Grafana 的开发团队对它的定义为时效性高的预警通知工具，对于数据异常的及时发现，对比的间隔时间显然是越短越好。</p>
+<p>它们希望你将比对的时间间隔缩短，30s、60s、120s，这样发现数据异常的速度也就越快。</p>
+<p>今年年初，开发者在一条 issue 下做过这样一个答复</p>
+<blockquote>
+<p>torkelo: you cannot control what time of day it will evaluate, it will evaluate every 24 hours. So if it was more than 24 hours since last evaluation it will evaluate (no matter what time of day)</p>
+</blockquote>
+<p>所以，<strong>grafana 对小时级、天级或在精确时间点触发预警的支持是很不友好的</strong>。</p>
+<p>例如，你想让你的数据在每个整点触发一次数据比对，至少在当前的最新版本(v5.4.2)，都是不支持的。</p>
+<p>而在 <code>Evaluate every</code> 的配置下，你也<strong>无法保证它的执行时间</strong>。</p>
+<p>举个栗子，你做了这样的设置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Evaluate every: 1h</div></pre></td></tr></table></figure>
+<p>设置了 1h 的执行间隔，那<strong>当这次告警对比结束后，它会在下一个告警周期中的不确定时间开始新的告警对比</strong>。</p>
+<p>也就是说，假设 Grafana 在 10:00 的时候执行了一次，你期待它下次执行时间为 11:00，然而现实是它会在 10:00 ~ 11:00 间的任意时间执行，提前执行。</p>
+<p>如果你想到了，那就能早早更改策略，如果想不到，那也开心下，毕竟生活处处是惊喜。</p>
+<h2 id="Conditions"><a href="#Conditions" class="headerlink" title="Conditions"></a>Conditions</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">avg() OF query(A, 15m, now) IS BELOW 14</div></pre></td></tr></table></figure>
+<p>预警阈值主要就是在这里设置，解释下上面的表达式：</p>
+<p>A 线的 15 分钟前至当前的平均值，如果小低于 14，则触发报警。</p>
+<h1 id="Q-amp-A"><a href="#Q-amp-A" class="headerlink" title="Q&amp;A"></a>Q&amp;A</h1><blockquote>
+<p>我想计算当前与过去七天平均值的增减幅？</p>
+</blockquote>
+<p>思路是对过去七天的数据取平均值，再来与当前时间比对，但是由于 <code>Graphite</code> 并没有让 <code>series</code> 与常数做计算的函数，所以我们只能用另一种精妙的方式曲线救国。</p>
+<p>计算增减幅的公式为：(当前 - 过去)/过去 =&gt; 当前/过去 - 1</p>
+<p>所以我们只需要画一条当前与过去的比值，再在 <code>Conditions</code> 的阈值中设置预期值 + 1 即可</p>
+<p>例如，我们想在增幅超过 50% 减幅超过 30% 时触发告警通知，那么使用 <code>asPercent</code> 函数便可计算出当前占用过去的比率，再在 <code>Conditions</code> 中进行这样的配置：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">avg() OF query(C, 15m, now) IS OUTSIDE RANGE 70 to 150</div></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+       
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/11/29/install-graphite/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2541,220 +2790,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/04/02/axios-intercepter-perflight-response-error/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Amosannn">
-      <meta itemprop="description" content="start from zero">
-      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?s=400&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&v=4">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Amosannn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2018/04/02/axios-intercepter-perflight-response-error/" class="post-title-link" itemprop="https://amosannn.github.io/index.html">axios 添加登录拦截器后出现 preflight response 错误</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2018-04-02 16:26:26" itemprop="dateCreated datePublished" datetime="2018-04-02T16:26:26+08:00">2018-04-02</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2018-04-03 01:14:02" itemprop="dateModified" datetime="2018-04-03T01:14:02+08:00">2018-04-03</time>
-              
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/2018/04/02/axios-intercepter-perflight-response-error/" class="leancloud_visitors" data-flag-title="axios 添加登录拦截器后出现 preflight response 错误">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数：</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-            <div class="post-symbolscount">
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-file-word-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">本文字数：</span>
-                
-                <span title="本文字数">2.2k</span>
-              
-
-              
-                <span class="post-meta-divider">|</span>
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-clock-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
-                
-                <span title="阅读时长">2 分钟</span>
-              
-            </div>
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body han-init-context" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>为了加强网站安全性，给除了登录注册等特殊页面外的页面路由都加上了访问控制。然后问题就出现了，接口请求没有返回值了！抛了这样一个错误：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Request header field 8080:1 Authorization is not allowed by Access-Control-Allow-Headers in preflight response</div></pre></td></tr></table></figure>
-<p>之前的跨域设置居然不管用了！</p>
-<h1 id="挣扎"><a href="#挣扎" class="headerlink" title="挣扎"></a>挣扎</h1><h2 id="分析拦截器代码"><a href="#分析拦截器代码" class="headerlink" title="分析拦截器代码"></a>分析拦截器代码</h2><p>看看这个拦截器代码究竟做了什么！</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// http request 拦截器</span></div><div class="line">axios.interceptors.request.use(</div><div class="line">    <span class="function"><span class="params">config</span> =&gt;</span> &#123;</div><div class="line">        <span class="keyword">if</span> (store.state.token) &#123;  <span class="comment">// 判断是否存在token，如果存在的话，则每个http header都加上token</span></div><div class="line">            config.headers.Authorization = <span class="string">`token <span class="subst">$&#123;store.state.token&#125;</span>`</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> config;</div><div class="line">    &#125;,</div><div class="line">    err =&gt; &#123;</div><div class="line">        <span class="keyword">return</span> <span class="built_in">Promise</span>.reject(err);</div><div class="line">    &#125;);</div><div class="line"></div><div class="line"><span class="comment">// http response 拦截器</span></div><div class="line">axios.interceptors.response.use(</div><div class="line">    <span class="function"><span class="params">response</span> =&gt;</span> &#123;</div><div class="line">        <span class="keyword">return</span> response;</div><div class="line">    &#125;,</div><div class="line">    error =&gt; &#123;</div><div class="line">        <span class="keyword">if</span> (error.response) &#123;</div><div class="line">            <span class="keyword">switch</span> (error.response.status) &#123;</div><div class="line">                <span class="keyword">case</span> <span class="number">401</span>:</div><div class="line">                    <span class="comment">// 返回 401 清除token信息并跳转到登录页面</span></div><div class="line">                    store.commit(types.LOGOUT);</div><div class="line">                    router.replace(&#123;</div><div class="line">                        <span class="attr">path</span>: <span class="string">'login'</span>,</div><div class="line">                        <span class="attr">query</span>: &#123;<span class="attr">redirect</span>: router.currentRoute.fullPath&#125;</div><div class="line">                    &#125;)</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> <span class="built_in">Promise</span>.reject(error.response.data)   <span class="comment">// 返回接口返回的错误信息</span></div><div class="line">    &#125;);</div></pre></td></tr></table></figure>
-<p>嗯！debugger一波找到原因在第五行，添加了一个新的请求头<code>Authorization</code>。</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">config.headers.Authorization = <span class="string">`token <span class="subst">$&#123;store.state.token&#125;</span>`</span>;</div></pre></td></tr></table></figure>
-<p>然而，在前端的请求中并没有看到<code>Authorization</code>这个头。。</p>
-<h2 id="分析请求"><a href="#分析请求" class="headerlink" title="分析请求"></a>分析请求</h2><p>在查看请求详情的时候发现一条重要信息：</p>
-<p><img src="../images/options_request.png" alt="options request"></p>
-<p>options请求过后没有请求接口，那么就证明是服务端拒绝了访问。</p>
-<blockquote>
-<p>跨域资源共享标准新增了一组 HTTP 首部字段，允许服务器声明哪些源站有权限访问哪些资源。另外，规范要求，对那些可能对服务器数据产生副作用的 HTTP 请求方法（特别是 <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/GET" target="_blank" rel="external"><code>GET</code></a> 以外的 HTTP 请求，或者搭配某些 MIME 类型的 <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/POST" target="_blank" rel="external"><code>POST</code></a> 请求），浏览器必须首先使用 <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods/OPTIONS" target="_blank" rel="external"><code>OPTIONS</code></a> 方法发起一个预检请求（preflight request），从而获知服务端是否允许该跨域请求。服务器确认允许之后，才发起实际的 HTTP 请求。在预检请求的返回中，服务器端也可以通知客户端，是否需要携带身份凭证（包括 <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Cookies" target="_blank" rel="external">Cookies </a>和 HTTP 认证相关数据）。</p>
-<p>— 来自 <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Access_control_CORS" target="_blank" rel="external">MDN web docs</a></p>
-</blockquote>
-<h1 id="填坑"><a href="#填坑" class="headerlink" title="填坑"></a>填坑</h1><p>解决的办法也很简单，在服务端的跨域拦截器中给<code>OPTIONS</code>方法放行。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 新增一个 Authorization 请求头</span></div><div class="line">response.setHeader(<span class="string">"Access-Control-Allow-Headers"</span>, <span class="string">"Origin, X-Requested-With, Content-Type, Accept, Authorization"</span>);</div><div class="line"></div><div class="line"><span class="comment">// 放行 OPTIONS 请求方法</span></div><div class="line"><span class="keyword">if</span> (request.getMethod().equals(<span class="string">"OPTIONS"</span>)) &#123;</div><div class="line">  response.setStatus(HttpServletResponse.SC_OK);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>服务端放行<code>OPTIONS</code>方法后，再次请求，就可以看到同一个请求发送了两次。第一条为 options 方法，第二条请求就是 post 或 get 请求啦，并且在 header 中也可以看到 axios 拦截器设置的 Authorization 了。</p>
-<hr>
-<p>参考链接</p>
-<p><a href="https://github.com/superman66/vue-axios-github" target="_blank" rel="external">axios 登录拦截器</a></p>
-<p><a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Access_control_CORS" target="_blank" rel="external">Access control CORS</a></p>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-       
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2806,7 +2841,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">33</span>
+                    <span class="site-state-item-count">34</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -2906,7 +2941,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">36</span>
+                      
+                    
+                    <span class="site-state-item-count">37</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -2990,7 +3027,7 @@
       <i class="fa fa-area-chart"></i>
     </span>
     
-    <span title="站点总字数">75k</span>
+    <span title="站点总字数">77k</span>
   
 
   
@@ -2999,7 +3036,7 @@
       <i class="fa fa-coffee"></i>
     </span>
     
-    <span title="站点阅读时长">1:08</span>
+    <span title="站点阅读时长">1:10</span>
   
 </div>
 

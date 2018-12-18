@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://amosannn.github.io/"/>
-  <updated>2018-11-30T10:58:11.820Z</updated>
+  <updated>2018-12-18T04:13:21.715Z</updated>
   <id>https://amosannn.github.io/</id>
   
   <author>
@@ -14,6 +14,70 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>使用 Grafana + Graphite 进行数据预警监控</title>
+    <link href="https://amosannn.github.io/2018/12/17/data-alert-by-graphite-and-grafana/"/>
+    <id>https://amosannn.github.io/2018/12/17/data-alert-by-graphite-and-grafana/</id>
+    <published>2018-12-17T01:55:25.000Z</published>
+    <updated>2018-12-18T04:13:21.715Z</updated>
+    
+    <content type="html"><![CDATA[<p><img src="../images/grafana/DeepinScrot-0552.png" alt=""></p>
+<h1 id="向-Graphite-写入数据"><a href="#向-Graphite-写入数据" class="headerlink" title="向 Graphite 写入数据"></a>向 Graphite 写入数据</h1><p>Graphite 的数据主要以 <code>whisper</code> 的格式存储在 <code>carbon</code> 这个组件中，而向其中填充数据的话我们有多种方式，这里演示两种常用手段。</p>
+<h2 id="使用-python"><a href="#使用-python" class="headerlink" title="使用 python"></a>使用 python</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ pip3 install graphyte</div></pre></td></tr></table></figure>
+<p>这里使用了 <code>graphyte</code>，用法很简单，只需要指定写入的 series 对应的值即可，写入的时间戳与 tag 是附加选项，可写可不写。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">graphyte.send(series, value, timestamp, &#123;<span class="string">'tag_name'</span>: tag_value, <span class="string">'tag_name'</span>: <span class="string">'tag_value'</span>&#125;)</div></pre></td></tr></table></figure>
+<h2 id="使用-curl"><a href="#使用-curl" class="headerlink" title="使用 curl"></a>使用 curl</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ echo &quot;foo.bar 3 `date +%s`&quot; | nc 127.0.0.1 2003</div></pre></td></tr></table></figure>
+<p>当数据准备好了之后便按你的喜好来设置土星的样式</p>
+<h1 id="设置预警"><a href="#设置预警" class="headerlink" title="设置预警"></a>设置预警</h1><p>进入到 <code>Grafana</code> 中的 Alert 标签下，主要需要设置以下几个参数</p>
+<ol>
+<li>Alert Config</li>
+<li>Conditions</li>
+</ol>
+<p>如果想在设置的阈值触发时发送消息通知，则需要进一步设置 <code>Notifications</code> 以及 <code>Alert Rules</code> 和 <code>Notification channels</code></p>
+<h2 id="Alert-Config"><a href="#Alert-Config" class="headerlink" title="Alert Config"></a>Alert Config</h2><p>主要关注 <code>Evaluate every</code> 这个选项</p>
+<p>我猜想 Grafana 的开发团队对它的定义为时效性高的预警通知工具，对于数据异常的及时发现，对比的间隔时间显然是越短越好。</p>
+<p>它们希望你将比对的时间间隔缩短，30s、60s、120s，这样发现数据异常的速度也就越快。</p>
+<p>今年年初，开发者在一条 issue 下做过这样一个答复</p>
+<blockquote>
+<p>torkelo: you cannot control what time of day it will evaluate, it will evaluate every 24 hours. So if it was more than 24 hours since last evaluation it will evaluate (no matter what time of day)</p>
+</blockquote>
+<p>所以，<strong>grafana 对小时级、天级或在精确时间点触发预警的支持是很不友好的</strong>。</p>
+<p>例如，你想让你的数据在每个整点触发一次数据比对，至少在当前的最新版本(v5.4.2)，都是不支持的。</p>
+<p>而在 <code>Evaluate every</code> 的配置下，你也<strong>无法保证它的执行时间</strong>。</p>
+<p>举个栗子，你做了这样的设置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Evaluate every: 1h</div></pre></td></tr></table></figure>
+<p>设置了 1h 的执行间隔，那<strong>当这次告警对比结束后，它会在下一个告警周期中的不确定时间开始新的告警对比</strong>。</p>
+<p>也就是说，假设 Grafana 在 10:00 的时候执行了一次，你期待它下次执行时间为 11:00，然而现实是它会在 10:00 ~ 11:00 间的任意时间执行，提前执行。</p>
+<p>如果你想到了，那就能早早更改策略，如果想不到，那也开心下，毕竟生活处处是惊喜。</p>
+<h2 id="Conditions"><a href="#Conditions" class="headerlink" title="Conditions"></a>Conditions</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">avg() OF query(A, 15m, now) IS BELOW 14</div></pre></td></tr></table></figure>
+<p>预警阈值主要就是在这里设置，解释下上面的表达式：</p>
+<p>A 线的 15 分钟前至当前的平均值，如果小低于 14，则触发报警。</p>
+<h1 id="Q-amp-A"><a href="#Q-amp-A" class="headerlink" title="Q&amp;A"></a>Q&amp;A</h1><blockquote>
+<p>我想计算当前与过去七天平均值的增减幅？</p>
+</blockquote>
+<p>思路是对过去七天的数据取平均值，再来与当前时间比对，但是由于 <code>Graphite</code> 并没有让 <code>series</code> 与常数做计算的函数，所以我们只能用另一种精妙的方式曲线救国。</p>
+<p>计算增减幅的公式为：(当前 - 过去)/过去 =&gt; 当前/过去 - 1</p>
+<p>所以我们只需要画一条当前与过去的比值，再在 <code>Conditions</code> 的阈值中设置预期值 + 1 即可</p>
+<p>例如，我们想在增幅超过 50% 减幅超过 30% 时触发告警通知，那么使用 <code>asPercent</code> 函数便可计算出当前占用过去的比率，再在 <code>Conditions</code> 中进行这样的配置：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">avg() OF query(C, 15m, now) IS OUTSIDE RANGE 70 to 150</div></pre></td></tr></table></figure>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;img src=&quot;../images/grafana/DeepinScrot-0552.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+&lt;h1 id=&quot;向-Graphite-写入数据&quot;&gt;&lt;a href=&quot;#向-Graphite-写入数据&quot; class=&quot;headerlink&quot; titl
+    
+    </summary>
+    
+      <category term="技术一路走到黑" scheme="https://amosannn.github.io/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
+    
+    
+      <category term="Graphite" scheme="https://amosannn.github.io/tags/Graphite/"/>
+    
+      <category term="Grafana" scheme="https://amosannn.github.io/tags/Grafana/"/>
+    
+  </entry>
   
   <entry>
     <title>Graphite 之把它装起来</title>
@@ -1495,47 +1559,6 @@
 &lt;p&gt;在执行一次make可能会再抛出这样一个错误：&lt;br&gt;&lt;img src=&quot;/images/redis_install/redis_install_error2.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
 &lt;p&gt;这样的话便在make后加上参数&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;$ make MALLOC=libc&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
 &lt;p&gt;编译完成后&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;$ src/redis-server  redis.conf&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
-    
-    </summary>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>从Terminal过渡到Item2</title>
-    <link href="https://amosannn.github.io/2017/11/05/intalled-item2/"/>
-    <id>https://amosannn.github.io/2017/11/05/intalled-item2/</id>
-    <published>2017-11-04T17:25:27.000Z</published>
-    <updated>2017-11-05T22:55:44.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>一直听说item2是个比terminal强大的终端工具，为了提升命令行的体验，从teminal切换到了item2。</p>
-<h2 id="下载Item2"><a href="#下载Item2" class="headerlink" title="下载Item2"></a>下载Item2</h2><p><a href="https://www.iterm2.com/downloads.html" target="_blank" rel="external">https://www.iterm2.com/downloads.html</a></p>
-<h2 id="设置开启快捷键"><a href="#设置开启快捷键" class="headerlink" title="设置开启快捷键"></a>设置开启快捷键</h2><p>前提是item2在后台运行<br>-&gt; 进入preference(command ,)<br>-&gt; keys<br>-&gt; Hotkeys(左下角) 勾选<code>Show/hide iTerm2 with a system-wide hotkey</code><br>然后就按喜好设置快捷键啦</p>
-<h2 id="配色方案"><a href="#配色方案" class="headerlink" title="配色方案"></a>配色方案</h2><p>可以自定终端背景色或导入现成的配色方案，比如<a href="http://ethanschoonover.com/solarized" target="_blank" rel="external">Solarized</a><br>跳到Download下载后选择相应的文件导入<br><img src="/images/item2-solarized-setting.png" alt=""><br>你可以选择双击’.itermcolors‘文件或在preference -&gt; profiles -&gt; colors -&gt; Color Presets（右下角）-&gt; import… 中导入</p>
-<h2 id="安装zsh"><a href="#安装zsh" class="headerlink" title="安装zsh"></a>安装zsh</h2><p>osx中默认zsh为4.0版本，可直接切换使用或下载最新的5.0版本<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">brew install zsh</div></pre></td></tr></table></figure></p>
-<a id="more"></a>
-<p>将zsh设置成系统默认shell，以代替bash。 用编辑器打开/etc/shells，在末尾添加/usr/local/bin/zsh,保存关闭。 在终端中执行以下命令：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">chsh <span class="_">-s</span> /usr/<span class="built_in">local</span>/bin/zsh</div></pre></td></tr></table></figure></p>
-<p>重启iTerm2</p>
-<h2 id="安装oh-my-zsh"><a href="#安装oh-my-zsh" class="headerlink" title="安装oh-my-zsh"></a>安装oh-my-zsh</h2><p>纯傻瓜的方式对zsh进行配置并得到强大的功能，<a href="https://github.com/robbyrussell/oh-my-zsh" target="_blank" rel="external">官方地址</a><br>curl安装或使用wget<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">curl -L http://install.ohmyz.sh | sh</div><div class="line"></div><div class="line">wget --no-check-certificate http://install.ohmyz.sh -O - | sh</div></pre></td></tr></table></figure></p>
-<p>编辑 ~/.zshrc 文件<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">vi ~/.zshrc</div><div class="line"></div><div class="line">ZSH_THEME=<span class="string">"agnoster"</span>          <span class="comment"># 使用 agnoster 主题，很好很强大</span></div><div class="line">DEFAULT_USER=<span class="string">"你的用户名"</span>     <span class="comment"># 增加这一项，便可以隐藏掉路径前面那串用户名</span></div></pre></td></tr></table></figure></p>
-<h2 id="解决乱码问题"><a href="#解决乱码问题" class="headerlink" title="解决乱码问题"></a>解决乱码问题</h2><p><img src="/images/item2_ scrambled.png" alt=""><br>装好后可能会出现乱码，这时就需要字体库支持<br>推荐使用powerline <a href="https://github.com/powerline/fonts" target="_blank" rel="external">https://github.com/powerline/fonts</a><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">git clone https://github.com/powerline/fonts.git ~/powerline-fonts</div><div class="line">source ~/powerline-fonts/install.sh</div></pre></td></tr></table></figure></p>
-<p>执行上面两段命令后，会输出这样一行成功提示<br>All Powerline fonts installed to /Users/superdanny/Library/Fonts</p>
-<p>回到item2的preference，在profiles -&gt; Text -&gt; Font 中更改字体为 <code>for Powerline</code> 后缀的字体<br>重启item2后乱码问题解决</p>
-<h2 id="指令高亮"><a href="#指令高亮" class="headerlink" title="指令高亮"></a>指令高亮</h2><p>输入正确命令显示绿色，错误则为红色(ls为绿，l为红)<br>克隆工程到目录（推荐.zshrc所在目录），并在.zshrc文件末尾加上执行内容（XXX为文件目录）<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">git <span class="built_in">clone</span> git://github.com/zsh-users/zsh-syntax-highlighting.git</div><div class="line"></div><div class="line">vi ~/.zshrc</div><div class="line"><span class="built_in">source</span> XXX/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh</div></pre></td></tr></table></figure></p>
-<p>并且需修改.zshrc中的plugin配置<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">plugins=(git zsh-syntax-highlighting) <span class="comment"># 自己按需把要用的 plugin 写上</span></div></pre></td></tr></table></figure></p>
-<h2 id="修改vim配色"><a href="#修改vim配色" class="headerlink" title="修改vim配色"></a>修改vim配色</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">$ cd solarized</div><div class="line">$ cd vim-colors-solarized/colors</div><div class="line">$ mkdir -p ~/.vim/colors</div><div class="line">$ cp solarized.vim ~/.vim/colors/</div><div class="line"></div><div class="line">$ vi ~/.vimrc</div><div class="line">syntax enable</div><div class="line">set background=dark</div><div class="line">colorscheme solarized</div></pre></td></tr></table></figure>
-<h2 id="修改ls配色"><a href="#修改ls配色" class="headerlink" title="修改ls配色"></a>修改ls配色</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ vi ~/.bash_profile</div><div class="line"><span class="built_in">export</span> CLICOLOR=1</div></pre></td></tr></table></figure>
-<p>修改完.bash_profile需要source .bash_profile</p>
-<p>大功告成啦，enjoy it!!</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;一直听说item2是个比terminal强大的终端工具，为了提升命令行的体验，从teminal切换到了item2。&lt;/p&gt;
-&lt;h2 id=&quot;下载Item2&quot;&gt;&lt;a href=&quot;#下载Item2&quot; class=&quot;headerlink&quot; title=&quot;下载Item2&quot;&gt;&lt;/a&gt;下载Item2&lt;/h2&gt;&lt;p&gt;&lt;a href=&quot;https://www.iterm2.com/downloads.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;https://www.iterm2.com/downloads.html&lt;/a&gt;&lt;/p&gt;
-&lt;h2 id=&quot;设置开启快捷键&quot;&gt;&lt;a href=&quot;#设置开启快捷键&quot; class=&quot;headerlink&quot; title=&quot;设置开启快捷键&quot;&gt;&lt;/a&gt;设置开启快捷键&lt;/h2&gt;&lt;p&gt;前提是item2在后台运行&lt;br&gt;-&amp;gt; 进入preference(command ,)&lt;br&gt;-&amp;gt; keys&lt;br&gt;-&amp;gt; Hotkeys(左下角) 勾选&lt;code&gt;Show/hide iTerm2 with a system-wide hotkey&lt;/code&gt;&lt;br&gt;然后就按喜好设置快捷键啦&lt;/p&gt;
-&lt;h2 id=&quot;配色方案&quot;&gt;&lt;a href=&quot;#配色方案&quot; class=&quot;headerlink&quot; title=&quot;配色方案&quot;&gt;&lt;/a&gt;配色方案&lt;/h2&gt;&lt;p&gt;可以自定终端背景色或导入现成的配色方案，比如&lt;a href=&quot;http://ethanschoonover.com/solarized&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Solarized&lt;/a&gt;&lt;br&gt;跳到Download下载后选择相应的文件导入&lt;br&gt;&lt;img src=&quot;/images/item2-solarized-setting.png&quot; alt=&quot;&quot;&gt;&lt;br&gt;你可以选择双击’.itermcolors‘文件或在preference -&amp;gt; profiles -&amp;gt; colors -&amp;gt; Color Presets（右下角）-&amp;gt; import… 中导入&lt;/p&gt;
-&lt;h2 id=&quot;安装zsh&quot;&gt;&lt;a href=&quot;#安装zsh&quot; class=&quot;headerlink&quot; title=&quot;安装zsh&quot;&gt;&lt;/a&gt;安装zsh&lt;/h2&gt;&lt;p&gt;osx中默认zsh为4.0版本，可直接切换使用或下载最新的5.0版本&lt;br&gt;&lt;figure class=&quot;highlight bash&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;brew install zsh&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
     
     </summary>
     

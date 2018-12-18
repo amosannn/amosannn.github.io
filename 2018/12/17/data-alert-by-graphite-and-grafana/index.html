@@ -116,19 +116,19 @@
 
 
 
-  <meta name="description" content="这可能是目前互联网上最详细的BFG Repo-Cleaner中文教程了。 为了删除三天前的一次错误提交，我开始寻找关于撤销github历史commit的方法。实话说，经历了6个小时的搜索，我依旧没有找到能解决我所碰到的奇怪问题的解决方案，我发现网络上对于BFG的相关讨论太少太少，尤其是中文的信息，更是贫瘠。另外的原因也是大部分人确实能按照官方的指引，一步到位地删除历史提交的信息。我失败了，不知道">
-<meta name="keywords" content="GitHub,BFG">
+  <meta name="description" content="向 Graphite 写入数据Graphite 的数据主要以 whisper 的格式存储在 carbon 这个组件中，而向其中填充数据的话我们有多种方式，这里演示两种常用手段。 使用 python1$ pip3 install graphyte 这里使用了 graphyte，用法很简单，只需要指定写入的 series 对应的值即可，写入的时间戳与 tag 是附加选项，可写可不写。 1graphy">
+<meta name="keywords" content="Graphite,Grafana">
 <meta property="og:type" content="article">
-<meta property="og:title" content="如何删除GitHub的历史commit">
-<meta property="og:url" content="https://amosannn.github.io/2017/05/22/delete-github-history-by-bfg/index.html">
+<meta property="og:title" content="使用 Grafana + Graphite 进行数据预警监控">
+<meta property="og:url" content="https://amosannn.github.io/2018/12/17/data-alert-by-graphite-and-grafana/index.html">
 <meta property="og:site_name" content="Amosannn">
-<meta property="og:description" content="这可能是目前互联网上最详细的BFG Repo-Cleaner中文教程了。 为了删除三天前的一次错误提交，我开始寻找关于撤销github历史commit的方法。实话说，经历了6个小时的搜索，我依旧没有找到能解决我所碰到的奇怪问题的解决方案，我发现网络上对于BFG的相关讨论太少太少，尤其是中文的信息，更是贫瘠。另外的原因也是大部分人确实能按照官方的指引，一步到位地删除历史提交的信息。我失败了，不知道">
-<meta property="og:image" content="https://amosannn.github.io/images/github-hacker.jpg">
-<meta property="og:updated_time" content="2018-01-05T13:00:36.000Z">
+<meta property="og:description" content="向 Graphite 写入数据Graphite 的数据主要以 whisper 的格式存储在 carbon 这个组件中，而向其中填充数据的话我们有多种方式，这里演示两种常用手段。 使用 python1$ pip3 install graphyte 这里使用了 graphyte，用法很简单，只需要指定写入的 series 对应的值即可，写入的时间戳与 tag 是附加选项，可写可不写。 1graphy">
+<meta property="og:image" content="https://amosannn.github.io/2018/12/17/images/grafana/DeepinScrot-0552.png">
+<meta property="og:updated_time" content="2018-12-18T04:13:21.715Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="如何删除GitHub的历史commit">
-<meta name="twitter:description" content="这可能是目前互联网上最详细的BFG Repo-Cleaner中文教程了。 为了删除三天前的一次错误提交，我开始寻找关于撤销github历史commit的方法。实话说，经历了6个小时的搜索，我依旧没有找到能解决我所碰到的奇怪问题的解决方案，我发现网络上对于BFG的相关讨论太少太少，尤其是中文的信息，更是贫瘠。另外的原因也是大部分人确实能按照官方的指引，一步到位地删除历史提交的信息。我失败了，不知道">
-<meta name="twitter:image" content="https://amosannn.github.io/images/github-hacker.jpg">
+<meta name="twitter:title" content="使用 Grafana + Graphite 进行数据预警监控">
+<meta name="twitter:description" content="向 Graphite 写入数据Graphite 的数据主要以 whisper 的格式存储在 carbon 这个组件中，而向其中填充数据的话我们有多种方式，这里演示两种常用手段。 使用 python1$ pip3 install graphyte 这里使用了 graphyte，用法很简单，只需要指定写入的 series 对应的值即可，写入的时间戳与 tag 是附加选项，可写可不写。 1graphy">
+<meta name="twitter:image" content="https://amosannn.github.io/2018/12/17/images/grafana/DeepinScrot-0552.png">
 
 
 
@@ -137,7 +137,7 @@
 
 
 
-  <link rel="canonical" href="https://amosannn.github.io/2017/05/22/delete-github-history-by-bfg/"/>
+  <link rel="canonical" href="https://amosannn.github.io/2018/12/17/data-alert-by-graphite-and-grafana/"/>
 
 
 
@@ -147,7 +147,7 @@
   };
 </script>
 
-  <title>如何删除GitHub的历史commit | Amosannn</title>
+  <title>使用 Grafana + Graphite 进行数据预警监控 | Amosannn</title>
   
 
 
@@ -350,7 +350,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/05/22/delete-github-history-by-bfg/">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/12/17/data-alert-by-graphite-and-grafana/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Amosannn">
@@ -367,7 +367,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">如何删除GitHub的历史commit
+          <h1 class="post-title" itemprop="name headline">使用 Grafana + Graphite 进行数据预警监控
               
             
           </h1>
@@ -392,7 +392,7 @@
                 
               
 
-              <time title="创建时间：2017-05-22 01:33:24" itemprop="dateCreated datePublished" datetime="2017-05-22T01:33:24+08:00">2017-05-22</time>
+              <time title="创建时间：2018-12-17 09:55:25" itemprop="dateCreated datePublished" datetime="2018-12-17T09:55:25+08:00">2018-12-17</time>
             
 
             
@@ -409,12 +409,30 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2018-01-05 21:00:36" itemprop="dateModified" datetime="2018-01-05T21:00:36+08:00">2018-01-05</time>
+                <time title="修改时间：2018-12-18 12:13:21" itemprop="dateModified" datetime="2018-12-18T12:13:21+08:00">2018-12-18</time>
               
             
           </span>
 
           
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/技术一路走到黑/" itemprop="url" rel="index"><span itemprop="name">技术一路走到黑</span></a></span>
+
+                
+                
+              
+            </span>
+          
 
           
             
@@ -422,7 +440,7 @@
 
           
           
-             <span id="/2017/05/22/delete-github-history-by-bfg/" class="leancloud_visitors" data-flag-title="如何删除GitHub的历史commit">
+             <span id="/2018/12/17/data-alert-by-graphite-and-grafana/" class="leancloud_visitors" data-flag-title="使用 Grafana + Graphite 进行数据预警监控">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -447,7 +465,7 @@
                 
                   <span class="post-meta-item-text">本文字数：</span>
                 
-                <span title="本文字数">2.7k</span>
+                <span title="本文字数">1.7k</span>
               
 
               
@@ -481,70 +499,45 @@
       
 
       
-        <p><img src="/images/github-hacker.jpg" alt=""></p>
-<p>这可能是目前互联网上最详细的BFG Repo-Cleaner中文教程了。</p>
-<p>为了删除三天前的一次错误提交，我开始寻找关于撤销github历史commit的方法。<br>实话说，经历了6个小时的搜索，我依旧没有找到能解决我所碰到的奇怪问题的解决方案，我发现网络上对于BFG的相关讨论太少太少，尤其是中文的信息，更是贫瘠。另外的原因也是大部分人确实能按照官方的指引，一步到位地删除历史提交的信息。我失败了，不知道是因为git配置或是哪出了纰漏，但也因此浏览了互联网上大部分解答。<br>以下是我整理出的使用教程。<br><a id="more"></a></p>
-<h2 id="BFG-Repo-Cleaner"><a href="#BFG-Repo-Cleaner" class="headerlink" title="BFG Repo-Cleaner"></a><a href="https://rtyley.github.io/bfg-repo-cleaner/" target="_blank" rel="external">BFG Repo-Cleaner</a></h2><blockquote>
-<p>github称BFG为<code>git filter-branch</code>的替代品。一款比它更快更简单的用于删除无用数据的工具。</p>
-</blockquote>
-<p>作为一个github官方推荐的”仓库清理工具”，快速和简单是它被推荐的重要原因，程序为一个<code>Scala</code>编写而成的jar包，也意味着运行环境需要jdk的支持。<br>ok，竟然github都这样推荐了，就先来试一试。</p>
-<h3 id="BFG的主要功能与使用步骤如下："><a href="#BFG的主要功能与使用步骤如下：" class="headerlink" title="BFG的主要功能与使用步骤如下："></a>BFG的主要功能与使用步骤如下：</h3><h4 id="1-克隆仓库"><a href="#1-克隆仓库" class="headerlink" title="1.克隆仓库"></a>1.克隆仓库</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ git clone --mirror git://example.com/some-big-repo.git</div></pre></td></tr></table></figure>
-<p>使用<code>--mirror</code>标记clone一份repo（目标仓库）到本地。</p>
-<h4 id="2-执行BFG命令移除文件"><a href="#2-执行BFG命令移除文件" class="headerlink" title="2.执行BFG命令移除文件"></a>2.执行BFG命令移除文件</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ java -jar 占位符1 占位符2 占位符3</div></pre></td></tr></table></figure>
-<p>clone下来的git仓库和你想象中应该是有点差距的，因为它和你托管在github上的仓库并不一样，它并没有你编写的代码和文件结构，但它与你的库相关联。你可以选择备份也可以选择直接操作。</p>
-<p>占位符1：</p>
+        <p><img src="../images/grafana/DeepinScrot-0552.png" alt=""></p>
+<h1 id="向-Graphite-写入数据"><a href="#向-Graphite-写入数据" class="headerlink" title="向 Graphite 写入数据"></a>向 Graphite 写入数据</h1><p>Graphite 的数据主要以 <code>whisper</code> 的格式存储在 <code>carbon</code> 这个组件中，而向其中填充数据的话我们有多种方式，这里演示两种常用手段。</p>
+<h2 id="使用-python"><a href="#使用-python" class="headerlink" title="使用 python"></a>使用 python</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ pip3 install graphyte</div></pre></td></tr></table></figure>
+<p>这里使用了 <code>graphyte</code>，用法很简单，只需要指定写入的 series 对应的值即可，写入的时间戳与 tag 是附加选项，可写可不写。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">graphyte.send(series, value, timestamp, &#123;<span class="string">'tag_name'</span>: tag_value, <span class="string">'tag_name'</span>: <span class="string">'tag_value'</span>&#125;)</div></pre></td></tr></table></figure>
+<h2 id="使用-curl"><a href="#使用-curl" class="headerlink" title="使用 curl"></a>使用 curl</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ echo &quot;foo.bar 3 `date +%s`&quot; | nc 127.0.0.1 2003</div></pre></td></tr></table></figure>
+<p>当数据准备好了之后便按你的喜好来设置土星的样式</p>
+<h1 id="设置预警"><a href="#设置预警" class="headerlink" title="设置预警"></a>设置预警</h1><p>进入到 <code>Grafana</code> 中的 Alert 标签下，主要需要设置以下几个参数</p>
+<ol>
+<li>Alert Config</li>
+<li>Conditions</li>
+</ol>
+<p>如果想在设置的阈值触发时发送消息通知，则需要进一步设置 <code>Notifications</code> 以及 <code>Alert Rules</code> 和 <code>Notification channels</code></p>
+<h2 id="Alert-Config"><a href="#Alert-Config" class="headerlink" title="Alert Config"></a>Alert Config</h2><p>主要关注 <code>Evaluate every</code> 这个选项</p>
+<p>我猜想 Grafana 的开发团队对它的定义为时效性高的预警通知工具，对于数据异常的及时发现，对比的间隔时间显然是越短越好。</p>
+<p>它们希望你将比对的时间间隔缩短，30s、60s、120s，这样发现数据异常的速度也就越快。</p>
+<p>今年年初，开发者在一条 issue 下做过这样一个答复</p>
 <blockquote>
-<ul>
-<li>jar包路径，若刚好位于bash的当前目录，则直接输入jar包文件名 例：bfg-1.12.15.jar</li>
-</ul>
+<p>torkelo: you cannot control what time of day it will evaluate, it will evaluate every 24 hours. So if it was more than 24 hours since last evaluation it will evaluate (no matter what time of day)</p>
 </blockquote>
-<p>占位符2：</p>
-<blockquote>
-<ul>
-<li><code>--strip-blobs-bigger-than 10M</code> 删除所有大于10m的文件</li>
-<li><code>--delete-files id_{dsa,rsa}</code> 删除id_dsa, id_rsa</li>
-<li><code>--delete-files file</code> 删除目标文件</li>
-<li><code>--replace-text passwords.txt</code> txt定义语法替换文件内容</li>
-<li><code>--delete-folders folder</code> 删除文件夹</li>
-</ul>
+<p>所以，<strong>grafana 对小时级、天级或在精确时间点触发预警的支持是很不友好的</strong>。</p>
+<p>例如，你想让你的数据在每个整点触发一次数据比对，至少在当前的最新版本(v5.4.2)，都是不支持的。</p>
+<p>而在 <code>Evaluate every</code> 的配置下，你也<strong>无法保证它的执行时间</strong>。</p>
+<p>举个栗子，你做了这样的设置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Evaluate every: 1h</div></pre></td></tr></table></figure>
+<p>设置了 1h 的执行间隔，那<strong>当这次告警对比结束后，它会在下一个告警周期中的不确定时间开始新的告警对比</strong>。</p>
+<p>也就是说，假设 Grafana 在 10:00 的时候执行了一次，你期待它下次执行时间为 11:00，然而现实是它会在 10:00 ~ 11:00 间的任意时间执行，提前执行。</p>
+<p>如果你想到了，那就能早早更改策略，如果想不到，那也开心下，毕竟生活处处是惊喜。</p>
+<h2 id="Conditions"><a href="#Conditions" class="headerlink" title="Conditions"></a>Conditions</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">avg() OF query(A, 15m, now) IS BELOW 14</div></pre></td></tr></table></figure>
+<p>预警阈值主要就是在这里设置，解释下上面的表达式：</p>
+<p>A 线的 15 分钟前至当前的平均值，如果小低于 14，则触发报警。</p>
+<h1 id="Q-amp-A"><a href="#Q-amp-A" class="headerlink" title="Q&amp;A"></a>Q&amp;A</h1><blockquote>
+<p>我想计算当前与过去七天平均值的增减幅？</p>
 </blockquote>
-<p>占位符3：</p>
-<blockquote>
-<ul>
-<li>clone下来的git文件名 例：some-big-repo.git</li>
-</ul>
-</blockquote>
-<p>e.g.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">java -jar bfg.jar --strip-blobs-bigger-than 10M some-big-repo.git</div></pre></td></tr></table></figure></p>
-<h4 id="3-使用gc命令删除目标数据"><a href="#3-使用gc命令删除目标数据" class="headerlink" title="3.使用gc命令删除目标数据"></a>3.使用gc命令删除目标数据</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ cd some-big-repo.git</div><div class="line">$ git reflog expire --expire=now --all &amp;&amp; git gc --prune=now --aggressive</div></pre></td></tr></table></figure>
-<h4 id="4-提交修改"><a href="#4-提交修改" class="headerlink" title="4.提交修改"></a>4.提交修改</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ git push</div></pre></td></tr></table></figure>
-<p>至此，新clone出来的git库中，将再也找不到被删除的内容了。<br>相关参考链接请移步页脚。</p>
-<hr>
-<p>以下记录我遇到的问题</p>
-<p>执行命令<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">java -jar bfg-1.12.15.jar --delete-files carousel.jsp tmall-web-store.git</div></pre></td></tr></table></figure></p>
-<p>报错信息：These are your protected commits, and so their contents will NOT be altered: commit 6c3f4d5a (protected by ‘HEAD’)</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">$ java -jar bfg-1.12.15.jar --delete-files xxxxx.xx xxxxx.git</div><div class="line"></div><div class="line">Using repo : C:\Users\js\Downloads\xxxxx.git</div><div class="line"></div><div class="line">Found 205 objects to protect</div><div class="line">Found 2 commit-pointing refs : HEAD, refs/heads/master</div><div class="line"></div><div class="line">Protected commits</div><div class="line">-----------------</div><div class="line"></div><div class="line">These are your protected commits, and so their contents will NOT be altered:</div><div class="line"></div><div class="line"> * commit 6c3f4d5a (protected by &apos;HEAD&apos;)</div><div class="line"></div><div class="line">Cleaning</div><div class="line">--------</div><div class="line"></div><div class="line">Found 14 commits</div><div class="line">Cleaning commits:       100% (14/14)</div><div class="line">Cleaning commits completed in 93 ms.</div><div class="line"></div><div class="line">BFG aborting: No refs to update - no dirty commits found??</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">--</div><div class="line">You can rewrite history in Git - don&apos;t let Trump do it for real!</div><div class="line">Trump&apos;s administration has lied consistently, to make people give up on ever</div><div class="line">being told the truth. Don&apos;t give up: https://github.com/bkeepers/stop-trump</div><div class="line">--</div></pre></td></tr></table></figure>
-<p>我不明白为什么会显示protected commits，在我尝试多次commit之后，也就是修改head~1，或是手动删除文件，都无法让程序成功运行下去。甚至在多次push与pull之后，commit记录竟x2了…</p>
-<p>几近崩溃的我只能执行git上取消上一个commit的命令,手动撤销了所有的记录（包括目标记录后的几条commit），再重新提交…Orz<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">git reset --hard HEAD~1</div><div class="line">git push --force</div></pre></td></tr></table></figure></p>
-<h2 id="–-2018-01-05更新-–"><a href="#–-2018-01-05更新-–" class="headerlink" title="– 2018.01.05更新 –"></a>– 2018.01.05更新 –</h2><p>又遇到上传错东西的问题了。。</p>
-<blockquote>
-<ul>
-<li>java -jar bfg.jar  –delete-files xxx.yml zhiliao</li>
-<li>git rebase -i ‘(此处填写commit id，一长串的那个)’</li>
-</ul>
-</blockquote>
-<p>遇到不让push的时候就强制push</p>
-<blockquote>
-<ul>
-<li>git push origin master -f</li>
-</ul>
-</blockquote>
-<p>相关链接：</p>
-<blockquote>
-<ul>
-<li><a href="https://rtyley.github.io/bfg-repo-cleaner/" target="_blank" rel="external">BFG Repo-Cleaner</a></li>
-<li><a href="https://help.github.com/articles/removing-sensitive-data-from-a-repository/" target="_blank" rel="external">[github]Removing sensitive data from a repository</a></li>
-</ul>
-</blockquote>
+<p>思路是对过去七天的数据取平均值，再来与当前时间比对，但是由于 <code>Graphite</code> 并没有让 <code>series</code> 与常数做计算的函数，所以我们只能用另一种精妙的方式曲线救国。</p>
+<p>计算增减幅的公式为：(当前 - 过去)/过去 =&gt; 当前/过去 - 1</p>
+<p>所以我们只需要画一条当前与过去的比值，再在 <code>Conditions</code> 的阈值中设置预期值 + 1 即可</p>
+<p>例如，我们想在增幅超过 50% 减幅超过 30% 时触发告警通知，那么使用 <code>asPercent</code> 函数便可计算出当前占用过去的比率，再在 <code>Conditions</code> 中进行这样的配置：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">avg() OF query(C, 15m, now) IS OUTSIDE RANGE 70 to 150</div></pre></td></tr></table></figure>
 
       
     </div>
@@ -568,9 +561,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/GitHub/" rel="tag"># GitHub</a>
+            <a href="/tags/Graphite/" rel="tag"># Graphite</a>
           
-            <a href="/tags/BFG/" rel="tag"># BFG</a>
+            <a href="/tags/Grafana/" rel="tag"># Grafana</a>
           
         </div>
       
@@ -583,8 +576,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/04/16/Hello-Hexo/" rel="next" title="Hello Hexo">
-                <i class="fa fa-chevron-left"></i> Hello Hexo
+              <a href="/2018/11/29/install-graphite/" rel="next" title="Graphite 之把它装起来">
+                <i class="fa fa-chevron-left"></i> Graphite 之把它装起来
               </a>
             
           </div>
@@ -592,10 +585,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/05/23/currency-formatting-by-javascript/" rel="prev" title="使用JavaScript进行货币格式化">
-                使用JavaScript进行货币格式化 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -839,7 +828,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#BFG-Repo-Cleaner"><span class="nav-number">1.</span> <span class="nav-text">BFG Repo-Cleaner</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#BFG的主要功能与使用步骤如下："><span class="nav-number">1.1.</span> <span class="nav-text">BFG的主要功能与使用步骤如下：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-克隆仓库"><span class="nav-number">1.1.1.</span> <span class="nav-text">1.克隆仓库</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-执行BFG命令移除文件"><span class="nav-number">1.1.2.</span> <span class="nav-text">2.执行BFG命令移除文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-使用gc命令删除目标数据"><span class="nav-number">1.1.3.</span> <span class="nav-text">3.使用gc命令删除目标数据</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-提交修改"><span class="nav-number">1.1.4.</span> <span class="nav-text">4.提交修改</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#–-2018-01-05更新-–"><span class="nav-number">2.</span> <span class="nav-text">– 2018.01.05更新 –</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#向-Graphite-写入数据"><span class="nav-number">1.</span> <span class="nav-text">向 Graphite 写入数据</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-python"><span class="nav-number">1.1.</span> <span class="nav-text">使用 python</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-curl"><span class="nav-number">1.2.</span> <span class="nav-text">使用 curl</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#设置预警"><span class="nav-number">2.</span> <span class="nav-text">设置预警</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Alert-Config"><span class="nav-number">2.1.</span> <span class="nav-text">Alert Config</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Conditions"><span class="nav-number">2.2.</span> <span class="nav-text">Conditions</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-amp-A"><span class="nav-number">3.</span> <span class="nav-text">Q&A</span></a></li></ol></div>
             
 
           </div>
