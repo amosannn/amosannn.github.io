@@ -347,6 +347,701 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2019/04/30/haproxy-listen-vs-frontend/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Amosannn">
+      <meta itemprop="description" content="start from zero">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?s=400&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&v=4">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Amosannn">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/04/30/haproxy-listen-vs-frontend/" class="post-title-link" itemprop="https://amosannn.github.io/index.html">Haproxy 之 Http 代理的两种方式</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-04-30 09:55:30" itemprop="dateCreated datePublished" datetime="2019-04-30T09:55:30+08:00">2019-04-30</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-05-16 10:33:47" itemprop="dateModified" datetime="2019-05-16T10:33:47+08:00">2019-05-16</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/技术一路走到黑/" itemprop="url" rel="index"><span itemprop="name">技术一路走到黑</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2019/04/30/haproxy-listen-vs-frontend/" class="leancloud_visitors" data-flag-title="Haproxy 之 Http 代理的两种方式">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">1.4k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">1 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h2 id="listen-与-frontend-backend-的配置区别"><a href="#listen-与-frontend-backend-的配置区别" class="headerlink" title="listen 与 (frontend + backend) 的配置区别"></a>listen 与 (frontend + backend) 的配置区别</h2><h3 id="frontend-backend-的配置示例及运行流程"><a href="#frontend-backend-的配置示例及运行流程" class="headerlink" title="frontend + backend 的配置示例及运行流程"></a>frontend + backend 的配置示例及运行流程</h3><p>这是一个 HTTP 代理在所有接口上监听端口 80 的简单配置，请求进入后的运行流程如下：</p>
+<ol>
+<li><code>frontend</code> 监听 80 端口</li>
+<li>请求被 <code>frontend</code> 转发到 <code>backend</code> 的 servers 中</li>
+<li>请求进入运行在 127.0.0.1:8000 的 server1 中</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"># Simple configuration for an HTTP proxy listening on port 80 on all</div><div class="line"># interfaces and forwarding requests to a single backend &quot;servers&quot; with a</div><div class="line"># single server &quot;server1&quot; listening on 127.0.0.1:8000</div><div class="line"></div><div class="line">global</div><div class="line">daemon</div><div class="line">maxconn 256</div><div class="line"></div><div class="line">defaults</div><div class="line">mode http</div><div class="line">timeout connect 5000ms</div><div class="line">timeout client 50000ms</div><div class="line">timeout server 50000ms</div><div class="line"></div><div class="line">frontend http-in</div><div class="line">bind *:80</div><div class="line">default_backend servers</div><div class="line"></div><div class="line">backend servers</div><div class="line">server server1 127.0.0.1:8000 maxconn 32</div></pre></td></tr></table></figure>
+          <!--noindex-->
+          
+            <div class="post-button text-center">
+              <a class="btn" href="/2019/04/30/haproxy-listen-vs-frontend/" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+         
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+       
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2019/04/28/haproxy-common-configuration-analysis/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Amosannn">
+      <meta itemprop="description" content="start from zero">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?s=400&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&v=4">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Amosannn">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/04/28/haproxy-common-configuration-analysis/" class="post-title-link" itemprop="https://amosannn.github.io/index.html">Haproxy 之常用配置详解</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-04-28 09:55:30" itemprop="dateCreated datePublished" datetime="2019-04-28T09:55:30+08:00">2019-04-28</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-05-16 10:34:48" itemprop="dateModified" datetime="2019-05-16T10:34:48+08:00">2019-05-16</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/技术一路走到黑/" itemprop="url" rel="index"><span itemprop="name">技术一路走到黑</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2019/04/28/haproxy-common-configuration-analysis/" class="leancloud_visitors" data-flag-title="Haproxy 之常用配置详解">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">3.1k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">3 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>HAProxy 配置中有三个重要部分</p>
+<ul>
+<li>global</li>
+<li>defaults</li>
+<li>listen or (frontend + backend)</li>
+</ul>
+<h2 id="常用配置详解"><a href="#常用配置详解" class="headerlink" title="常用配置详解"></a>常用配置详解</h2><h3 id="全局配置（global）"><a href="#全局配置（global）" class="headerlink" title="全局配置（global）"></a>全局配置（global）</h3><table>
+<thead>
+<tr>
+<th>参数名</th>
+<th>值</th>
+<th>参数含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>maxconn</td>
+<td>20480</td>
+<td>默认最大连接数</td>
+</tr>
+<tr>
+<td>daemon</td>
+<td></td>
+<td>以后台形式运行haproxy</td>
+</tr>
+<tr>
+<td>nbproc</td>
+<td>1</td>
+<td>进程数量（可以设置多个进程提高性能）</td>
+</tr>
+<tr>
+<td>pidfile</td>
+<td>/var/run/haproxy.pid</td>
+<td>haproxy 的 pid 存放路径，启动进程的用户必须有权限访问此文件</td>
+</tr>
+</tbody>
+</table>
+<h3 id="默认全局配置（defaults）"><a href="#默认全局配置（defaults）" class="headerlink" title="默认全局配置（defaults）"></a>默认全局配置（defaults）</h3><p>这些参数可以被利用配置到frontend，backend，listen组件</p>
+<p>option 参数可以同时配置多个</p>
+<p>balance 只可配置一个*</p>
+          <!--noindex-->
+          
+            <div class="post-button text-center">
+              <a class="btn" href="/2019/04/28/haproxy-common-configuration-analysis/" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+         
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+       
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/12/24/airflow-create-user-and-filter-dags-by-owner/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Amosannn">
+      <meta itemprop="description" content="start from zero">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?s=400&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&v=4">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Amosannn">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2018/12/24/airflow-create-user-and-filter-dags-by-owner/" class="post-title-link" itemprop="https://amosannn.github.io/index.html">Airflow 如何让用户只能看到自己创建的 Dag</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-12-24 09:55:30" itemprop="dateCreated datePublished" datetime="2018-12-24T09:55:30+08:00">2018-12-24</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2018-12-29 11:32:22" itemprop="dateModified" datetime="2018-12-29T11:32:22+08:00">2018-12-29</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/技术一路走到黑/" itemprop="url" rel="index"><span itemprop="name">技术一路走到黑</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/12/24/airflow-create-user-and-filter-dags-by-owner/" class="leancloud_visitors" data-flag-title="Airflow 如何让用户只能看到自己创建的 Dag">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">420</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">1 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>Airflow 是个很奇怪的东西，直到 1.10 它都没有权限系统，自带的创建用户和密码验证，只能作为一扇挡着外人的门。只要打开这扇门，里面的所有 <code>Owner</code> 下的 Dag 都会完完全全展示在你面前并且受你掌控。</p>
+<p>究其原因，便是 airflow 自带的用户创建默认是 <code>superuser</code>，虽然话是这么说，创建个普通 user 就行了，但在一系列尝试后，我发现，它并没有提供其他等级的用户给你选择，只有 <code>superuser</code> 。。</p>
+<p>所以在尝试了这一系列操作之后，我觉得有必要使用官方建议的 <code>LDAP</code>，虽然它看起来很麻烦的样子。</p>
+<p>然而经过一番探查，我发现 <code>LDAP</code> 的作用并不是 filter dags by ower，他只是细粒度的分配登录权限。而真正的分发 Dag 到个人账户下，还是得等待 airflow 新版本的发布（当前版本该选项不生效）。</p>
+<hr>
+<p><a href="https://stackoverflow.com/questions/47205798/airflow-webserver-not-filtering-dags-by-owner" target="_blank" rel="external">airflow webserver not filtering dags by owner</a></p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+       
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/12/17/data-alert-by-graphite-and-grafana/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -409,7 +1104,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2018-12-18 12:13:21" itemprop="dateModified" datetime="2018-12-18T12:13:21+08:00">2018-12-18</time>
+                <time title="修改时间：2019-05-16 10:37:54" itemprop="dateModified" datetime="2019-05-16T10:37:54+08:00">2019-05-16</time>
               
             
           </span>
@@ -500,14 +1195,13 @@
 
       
         
-          
-            <p><img src="../images/grafana/DeepinScrot-0552.png" alt=""></p>
+          <p><img src="../images/grafana/DeepinScrot-2637.png" alt=""></p>
 <h1 id="向-Graphite-写入数据"><a href="#向-Graphite-写入数据" class="headerlink" title="向 Graphite 写入数据"></a>向 Graphite 写入数据</h1><p>Graphite 的数据主要以 <code>whisper</code> 的格式存储在 <code>carbon</code> 这个组件中，而向其中填充数据的话我们有多种方式，这里演示两种常用手段。</p>
 <h2 id="使用-python"><a href="#使用-python" class="headerlink" title="使用 python"></a>使用 python</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ pip3 install graphyte</div></pre></td></tr></table></figure>
 <p>这里使用了 <code>graphyte</code>，用法很简单，只需要指定写入的 series 对应的值即可，写入的时间戳与 tag 是附加选项，可写可不写。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">graphyte.send(series, value, timestamp, &#123;<span class="string">'tag_name'</span>: tag_value, <span class="string">'tag_name'</span>: <span class="string">'tag_value'</span>&#125;)</div></pre></td></tr></table></figure>
 <h2 id="使用-curl"><a href="#使用-curl" class="headerlink" title="使用 curl"></a>使用 curl</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ echo &quot;foo.bar 3 `date +%s`&quot; | nc 127.0.0.1 2003</div></pre></td></tr></table></figure>
-<p>当数据准备好了之后便按你的喜好来设置土星的样式</p>
+<p>当数据准备好了之后便按你的喜好来设置图形的样式</p>
 <h1 id="设置预警"><a href="#设置预警" class="headerlink" title="设置预警"></a>设置预警</h1><p>进入到 <code>Grafana</code> 中的 Alert 标签下，主要需要设置以下几个参数</p>
 <ol>
 <li>Alert Config</li>
@@ -521,27 +1215,16 @@
 <blockquote>
 <p>torkelo: you cannot control what time of day it will evaluate, it will evaluate every 24 hours. So if it was more than 24 hours since last evaluation it will evaluate (no matter what time of day)</p>
 </blockquote>
-<p>所以，<strong>grafana 对小时级、天级或在精确时间点触发预警的支持是很不友好的</strong>。</p>
-<p>例如，你想让你的数据在每个整点触发一次数据比对，至少在当前的最新版本(v5.4.2)，都是不支持的。</p>
-<p>而在 <code>Evaluate every</code> 的配置下，你也<strong>无法保证它的执行时间</strong>。</p>
-<p>举个栗子，你做了这样的设置</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Evaluate every: 1h</div></pre></td></tr></table></figure>
-<p>设置了 1h 的执行间隔，那<strong>当这次告警对比结束后，它会在下一个告警周期中的不确定时间开始新的告警对比</strong>。</p>
-<p>也就是说，假设 Grafana 在 10:00 的时候执行了一次，你期待它下次执行时间为 11:00，然而现实是它会在 10:00 ~ 11:00 间的任意时间执行，提前执行。</p>
-<p>如果你想到了，那就能早早更改策略，如果想不到，那也开心下，毕竟生活处处是惊喜。</p>
-<h2 id="Conditions"><a href="#Conditions" class="headerlink" title="Conditions"></a>Conditions</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">avg() OF query(A, 15m, now) IS BELOW 14</div></pre></td></tr></table></figure>
-<p>预警阈值主要就是在这里设置，解释下上面的表达式：</p>
-<p>A 线的 15 分钟前至当前的平均值，如果小低于 14，则触发报警。</p>
-<h1 id="Q-amp-A"><a href="#Q-amp-A" class="headerlink" title="Q&amp;A"></a>Q&amp;A</h1><blockquote>
-<p>我想计算当前与过去七天平均值的增减幅？</p>
-</blockquote>
-<p>思路是对过去七天的数据取平均值，再来与当前时间比对，但是由于 <code>Graphite</code> 并没有让 <code>series</code> 与常数做计算的函数，所以我们只能用另一种精妙的方式曲线救国。</p>
-<p>计算增减幅的公式为：(当前 - 过去)/过去 =&gt; 当前/过去 - 1</p>
-<p>所以我们只需要画一条当前与过去的比值，再在 <code>Conditions</code> 的阈值中设置预期值 + 1 即可</p>
-<p>例如，我们想在增幅超过 50% 减幅超过 30% 时触发告警通知，那么使用 <code>asPercent</code> 函数便可计算出当前占用过去的比率，再在 <code>Conditions</code> 中进行这样的配置：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">avg() OF query(C, 15m, now) IS OUTSIDE RANGE 70 to 150</div></pre></td></tr></table></figure>
-
+<p>所以，<strong>grafana 对小时级、天级或在精确时间点触发预警的支持是很不友好的</strong>。<br>
+          <!--noindex-->
           
+            <div class="post-button text-center">
+              <a class="btn" href="/2018/12/17/data-alert-by-graphite-and-grafana/" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+         
+          <!--/noindex-->
         
       
     </div>
@@ -2071,725 +2754,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/10/30/airflow-concept-combing/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Amosannn">
-      <meta itemprop="description" content="start from zero">
-      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?s=400&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&v=4">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Amosannn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2018/10/30/airflow-concept-combing/" class="post-title-link" itemprop="https://amosannn.github.io/index.html">Airflow 概念梳理</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2018-10-30 19:18:16" itemprop="dateCreated datePublished" datetime="2018-10-30T19:18:16+08:00">2018-10-30</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2018-11-26 15:44:59" itemprop="dateModified" datetime="2018-11-26T15:44:59+08:00">2018-11-26</time>
-              
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/技术一路走到黑/" itemprop="url" rel="index"><span itemprop="name">技术一路走到黑</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/2018/10/30/airflow-concept-combing/" class="leancloud_visitors" data-flag-title="Airflow 概念梳理">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数：</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-            <div class="post-symbolscount">
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-file-word-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">本文字数：</span>
-                
-                <span title="本文字数">1.3k</span>
-              
-
-              
-                <span class="post-meta-divider">|</span>
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-clock-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
-                
-                <span title="阅读时长">1 分钟</span>
-              
-            </div>
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body han-init-context" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="有向无环图"><a href="#有向无环图" class="headerlink" title="有向无环图"></a>有向无环图</h1><p>Airflow 基于一个重要的数据结构，DAG。</p>
-<p>为什么依赖 DAG？</p>
-<p>LInux 与 WIndows 的 crontab 与任务计划，只可以配置定时任务或间隔任务，无法配置作业间的依赖关系。</p>
-<p>一个很大的弊端是，如果我们需要在作业 A 执行之后才有供作业 B 执行的数据，而出现了不可因素导致轮到作业 B 执行的时候作业 A 还未执行完毕。这必定会导致数据缺失，或作业 B 执行失败。</p>
-<p>所以，使用有向无环图来定义作业流，在任务调度中是非常合适的。</p>
-<h1 id="基础服务"><a href="#基础服务" class="headerlink" title="基础服务"></a>基础服务</h1><h2 id="Webserver"><a href="#Webserver" class="headerlink" title="Webserver"></a>Webserver</h2><p>是 Airflow 的基础服务，提供了前端可视化管理工具，可视化才是最好的！</p>
-<p>你可以在上面执行调度操作，查看任务处理耗时分析，清除状态作业重跑，查看日志，管理用户和数据连接，以及配置的 DAG 是否正确等。</p>
-<h2 id="Scheduler"><a href="#Scheduler" class="headerlink" title="Scheduler"></a>Scheduler</h2><p>也是 Airflow 的基础服务之一，身为调度器，负责监控 DAG 的状态，计算调度时间，启动满足条件的 DAG，并将任务提交到 Executor。</p>
-<h2 id="Worker"><a href="#Worker" class="headerlink" title="Worker"></a>Worker</h2><p>工作节点，这个角色类似于 yarn 中的 namenode，直接负责 Executor 的执行分配。</p>
-<p>ps: yarn 为 hadoop 中的资源管理系统</p>
-<h3 id="Executor"><a href="#Executor" class="headerlink" title="Executor"></a>Executor</h3><p>Airflow 有三种执行器</p>
-<ul>
-<li><p>SequentialExecutor </p>
-<p>顺序执行器，无需额外配置，默认使用 sqlite 作为元数据，因此也无法支持任务之间的并发操作。</p>
-</li>
-<li><p>LocalExecutor</p>
-<p>本地执行器，不支持 sqlite，但可使用 mysql、oracle、postgress 等主流数据库，需配置数据库链接 URL。</p>
-</li>
-<li><p>CeleryExecutor</p>
-<p>江湖人称芹菜，是一款基于消息队列的分布式异步任务调度工具，可将任务运行在千里之外（远程节点），十分优秀！</p>
-<p>ps: 需执行 Airflow 的工作节点 <code>airflow worker</code></p>
-<p>pps: 需额外安装 <code>Redis</code> 或 <code>RabbitMQ</code> 等</p>
-</li>
-</ul>
-<h1 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h1><h2 id="Operators"><a href="#Operators" class="headerlink" title="Operators"></a>Operators</h2><p>有了作业流，就得有作业内容，Operators 就是做这事的。</p>
-<p>Airflow 目前支持十多种不同的作业类型</p>
-<ul>
-<li>BashOperator</li>
-<li>PythonOperator</li>
-<li>DockerOperator</li>
-<li>DruidCheckOperator</li>
-<li>EmailOperator</li>
-<li>HiveOperator</li>
-<li>HTTPOperator</li>
-<li>DummyOperator </li>
-<li>……</li>
-</ul>
-<p>他们的作用都像字面意思说的那样，可完成相应的操作或调用。</p>
-<p>值得注意的是 DummyOperator，是个空操作，相当于标记和中转节点。</p>
-<p>当然，他们有一个共同的爸爸「BaseOperator」，中央集权，他一人的修改会改变儿子们继承到的功能。</p>
-<h2 id="Timezone"><a href="#Timezone" class="headerlink" title="Timezone"></a>Timezone</h2><p>在 1.9 版本及以前，Airflow 使用的是本地时间，不同服务器时区不同容易产生运行错误。</p>
-<p>而在 1.10 中，加入了自定义的时区配置（1.9 的时区配置无法生效，大坑。。）</p>
-<h2 id="预警与监控"><a href="#预警与监控" class="headerlink" title="预警与监控"></a>预警与监控</h2><p>当任务执行失败或状态异常时，发送短信或邮件。</p>
-<p>这是个棒棒的功能，守卫再严的城池也有失守的时候，硝烟一起，家书即刻送达。</p>
-<p>你说，这为镇守襄阳城提供多少便利？</p>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-       
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/10/29/airflow_install_and_more/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Amosannn">
-      <meta itemprop="description" content="start from zero">
-      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?s=400&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&v=4">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Amosannn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2018/10/29/airflow_install_and_more/" class="post-title-link" itemprop="https://amosannn.github.io/index.html">Airflow 安装及跳坑指南</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2018-10-29 19:58:16" itemprop="dateCreated datePublished" datetime="2018-10-29T19:58:16+08:00">2018-10-29</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2018-11-06 16:27:11" itemprop="dateModified" datetime="2018-11-06T16:27:11+08:00">2018-11-06</time>
-              
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/技术一路走到黑/" itemprop="url" rel="index"><span itemprop="name">技术一路走到黑</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/2018/10/29/airflow_install_and_more/" class="leancloud_visitors" data-flag-title="Airflow 安装及跳坑指南">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数：</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-            <div class="post-symbolscount">
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-file-word-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">本文字数：</span>
-                
-                <span title="本文字数">12k</span>
-              
-
-              
-                <span class="post-meta-divider">|</span>
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-clock-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
-                
-                <span title="阅读时长">11 分钟</span>
-              
-            </div>
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body han-init-context" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="有啥用"><a href="#有啥用" class="headerlink" title="有啥用"></a>有啥用</h2><p><code>Airflow</code> 简单来说就是管理和调度各种离线定时的 Job，用以替代 <code>crontab</code>， 可以把它看作是个高级版的 <code>crontab</code>。</p>
-<p>如果 <code>crontab</code>  的规模达到百千万，管理起来会非常复杂。这个时候可以考虑将任务迁移到 <code>Airflow</code>，你将可以清楚地分辨出哪些 DAG 是稳定的，哪些不那么见状，需要优化。如果 DAG 不足以打动你，强交互性、友好的界面管理、重跑任务以及合适的报警级别足以让你感觉相见恨晚。</p>
-<h2 id="简单记录安装及配置过程"><a href="#简单记录安装及配置过程" class="headerlink" title="简单记录安装及配置过程"></a>简单记录安装及配置过程</h2><p><code>Airflow</code> 在 1.8 之后更名为 <code>apache-airflow</code></p>
-<blockquote>
-<p>NOTE: The transition from 1.8.0 (or before) to 1.8.1 (or after) requires uninstalling Airflow before installing the new version. The package name was changed from airflow to apache-airflow as of version 1.8.1.</p>
-</blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ pip3 install apache-airflow</div></pre></td></tr></table></figure>
-<p>如果你想安装 1.8.0 的 <code>Airflow</code></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ pip3 install airflow</div></pre></td></tr></table></figure>
-<h3 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ airflow inidb</div></pre></td></tr></table></figure>
-<p>初始化后默认会在 <code>~/</code> 下生成 <code>airflow</code> 文件夹，如果想更换 <code>MySQL</code> 或其他数据库做为元数据存储，那么在配置文件中修改配置后重新初始化即可。</p>
-<p>关于如何在 python3 中安装 <code>MySQL</code>，此处不做赘述。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ vi ~/airflow/airflow.cfg</div><div class="line">sql_alchemy_conn = mysql://username:password@host:port/airflow</div></pre></td></tr></table></figure>
-<h2 id="安装扩展"><a href="#安装扩展" class="headerlink" title="安装扩展"></a>安装扩展</h2><p><code>Airflow</code> 内置了芹菜的调度器，只需要手动安装芹菜并进行简单配置就可以使用。</p>
-<p><code>Celery</code> 可使用 <code>RabbitMQ</code> 或 <code>Redis</code> 做为 broker，按需选择即可，此处也不做赘述。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">$ pip3 install apache-airflow[celery]</div><div class="line"></div><div class="line"># 启用还需修改几处配置</div><div class="line">$ vi ~/airflow/airflow.cfg</div><div class="line">executor = CeleryExecutor</div><div class="line">broker_url = redis://127.0.0.1:6379/0</div><div class="line">result_backend = db+mysql://root:xxx@127.0.0.1:3306/airflow</div></pre></td></tr></table></figure>
-<h3 id="这里有一个可能会踩入的小坑"><a href="#这里有一个可能会踩入的小坑" class="headerlink" title="这里有一个可能会踩入的小坑"></a>这里有一个可能会踩入的小坑</h3><p>既然项目更名了，在安装芹菜等扩展时，记得选对项目。</p>
-<p>否则便会安装两个项目，导致后期使用出现冲突。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$ pip3 install apache-airflow</div><div class="line">$ pip3 install airflow[celery]</div><div class="line"></div><div class="line">$ pip3 list</div><div class="line">...</div><div class="line">apache-airflow (1.10.0)</div><div class="line">airflow (1.8.0)</div><div class="line">...</div></pre></td></tr></table></figure>
-<h2 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"># 启动 webserver</div><div class="line">$ airflow webserver -p 8080</div><div class="line"># 启动调度程序</div><div class="line">$ airflow scheduler</div><div class="line"># 启动 Celery</div><div class="line">$ airflow worker</div></pre></td></tr></table></figure>
-<p>启动完成后就可以运行官方内置的 example 测试啦！</p>
-<h2 id="大坑"><a href="#大坑" class="headerlink" title="大坑"></a>大坑</h2><p>记录几个遇到的报错</p>
-<h3 id="airflow-exceptions-AirflowException-Could-not-create-Fernet-object-Incorrect-padding"><a href="#airflow-exceptions-AirflowException-Could-not-create-Fernet-object-Incorrect-padding" class="headerlink" title="airflow.exceptions.AirflowException: Could not create Fernet object: Incorrect padding"></a>airflow.exceptions.AirflowException: Could not create Fernet object: Incorrect padding</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div></pre></td><td class="code"><pre><div class="line">$ airflow initdb</div><div class="line">[2018-10-30 15:30:26,857] &#123;settings.py:174&#125; INFO - setting.configure_orm(): Using pool settings. pool_size=5, pool_recycle=1800</div><div class="line">[2018-10-30 15:30:27,164] &#123;__init__.py:51&#125; INFO - Using executor CeleryExecutor</div><div class="line">DB: mysql://root:***@localhost:3306/airflow</div><div class="line">[2018-10-30 15:30:27,320] &#123;db.py:338&#125; INFO - Creating tables</div><div class="line">INFO  [alembic.runtime.migration] Context impl MySQLImpl.</div><div class="line">INFO  [alembic.runtime.migration] Will assume non-transactional DDL.</div><div class="line">Traceback (most recent call last):</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/airflow/models.py&quot;, line 159, in get_fernet</div><div class="line">    _fernet = Fernet(configuration.conf.get(&apos;core&apos;, &apos;FERNET_KEY&apos;).encode(&apos;utf-8&apos;))</div><div class="line">  File &quot;/usr/lib/python3/dist-packages/cryptography/fernet.py&quot;, line 34, in __init__</div><div class="line">    key = base64.urlsafe_b64decode(key)</div><div class="line">  File &quot;/usr/lib/python3.5/base64.py&quot;, line 134, in urlsafe_b64decode</div><div class="line">    return b64decode(s)</div><div class="line">  File &quot;/usr/lib/python3.5/base64.py&quot;, line 88, in b64decode</div><div class="line">    return binascii.a2b_base64(s)</div><div class="line">binascii.Error: Incorrect padding</div><div class="line"></div><div class="line">During handling of the above exception, another exception occurred:</div><div class="line"></div><div class="line">Traceback (most recent call last):</div><div class="line">  File &quot;/home/ubuntu/.local/bin/airflow&quot;, line 32, in &lt;module&gt;</div><div class="line">    args.func(args)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/airflow/bin/cli.py&quot;, line 1002, in initdb</div><div class="line">    db_utils.initdb(settings.RBAC)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/airflow/utils/db.py&quot;, line 103, in initdb</div><div class="line">    schema=&apos;airflow_ci&apos;))</div><div class="line">  File &quot;&lt;string&gt;&quot;, line 4, in __init__</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/sqlalchemy/orm/state.py&quot;, line 414, in _initialize_instance</div><div class="line">    manager.dispatch.init_failure(self, args, kwargs)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/sqlalchemy/util/langhelpers.py&quot;, line 66, in __exit__</div><div class="line">    compat.reraise(exc_type, exc_value, exc_tb)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/sqlalchemy/util/compat.py&quot;, line 187, in reraise</div><div class="line">    raise value</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/sqlalchemy/orm/state.py&quot;, line 411, in _initialize_instance</div><div class="line">    return manager.original_init(*mixed[1:], **kwargs)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/airflow/models.py&quot;, line 677, in __init__</div><div class="line">    self.extra = extra</div><div class="line">  File &quot;&lt;string&gt;&quot;, line 1, in __set__</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/airflow/models.py&quot;, line 731, in set_extra</div><div class="line">    fernet = get_fernet()</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/airflow/models.py&quot;, line 163, in get_fernet</div><div class="line">    raise AirflowException(&quot;Could not create Fernet object: &#123;&#125;&quot;.format(ve))</div><div class="line">airflow.exceptions.AirflowException: Could not create Fernet object: Incorrect padding</div></pre></td></tr></table></figure>
-<h4 id="fernet-key"><a href="#fernet-key" class="headerlink" title="fernet_key"></a>fernet_key</h4><p>关于 <code>fernet_key</code> 是什么，配置文件里给出了相应的解释：</p>
-<blockquote>
-<p>Secret key to save connection passwords in the db</p>
-</blockquote>
-<h4 id="干掉它"><a href="#干掉它" class="headerlink" title="干掉它"></a>干掉它</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"># 生成一个 key 替换配置文件中的 fernet_key</div><div class="line">$ python3 -c &quot;from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())&quot;</div><div class="line"></div><div class="line">$ vi ~/airflow/airflow.cfg</div><div class="line">fernet_key = g3589dfasdfhnht289tghdsfij---dfadfgeu812=</div><div class="line"></div><div class="line">$ airflow initdb</div><div class="line">[2018-10-30 15:31:21,159] &#123;settings.py:174&#125; INFO - setting.configure_orm(): Using pool settings. pool_size=5, pool_recycle=1800</div><div class="line">[2018-10-30 15:31:21,464] &#123;__init__.py:51&#125; INFO - Using executor CeleryExecutor</div><div class="line">DB: mysql://root:***@localhost:3306/airflow</div><div class="line">[2018-10-30 15:31:21,620] &#123;db.py:338&#125; INFO - Creating tables</div><div class="line">INFO  [alembic.runtime.migration] Context impl MySQLImpl.</div><div class="line">INFO  [alembic.runtime.migration] Will assume non-transactional DDL.</div><div class="line">Done.</div></pre></td></tr></table></figure>
-<h3 id="TypeError-b’5e36be93294a6fea65a4c81571388241b1667fca’-is-not-JSON-serializable"><a href="#TypeError-b’5e36be93294a6fea65a4c81571388241b1667fca’-is-not-JSON-serializable" class="headerlink" title="TypeError: b’5e36be93294a6fea65a4c81571388241b1667fca’ is not JSON serializable"></a>TypeError: b’5e36be93294a6fea65a4c81571388241b1667fca’ is not JSON serializable</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div></pre></td><td class="code"><pre><div class="line">Ooops.</div><div class="line"></div><div class="line">                          ____/ (  (    )   )  \___</div><div class="line">                         /( (  (  )   _    ))  )   )\</div><div class="line">                       ((     (   )(    )  )   (   )  )</div><div class="line">                     ((/  ( _(   )   (   _) ) (  () )  )</div><div class="line">                    ( (  ( (_)   ((    (   )  .((_ ) .  )_</div><div class="line">                   ( (  )    (      (  )    )   ) . ) (   )</div><div class="line">                  (  (   (  (   ) (  _  ( _) ).  ) . ) ) ( )</div><div class="line">                  ( (  (   ) (  )   (  ))     ) _)(   )  )  )</div><div class="line">                 ( (  ( \ ) (    (_  ( ) ( )  )   ) )  )) ( )</div><div class="line">                  (  (   (  (   (_ ( ) ( _    )  ) (  )  )   )</div><div class="line">                 ( (  ( (  (  )     (_  )  ) )  _)   ) _( ( )</div><div class="line">                  ((  (   )(    (     _    )   _) _(_ (  (_ )</div><div class="line">                   (_((__(_(__(( ( ( |  ) ) ) )_))__))_)___)</div><div class="line">                   ((__)        \\||lll|l||///          \_))</div><div class="line">                            (   /(/ (  )  ) )\   )</div><div class="line">                          (    ( ( ( | | ) ) )\   )</div><div class="line">                           (   /(| / ( )) ) ) )) )</div><div class="line">                         (     ( ((((_(|)_)))))     )</div><div class="line">                          (      ||\(|(|)|/||     )</div><div class="line">                        (        |(||(||)||||        )</div><div class="line">                          (     //|/l|||)|\\ \     )</div><div class="line">                        (/ / //  /|//||||\\  \ \  \ _)</div><div class="line">-------------------------------------------------------------------------------</div><div class="line">Node: ubuntu</div><div class="line">-------------------------------------------------------------------------------</div><div class="line">Traceback (most recent call last):</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/flask/app.py&quot;, line 1982, in wsgi_app</div><div class="line">    response = self.full_dispatch_request()</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/flask/app.py&quot;, line 1614, in full_dispatch_request</div><div class="line">    rv = self.handle_user_exception(e)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/flask/app.py&quot;, line 1517, in handle_user_exception</div><div class="line">    reraise(exc_type, exc_value, tb)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/flask/_compat.py&quot;, line 33, in reraise</div><div class="line">    raise value</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/flask/app.py&quot;, line 1612, in full_dispatch_request</div><div class="line">    rv = self.dispatch_request()</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/flask/app.py&quot;, line 1598, in dispatch_request</div><div class="line">    return self.view_functions[rule.endpoint](**req.view_args)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/flask_admin/base.py&quot;, line 69, in inner</div><div class="line">    return self._run_view(f, *args, **kwargs)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/flask_admin/base.py&quot;, line 368, in _run_view</div><div class="line">    return fn(self, *args, **kwargs)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/flask_login.py&quot;, line 755, in decorated_view</div><div class="line">    return func(*args, **kwargs)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/airflow/utils/db.py&quot;, line 74, in wrapper</div><div class="line">    return func(*args, **kwargs)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/airflow/www/views.py&quot;, line 2061, in index</div><div class="line">    auto_complete_data=auto_complete_data)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/flask_admin/base.py&quot;, line 308, in render</div><div class="line">    return render_template(template, **kwargs)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/flask/templating.py&quot;, line 134, in render_template</div><div class="line">    context, ctx.app)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/flask/templating.py&quot;, line 116, in _render</div><div class="line">    rv = template.render(context)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/jinja2/environment.py&quot;, line 989, in render</div><div class="line">    return self.environment.handle_exception(exc_info, True)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/jinja2/environment.py&quot;, line 754, in handle_exception</div><div class="line">    reraise(exc_type, exc_value, tb)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/jinja2/_compat.py&quot;, line 37, in reraise</div><div class="line">    raise value.with_traceback(tb)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/airflow/www/templates/airflow/dags.html&quot;, line 18, in top-level template code</div><div class="line">    &#123;% extends &quot;airflow/master.html&quot; %&#125;</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/airflow/www/templates/airflow/master.html&quot;, line 18, in top-level template code</div><div class="line">    &#123;% extends &quot;admin/master.html&quot; %&#125;</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/airflow/www/templates/admin/master.html&quot;, line 18, in top-level template code</div><div class="line">    &#123;% extends &apos;admin/base.html&apos; %&#125;</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/flask_admin/templates/bootstrap3/admin/base.html&quot;, line 74, in top-level template code</div><div class="line">    &#123;% block tail_js %&#125;</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/airflow/www/templates/admin/master.html&quot;, line 44, in block &quot;tail_js&quot;</div><div class="line">    xhr.setRequestHeader(&quot;X-CSRFToken&quot;, &quot;&#123;&#123; csrf_token() &#125;&#125;&quot;);</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/flask_wtf/csrf.py&quot;, line 47, in generate_csrf</div><div class="line">    setattr(g, field_name, s.dumps(session[field_name]))</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/itsdangerous/serializer.py&quot;, line 166, in dumps</div><div class="line">    payload = want_bytes(self.dump_payload(obj))</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/itsdangerous/url_safe.py&quot;, line 42, in dump_payload</div><div class="line">    json = super(URLSafeSerializerMixin, self).dump_payload(obj)</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/itsdangerous/serializer.py&quot;, line 133, in dump_payload</div><div class="line">    return want_bytes(self.serializer.dumps(obj, **self.serializer_kwargs))</div><div class="line">  File &quot;/home/ubuntu/.local/lib/python3.5/site-packages/itsdangerous/_json.py&quot;, line 18, in dumps</div><div class="line">    return json.dumps(obj, **kwargs)</div><div class="line">  File &quot;/usr/lib/python3.5/json/__init__.py&quot;, line 237, in dumps</div><div class="line">    **kw).encode(obj)</div><div class="line">  File &quot;/usr/lib/python3.5/json/encoder.py&quot;, line 198, in encode</div><div class="line">    chunks = self.iterencode(o, _one_shot=True)</div><div class="line">  File &quot;/usr/lib/python3.5/json/encoder.py&quot;, line 256, in iterencode</div><div class="line">    return _iterencode(o, 0)</div><div class="line">  File &quot;/usr/lib/python3.5/json/encoder.py&quot;, line 179, in default</div><div class="line">    raise TypeError(repr(o) + &quot; is not JSON serializable&quot;)</div><div class="line">TypeError: b&apos;5e36be93294a6fea65a4c81571388241b1667fca&apos; is not JSON serializable</div></pre></td></tr></table></figure>
-<p>这个错误十分诡异，至今不解，项目运行环境为 <code>Python 3.5.2</code></p>
-<p>连首页都进不去，使用的地址为 <code>127.0.0.1:8080</code>，后面尝试把地址修改为 <code>localhost:8080</code> ，就没有这个报错了 Orz</p>
-<hr>
-<h2 id="了解更多"><a href="#了解更多" class="headerlink" title="了解更多"></a>了解更多</h2><p><a href="https://medium.com/airbnb-engineering/airflow-a-workflow-management-platform-46318b977fd8" target="_blank" rel="external">Airflow: a workflow management platform</a></p>
-<p><a href="https://medium.com/videoamp/what-we-learned-migrating-off-cron-to-airflow-b391841a0da4" target="_blank" rel="external">What we learned migrating off Cron to Airflow</a></p>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-       
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/10/26/add-partition-after-creating-external-table-in-hive/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Amosannn">
-      <meta itemprop="description" content="start from zero">
-      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?s=400&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&v=4">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Amosannn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2018/10/26/add-partition-after-creating-external-table-in-hive/" class="post-title-link" itemprop="https://amosannn.github.io/index.html">Hive 优化之为外部表创建分区</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2018-10-26 14:18:52" itemprop="dateCreated datePublished" datetime="2018-10-26T14:18:52+08:00">2018-10-26</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2018-11-26 15:41:28" itemprop="dateModified" datetime="2018-11-26T15:41:28+08:00">2018-11-26</time>
-              
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/2018/10/26/add-partition-after-creating-external-table-in-hive/" class="leancloud_visitors" data-flag-title="Hive 优化之为外部表创建分区">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数：</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-            <div class="post-symbolscount">
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-file-word-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">本文字数：</span>
-                
-                <span title="本文字数">1.2k</span>
-              
-
-              
-                <span class="post-meta-divider">|</span>
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-clock-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
-                
-                <span title="阅读时长">1 分钟</span>
-              
-            </div>
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body han-init-context" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>首先，我们有一个数据量很大的表。其次，对他进行条件查询或其他操作就像看着一只小蜗牛在爬。</p>
-<p>是可忍，孰不可忍！</p>
-<h2 id="0x01-原理"><a href="#0x01-原理" class="headerlink" title="0x01 原理"></a>0x01 原理</h2><p>关于分区为什么能提升查询速度，这就值得你仔细想想了。</p>
-<p>既然 <code>hive</code> 基于文件系统，那么我们可以把它类比成很多个桶。</p>
-<p>假设现在有 100 个桶，分别存放不同的海鲜，其中 2 个桶里有我们想要的桂花鱼，1 个桶里有阿根廷大红虾，那如何才能在最快的速度找出这 3 个桶？</p>
-<p>按照默认的策略，人们会打开盖子一桶一桶找，而如果有 1000、10000 个桶，就会从一个人找演变成一群人一起找。</p>
-<p>有没有改进方式呢？有。</p>
-<p>有一天老板发现，不对啊，这个事我居然叫那么多人来做，感觉自己额外付出了很多成本，亏钱了。不行！这个事情必须改革！于是他思前想后好几天怎么也也想不到更好的办法，也因此懊恼了许久。直到有一天，老板夫人得了风寒，老板十分心急，替夫人去药铺抓药，当它看见郎中拿着方子在药柜抓药的时候，心中的郁结终于揭开了。拍了拍脑瓜子，大叫了声，对呀！我怎么没想到呢！</p>
-<p>于是，从药铺回来后，老板更改了新的存鱼策略。它让员工们把鱼放进桶里的同时，在桶外贴上标签，取鱼的时候只需要远远地扫一眼就能快速定位。</p>
-<p><code>hive</code> 也是如此，你可以粗略地将它的存储系统理解为，将一堆文件放在同一个文件夹里，需要的时候在这堆文件里遍历，最后的效果不言而喻。</p>
-<p>分区的好处便是，将文件按一定的维度，存进不同的文件夹，相当于给他们打好了标签，这样我按这个维度搜索时，便不需要遍历其他无关的文件。数据越多，对查询效率的提升就越大。</p>
-<h2 id="0x02-操作一波"><a href="#0x02-操作一波" class="headerlink" title="0x02 操作一波"></a>0x02 操作一波</h2><p>首先看分区列表，如果结果为空就表示该表下没有分区。</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">show</span> <span class="keyword">partitions</span> tmp.tmp_user;</div></pre></td></tr></table></figure>
-<p>给当前表添加分区</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">alter</span> <span class="keyword">table</span> tmp.tmp_user <span class="keyword">add</span> <span class="keyword">partition</span> (<span class="keyword">month</span>=<span class="string">'2018_10'</span>, <span class="keyword">day</span>=<span class="string">'25'</span>) location <span class="string">'/user/amos/tmp_user/month=2018_10/day=25'</span>;</div></pre></td></tr></table></figure>
-<p>将数据迁移至分区中</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hdfs dfs -mv /user/amos/tmp_user/data_20181025.csv /user/amos/tmp_user/month=2018_10/day=25</div></pre></td></tr></table></figure>
-<h2 id="物极必反"><a href="#物极必反" class="headerlink" title="物极必反"></a>物极必反</h2><p>为了提升搜索效果，增加分区数是可以的，但是如果分区数太过庞大，而需查询的数据也很多的话，分区带来的提升会被弱化。尤其是在分区中数据较为分散的时候，只要查询数据量达到一定量级便会轻易集中所有分区。</p>
-<p>大量分区带来的不良后果不仅如此，还会在查询之后给磁盘带来更多的小文件。</p>
-<h2 id="说点题外话"><a href="#说点题外话" class="headerlink" title="说点题外话"></a>说点题外话</h2><p>如果是对数据仓库进行优化</p>
-<p>在 <code>hive</code> 中，有几种办法</p>
-<ul>
-<li>分区</li>
-<li>分桶</li>
-<li>索引</li>
-<li>区分活跃用户</li>
-<li>更改数据结构（id - string –&gt; id - list<string>)</string></li>
-</ul>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-       
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2841,7 +2805,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">34</span>
+                    <span class="site-state-item-count">37</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -2943,7 +2907,11 @@
                     
                       
                     
-                    <span class="site-state-item-count">37</span>
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">39</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -3015,7 +2983,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2018</span>
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2019</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>
@@ -3027,7 +2995,7 @@
       <i class="fa fa-area-chart"></i>
     </span>
     
-    <span title="站点总字数">77k</span>
+    <span title="站点总字数">82k</span>
   
 
   
@@ -3036,7 +3004,7 @@
       <i class="fa fa-coffee"></i>
     </span>
     
-    <span title="站点阅读时长">1:10</span>
+    <span title="站点阅读时长">1:14</span>
   
 </div>
 

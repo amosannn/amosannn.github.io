@@ -123,12 +123,12 @@
 <meta property="og:url" content="https://amosannn.github.io/2018/12/17/data-alert-by-graphite-and-grafana/index.html">
 <meta property="og:site_name" content="Amosannn">
 <meta property="og:description" content="向 Graphite 写入数据Graphite 的数据主要以 whisper 的格式存储在 carbon 这个组件中，而向其中填充数据的话我们有多种方式，这里演示两种常用手段。 使用 python1$ pip3 install graphyte 这里使用了 graphyte，用法很简单，只需要指定写入的 series 对应的值即可，写入的时间戳与 tag 是附加选项，可写可不写。 1graphy">
-<meta property="og:image" content="https://amosannn.github.io/2018/12/17/images/grafana/DeepinScrot-0552.png">
-<meta property="og:updated_time" content="2018-12-18T04:13:21.715Z">
+<meta property="og:image" content="https://amosannn.github.io/2018/12/17/images/grafana/DeepinScrot-2637.png">
+<meta property="og:updated_time" content="2019-05-16T02:37:54.865Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="使用 Grafana + Graphite 进行数据预警监控">
 <meta name="twitter:description" content="向 Graphite 写入数据Graphite 的数据主要以 whisper 的格式存储在 carbon 这个组件中，而向其中填充数据的话我们有多种方式，这里演示两种常用手段。 使用 python1$ pip3 install graphyte 这里使用了 graphyte，用法很简单，只需要指定写入的 series 对应的值即可，写入的时间戳与 tag 是附加选项，可写可不写。 1graphy">
-<meta name="twitter:image" content="https://amosannn.github.io/2018/12/17/images/grafana/DeepinScrot-0552.png">
+<meta name="twitter:image" content="https://amosannn.github.io/2018/12/17/images/grafana/DeepinScrot-2637.png">
 
 
 
@@ -409,7 +409,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2018-12-18 12:13:21" itemprop="dateModified" datetime="2018-12-18T12:13:21+08:00">2018-12-18</time>
+                <time title="修改时间：2019-05-16 10:37:54" itemprop="dateModified" datetime="2019-05-16T10:37:54+08:00">2019-05-16</time>
               
             
           </span>
@@ -499,13 +499,13 @@
       
 
       
-        <p><img src="../images/grafana/DeepinScrot-0552.png" alt=""></p>
+        <p><img src="../images/grafana/DeepinScrot-2637.png" alt=""></p>
 <h1 id="向-Graphite-写入数据"><a href="#向-Graphite-写入数据" class="headerlink" title="向 Graphite 写入数据"></a>向 Graphite 写入数据</h1><p>Graphite 的数据主要以 <code>whisper</code> 的格式存储在 <code>carbon</code> 这个组件中，而向其中填充数据的话我们有多种方式，这里演示两种常用手段。</p>
 <h2 id="使用-python"><a href="#使用-python" class="headerlink" title="使用 python"></a>使用 python</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ pip3 install graphyte</div></pre></td></tr></table></figure>
 <p>这里使用了 <code>graphyte</code>，用法很简单，只需要指定写入的 series 对应的值即可，写入的时间戳与 tag 是附加选项，可写可不写。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">graphyte.send(series, value, timestamp, &#123;<span class="string">'tag_name'</span>: tag_value, <span class="string">'tag_name'</span>: <span class="string">'tag_value'</span>&#125;)</div></pre></td></tr></table></figure>
 <h2 id="使用-curl"><a href="#使用-curl" class="headerlink" title="使用 curl"></a>使用 curl</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ echo &quot;foo.bar 3 `date +%s`&quot; | nc 127.0.0.1 2003</div></pre></td></tr></table></figure>
-<p>当数据准备好了之后便按你的喜好来设置土星的样式</p>
+<p>当数据准备好了之后便按你的喜好来设置图形的样式</p>
 <h1 id="设置预警"><a href="#设置预警" class="headerlink" title="设置预警"></a>设置预警</h1><p>进入到 <code>Grafana</code> 中的 Alert 标签下，主要需要设置以下几个参数</p>
 <ol>
 <li>Alert Config</li>
@@ -519,7 +519,7 @@
 <blockquote>
 <p>torkelo: you cannot control what time of day it will evaluate, it will evaluate every 24 hours. So if it was more than 24 hours since last evaluation it will evaluate (no matter what time of day)</p>
 </blockquote>
-<p>所以，<strong>grafana 对小时级、天级或在精确时间点触发预警的支持是很不友好的</strong>。</p>
+<p>所以，<strong>grafana 对小时级、天级或在精确时间点触发预警的支持是很不友好的</strong>。<br><a id="more"></a></p>
 <p>例如，你想让你的数据在每个整点触发一次数据比对，至少在当前的最新版本(v5.4.2)，都是不支持的。</p>
 <p>而在 <code>Evaluate every</code> 的配置下，你也<strong>无法保证它的执行时间</strong>。</p>
 <p>举个栗子，你做了这样的设置</p>
@@ -585,6 +585,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/12/24/airflow-create-user-and-filter-dags-by-owner/" rel="prev" title="Airflow 如何让用户只能看到自己创建的 Dag">
+                Airflow 如何让用户只能看到自己创建的 Dag <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -658,7 +662,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">34</span>
+                    <span class="site-state-item-count">37</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -760,7 +764,11 @@
                     
                       
                     
-                    <span class="site-state-item-count">37</span>
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">39</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -848,7 +856,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2018</span>
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2019</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>
@@ -860,7 +868,7 @@
       <i class="fa fa-area-chart"></i>
     </span>
     
-    <span title="站点总字数">77k</span>
+    <span title="站点总字数">82k</span>
   
 
   
@@ -869,7 +877,7 @@
       <i class="fa fa-coffee"></i>
     </span>
     
-    <span title="站点阅读时长">1:10</span>
+    <span title="站点阅读时长">1:14</span>
   
 </div>
 

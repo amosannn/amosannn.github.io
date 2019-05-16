@@ -123,7 +123,7 @@
 <meta property="og:url" content="https://amosannn.github.io/2018/10/29/airflow_install_and_more/index.html">
 <meta property="og:site_name" content="Amosannn">
 <meta property="og:description" content="有啥用Airflow 简单来说就是管理和调度各种离线定时的 Job，用以替代 crontab， 可以把它看作是个高级版的 crontab。 如果 crontab  的规模达到百千万，管理起来会非常复杂。这个时候可以考虑将任务迁移到 Airflow，你将可以清楚地分辨出哪些 DAG 是稳定的，哪些不那么见状，需要优化。如果 DAG 不足以打动你，强交互性、友好的界面管理、重跑任务以及合适的报警级别足">
-<meta property="og:updated_time" content="2018-11-06T08:27:11.230Z">
+<meta property="og:updated_time" content="2019-01-08T04:22:54.243Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Airflow 安装及跳坑指南">
 <meta name="twitter:description" content="有啥用Airflow 简单来说就是管理和调度各种离线定时的 Job，用以替代 crontab， 可以把它看作是个高级版的 crontab。 如果 crontab  的规模达到百千万，管理起来会非常复杂。这个时候可以考虑将任务迁移到 Airflow，你将可以清楚地分辨出哪些 DAG 是稳定的，哪些不那么见状，需要优化。如果 DAG 不足以打动你，强交互性、友好的界面管理、重跑任务以及合适的报警级别足">
@@ -407,7 +407,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2018-11-06 16:27:11" itemprop="dateModified" datetime="2018-11-06T16:27:11+08:00">2018-11-06</time>
+                <time title="修改时间：2019-01-08 12:22:54" itemprop="dateModified" datetime="2019-01-08T12:22:54+08:00">2019-01-08</time>
               
             
           </span>
@@ -506,7 +506,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ pip3 install apache-airflow</div></pre></td></tr></table></figure>
 <p>如果你想安装 1.8.0 的 <code>Airflow</code></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ pip3 install airflow</div></pre></td></tr></table></figure>
-<h3 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ airflow inidb</div></pre></td></tr></table></figure>
+<h3 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ airflow initdb</div></pre></td></tr></table></figure>
 <p>初始化后默认会在 <code>~/</code> 下生成 <code>airflow</code> 文件夹，如果想更换 <code>MySQL</code> 或其他数据库做为元数据存储，那么在配置文件中修改配置后重新初始化即可。</p>
 <p>关于如何在 python3 中安装 <code>MySQL</code>，此处不做赘述。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ vi ~/airflow/airflow.cfg</div><div class="line">sql_alchemy_conn = mysql://username:password@host:port/airflow</div></pre></td></tr></table></figure>
@@ -653,7 +653,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">34</span>
+                    <span class="site-state-item-count">37</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -755,7 +755,11 @@
                     
                       
                     
-                    <span class="site-state-item-count">37</span>
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">39</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -843,7 +847,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2018</span>
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2019</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>
@@ -855,7 +859,7 @@
       <i class="fa fa-area-chart"></i>
     </span>
     
-    <span title="站点总字数">77k</span>
+    <span title="站点总字数">82k</span>
   
 
   
@@ -864,7 +868,7 @@
       <i class="fa fa-coffee"></i>
     </span>
     
-    <span title="站点阅读时长">1:10</span>
+    <span title="站点阅读时长">1:14</span>
   
 </div>
 

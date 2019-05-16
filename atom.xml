@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://amosannn.github.io/"/>
-  <updated>2018-12-18T04:13:21.715Z</updated>
+  <updated>2019-05-16T02:33:47.001Z</updated>
   <id>https://amosannn.github.io/</id>
   
   <author>
@@ -16,19 +16,522 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>Haproxy 之 Http 代理的两种方式</title>
+    <link href="https://amosannn.github.io/2019/04/30/haproxy-listen-vs-frontend/"/>
+    <id>https://amosannn.github.io/2019/04/30/haproxy-listen-vs-frontend/</id>
+    <published>2019-04-30T01:55:30.000Z</published>
+    <updated>2019-05-16T02:33:47.001Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="listen-与-frontend-backend-的配置区别"><a href="#listen-与-frontend-backend-的配置区别" class="headerlink" title="listen 与 (frontend + backend) 的配置区别"></a>listen 与 (frontend + backend) 的配置区别</h2><h3 id="frontend-backend-的配置示例及运行流程"><a href="#frontend-backend-的配置示例及运行流程" class="headerlink" title="frontend + backend 的配置示例及运行流程"></a>frontend + backend 的配置示例及运行流程</h3><p>这是一个 HTTP 代理在所有接口上监听端口 80 的简单配置，请求进入后的运行流程如下：</p>
+<ol>
+<li><code>frontend</code> 监听 80 端口</li>
+<li>请求被 <code>frontend</code> 转发到 <code>backend</code> 的 servers 中</li>
+<li>请求进入运行在 127.0.0.1:8000 的 server1 中</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"># Simple configuration for an HTTP proxy listening on port 80 on all</div><div class="line"># interfaces and forwarding requests to a single backend &quot;servers&quot; with a</div><div class="line"># single server &quot;server1&quot; listening on 127.0.0.1:8000</div><div class="line"></div><div class="line">global</div><div class="line">daemon</div><div class="line">maxconn 256</div><div class="line"></div><div class="line">defaults</div><div class="line">mode http</div><div class="line">timeout connect 5000ms</div><div class="line">timeout client 50000ms</div><div class="line">timeout server 50000ms</div><div class="line"></div><div class="line">frontend http-in</div><div class="line">bind *:80</div><div class="line">default_backend servers</div><div class="line"></div><div class="line">backend servers</div><div class="line">server server1 127.0.0.1:8000 maxconn 32</div></pre></td></tr></table></figure>
+<a id="more"></a>
+<h3 id="listen-的配置示例及运行流程"><a href="#listen-的配置示例及运行流程" class="headerlink" title="listen 的配置示例及运行流程"></a>listen 的配置示例及运行流程</h3><p>使用单个 <code>listen</code> 块定义的相同配置。更精简但不那么富有表现力，尤其是在HTTP模式下。</p>
+<ol>
+<li>请求进入 80 端口</li>
+<li>转发入运行在 127.0.0.1:8000 的 server1 中</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"># The same configuration defined with a single listen block. Shorter but</div><div class="line"># less expressive, especially in HTTP mode.</div><div class="line"></div><div class="line">global</div><div class="line">daemon</div><div class="line">maxconn 256</div><div class="line"></div><div class="line">defaults</div><div class="line">mode http</div><div class="line">timeout connect 5000ms</div><div class="line">timeout client 50000ms</div><div class="line">timeout server 50000ms</div><div class="line"></div><div class="line">listen http-in</div><div class="line">bind *:80</div><div class="line">server server1 127.0.0.1:8000 maxconn 32</div></pre></td></tr></table></figure>
+<h2 id="相关命令"><a href="#相关命令" class="headerlink" title="相关命令"></a>相关命令</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"># 修改配置并重启</div><div class="line">sudo vi /etc/haproxy/haproxy.cfg</div><div class="line">haproxy -c -f /etc/haproxy/haproxy.cfg</div><div class="line">sudo service haproxy restart</div><div class="line"></div><div class="line"># 设置权重</div><div class="line">echo &apos;set weight read_only-back/slave1 0&apos; | sudo socat stdio /run/haproxy/admin.sock</div><div class="line"></div><div class="line">echo &apos;set server read_only-back/slave1 agent up&apos; | sudo socat stdio /run/haproxy/admin.sock</div></pre></td></tr></table></figure>
+<hr>
+<h2 id="了解更多"><a href="#了解更多" class="headerlink" title="了解更多"></a>了解更多</h2><p><a href="http://cbonte.github.io/haproxy-dconv/" target="_blank" rel="external">HAProxy 各版本官方文档</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;listen-与-frontend-backend-的配置区别&quot;&gt;&lt;a href=&quot;#listen-与-frontend-backend-的配置区别&quot; class=&quot;headerlink&quot; title=&quot;listen 与 (frontend + backend) 的配置区别&quot;&gt;&lt;/a&gt;listen 与 (frontend + backend) 的配置区别&lt;/h2&gt;&lt;h3 id=&quot;frontend-backend-的配置示例及运行流程&quot;&gt;&lt;a href=&quot;#frontend-backend-的配置示例及运行流程&quot; class=&quot;headerlink&quot; title=&quot;frontend + backend 的配置示例及运行流程&quot;&gt;&lt;/a&gt;frontend + backend 的配置示例及运行流程&lt;/h3&gt;&lt;p&gt;这是一个 HTTP 代理在所有接口上监听端口 80 的简单配置，请求进入后的运行流程如下：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;frontend&lt;/code&gt; 监听 80 端口&lt;/li&gt;
+&lt;li&gt;请求被 &lt;code&gt;frontend&lt;/code&gt; 转发到 &lt;code&gt;backend&lt;/code&gt; 的 servers 中&lt;/li&gt;
+&lt;li&gt;请求进入运行在 127.0.0.1:8000 的 server1 中&lt;/li&gt;
+&lt;/ol&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;5&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;6&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;7&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;8&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;9&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;10&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;11&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;12&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;13&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;14&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;15&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;16&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;17&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;18&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;19&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;20&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;# Simple configuration for an HTTP proxy listening on port 80 on all&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;# interfaces and forwarding requests to a single backend &amp;quot;servers&amp;quot; with a&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;# single server &amp;quot;server1&amp;quot; listening on 127.0.0.1:8000&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;global&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;daemon&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;maxconn 256&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;defaults&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;mode http&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;timeout connect 5000ms&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;timeout client 50000ms&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;timeout server 50000ms&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;frontend http-in&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;bind *:80&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;default_backend servers&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;backend servers&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;server server1 127.0.0.1:8000 maxconn 32&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+    
+    </summary>
+    
+      <category term="技术一路走到黑" scheme="https://amosannn.github.io/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
+    
+    
+      <category term="Haproxy" scheme="https://amosannn.github.io/tags/Haproxy/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Haproxy 之常用配置详解</title>
+    <link href="https://amosannn.github.io/2019/04/28/haproxy-common-configuration-analysis/"/>
+    <id>https://amosannn.github.io/2019/04/28/haproxy-common-configuration-analysis/</id>
+    <published>2019-04-28T01:55:30.000Z</published>
+    <updated>2019-05-16T02:34:48.194Z</updated>
+    
+    <content type="html"><![CDATA[<p>HAProxy 配置中有三个重要部分</p>
+<ul>
+<li>global</li>
+<li>defaults</li>
+<li>listen or (frontend + backend)</li>
+</ul>
+<h2 id="常用配置详解"><a href="#常用配置详解" class="headerlink" title="常用配置详解"></a>常用配置详解</h2><h3 id="全局配置（global）"><a href="#全局配置（global）" class="headerlink" title="全局配置（global）"></a>全局配置（global）</h3><table>
+<thead>
+<tr>
+<th>参数名</th>
+<th>值</th>
+<th>参数含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>maxconn</td>
+<td>20480</td>
+<td>默认最大连接数</td>
+</tr>
+<tr>
+<td>daemon</td>
+<td></td>
+<td>以后台形式运行haproxy</td>
+</tr>
+<tr>
+<td>nbproc</td>
+<td>1</td>
+<td>进程数量（可以设置多个进程提高性能）</td>
+</tr>
+<tr>
+<td>pidfile</td>
+<td>/var/run/haproxy.pid</td>
+<td>haproxy 的 pid 存放路径，启动进程的用户必须有权限访问此文件</td>
+</tr>
+</tbody>
+</table>
+<h3 id="默认全局配置（defaults）"><a href="#默认全局配置（defaults）" class="headerlink" title="默认全局配置（defaults）"></a>默认全局配置（defaults）</h3><p>这些参数可以被利用配置到frontend，backend，listen组件</p>
+<p>option 参数可以同时配置多个</p>
+<p>balance 只可配置一个*</p>
+<a id="more"></a>
+<table>
+<thead>
+<tr>
+<th>参数名</th>
+<th>值</th>
+<th>参数含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>log</td>
+<td>global</td>
+<td></td>
+</tr>
+<tr>
+<td>mode</td>
+<td>http</td>
+<td>所处理的类别 (#七层:http;四层:tcp )</td>
+</tr>
+<tr>
+<td>maxconn</td>
+<td>20480</td>
+<td>最大连接数</td>
+</tr>
+<tr>
+<td>option</td>
+<td>httplog</td>
+<td>日志类别为 http 日志格式</td>
+</tr>
+<tr>
+<td>option</td>
+<td>httpclose</td>
+<td>每次请求完毕后主动关闭 http 通道</td>
+</tr>
+<tr>
+<td>option</td>
+<td>dontlognull</td>
+<td>不记录健康检查的日志信息</td>
+</tr>
+<tr>
+<td>option</td>
+<td>forwardfor</td>
+<td>记录客户端 IP 在 X-Forwarded-For 头域中，用以获取客户端真实 ip</td>
+</tr>
+<tr>
+<td>option</td>
+<td>redispatch</td>
+<td>serverId 对应的服务器挂掉后，强制定向到其他健康的服务器</td>
+</tr>
+<tr>
+<td>option</td>
+<td>abortonclose</td>
+<td>当服务器负载很高的时候，自动结束掉当前队列处理比较久的连接</td>
+</tr>
+<tr>
+<td>stats refresh</td>
+<td>30</td>
+<td>统计页面刷新间隔</td>
+</tr>
+<tr>
+<td>retries</td>
+<td>3</td>
+<td>3次连接失败就认为服务不可用，也可以通过后面设置</td>
+</tr>
+<tr>
+<td>balance</td>
+<td>roundrobin</td>
+<td>默认的负载均衡的方式，轮询方式</td>
+</tr>
+<tr>
+<td>balance</td>
+<td>source</td>
+<td>默认的负载均衡的方式，类似 nginx 的 ip_hash</td>
+</tr>
+<tr>
+<td>balance</td>
+<td>leastconn</td>
+<td>默认的负载均衡的方式，最小连接</td>
+</tr>
+<tr>
+<td>timeout connect</td>
+<td>5000ms</td>
+<td>连接 server 端超时 5s</td>
+</tr>
+<tr>
+<td>timeout client</td>
+<td>50000ms</td>
+<td>客户端响应超时 50s</td>
+</tr>
+<tr>
+<td>timeout server</td>
+<td>50000ms</td>
+<td>server 端响应超时 50s</td>
+</tr>
+<tr>
+<td>timeout check</td>
+<td>2000</td>
+<td>心跳检测超时时间</td>
+</tr>
+</tbody>
+</table>
+<h3 id="监控页面的设置"><a href="#监控页面的设置" class="headerlink" title="监控页面的设置"></a>监控页面的设置</h3><h4 id="listen-的配置参数"><a href="#listen-的配置参数" class="headerlink" title="listen 的配置参数"></a>listen 的配置参数</h4><table>
+<thead>
+<tr>
+<th>参数名</th>
+<th>值</th>
+<th>参数含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>listen</td>
+<td>listen_demo</td>
+<td>监控组名称，是 Frontend 和 Backend 的组合体</td>
+</tr>
+<tr>
+<td>bind</td>
+<td>0.0.0.0:65532</td>
+<td>供外部访问的地址及端口</td>
+</tr>
+<tr>
+<td>mode</td>
+<td>http</td>
+<td>代理模式</td>
+</tr>
+<tr>
+<td>log</td>
+<td>127.0.0.1 local3 err</td>
+<td>错误日志记录</td>
+</tr>
+</tbody>
+</table>
+<p>HTTP 模式的相关设置</p>
+<table>
+<thead>
+<tr>
+<th>参数名</th>
+<th>值</th>
+<th>参数含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>stats refresh</td>
+<td>5s</td>
+<td>监控页自动刷新时间</td>
+</tr>
+<tr>
+<td>stats uri</td>
+<td>/admin?stats</td>
+<td>监控页的地址</td>
+</tr>
+<tr>
+<td>stats realm</td>
+<td>/info</td>
+<td>监控面的提示信息</td>
+</tr>
+<tr>
+<td>stats auth</td>
+<td>admin:admin</td>
+<td>监控页鉴权，可以同时设置多个用户</td>
+</tr>
+<tr>
+<td>stats</td>
+<td>hide-version</td>
+<td>隐藏统计页面上的 HAproxy 版本信息</td>
+</tr>
+<tr>
+<td>errorfile 403</td>
+<td>/etc/haproxy/errorfiles/403.http</td>
+<td></td>
+</tr>
+<tr>
+<td>errorfile 500</td>
+<td>/etc/haproxy/errorfiles/500.http</td>
+<td></td>
+</tr>
+<tr>
+<td>errorfile 502</td>
+<td>/etc/haproxy/errorfiles/502.http</td>
+<td></td>
+</tr>
+<tr>
+<td>errorfile 503</td>
+<td>/etc/haproxy/errorfiles/503.http</td>
+<td></td>
+</tr>
+<tr>
+<td>errorfile 504</td>
+<td>/etc/haproxy/errorfiles/504.http</td>
+</tr>
+</tbody>
+</table>
+<h4 id="frontend-的配置参数"><a href="#frontend-的配置参数" class="headerlink" title="frontend 的配置参数"></a>frontend 的配置参数</h4><table>
+<thead>
+<tr>
+<th>参数名</th>
+<th>值</th>
+<th>参数含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>frontend</td>
+<td>frontend_name</td>
+<td></td>
+</tr>
+<tr>
+<td>bind</td>
+<td>0.0.0.0:1080</td>
+<td>供外部访问的地址及端口</td>
+</tr>
+<tr>
+<td>mode</td>
+<td>http</td>
+<td></td>
+</tr>
+<tr>
+<td>log</td>
+<td>global</td>
+<td>应用全局的日志配置</td>
+</tr>
+<tr>
+<td>option</td>
+<td>httplog</td>
+<td>启用 http 的 log</td>
+</tr>
+<tr>
+<td>option</td>
+<td>httpclose</td>
+<td>每次请求完毕后主动关闭 http 通道，<code>HA-Proxy</code> 不支持 keep-alive 模式</td>
+</tr>
+<tr>
+<td>option</td>
+<td>forwardfor</td>
+<td>如果后端服务器需要获得客户端的真实 IP 需要配置次参数，将可以从 Http Header 中获得客户端 IP</td>
+</tr>
+<tr>
+<td>default_backend</td>
+<td>servers</td>
+<td>请求转发至名为 <code>servers</code> 的后端服务</td>
+</tr>
+</tbody>
+</table>
+<h4 id="backend-的配置参数"><a href="#backend-的配置参数" class="headerlink" title="backend 的配置参数"></a>backend 的配置参数</h4><table>
+<thead>
+<tr>
+<th>参数名</th>
+<th>值</th>
+<th>参数含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>backend</td>
+<td>servers</td>
+<td>后端服务名，可自定义</td>
+</tr>
+<tr>
+<td>mode</td>
+<td>http</td>
+<td></td>
+</tr>
+<tr>
+<td>balance</td>
+<td>roundrobin</td>
+<td>负载均衡，轮询方式</td>
+</tr>
+<tr>
+<td>option</td>
+<td>httpchk GET /index.html</td>
+<td>启动心跳检测的地址</td>
+</tr>
+<tr>
+<td>server</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>backend 中 server 的参数</p>
+<ul>
+<li>server web1 192.168.11.2:80 check inter 1500 rise 3 fall 3 weight 1</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>参数名</th>
+<th>值</th>
+<th>参数含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>server</td>
+<td>server1</td>
+<td>server 名</td>
+</tr>
+<tr>
+<td>check</td>
+<td>inter 1500</td>
+<td>心跳检测频率</td>
+</tr>
+<tr>
+<td>rise</td>
+<td>3</td>
+<td>3 次正确认为服务器可用</td>
+</tr>
+<tr>
+<td>fall</td>
+<td>3</td>
+<td>3 次失败认为服务器不可用</td>
+</tr>
+<tr>
+<td>weight</td>
+<td>2</td>
+<td>代表权重如果检查失败会自动踢掉该服务器</td>
+</tr>
+</tbody>
+</table>
+<h2 id="配置自由的时间单位"><a href="#配置自由的时间单位" class="headerlink" title="配置自由的时间单位"></a>配置自由的时间单位</h2><p>一些参数涉及表示时间的值，例如超时。这些值通常以毫秒表示（除非有特殊说明），但可以通过改变后缀单位来改变这些值。</p>
+<p>支持的单位是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">- us : microseconds. 1 microsecond = 1/1000000 second</div><div class="line">- ms : milliseconds. 1 millisecond = 1/1000 second. This is the default.</div><div class="line">- s  : seconds. 1s = 1000ms</div><div class="line">- m  : minutes. 1m = 60s = 60000ms</div><div class="line">- h  : hours.   1h = 60m = 3600s = 3600000ms</div><div class="line">- d  : days.    1d = 24h = 1440m = 86400s = 86400000ms</div></pre></td></tr></table></figure>
+<h2 id="相关命令"><a href="#相关命令" class="headerlink" title="相关命令"></a>相关命令</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"># 修改配置并重启</div><div class="line">sudo vi /etc/haproxy/haproxy.cfg</div><div class="line">haproxy -c -f /etc/haproxy/haproxy.cfg</div><div class="line">sudo service haproxy restart</div><div class="line"></div><div class="line"># 设置权重</div><div class="line">echo &apos;set weight read_only-back/slave1 0&apos; | sudo socat stdio /run/haproxy/admin.sock</div><div class="line"></div><div class="line">echo &apos;set server read_only-back/slave1 agent up&apos; | sudo socat stdio /run/haproxy/admin.sock</div></pre></td></tr></table></figure>
+<hr>
+<h2 id="了解更多"><a href="#了解更多" class="headerlink" title="了解更多"></a>了解更多</h2><p><a href="http://cbonte.github.io/haproxy-dconv/" target="_blank" rel="external">HAProxy 各版本官方文档</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;HAProxy 配置中有三个重要部分&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;global&lt;/li&gt;
+&lt;li&gt;defaults&lt;/li&gt;
+&lt;li&gt;listen or (frontend + backend)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;常用配置详解&quot;&gt;&lt;a href=&quot;#常用配置详解&quot; class=&quot;headerlink&quot; title=&quot;常用配置详解&quot;&gt;&lt;/a&gt;常用配置详解&lt;/h2&gt;&lt;h3 id=&quot;全局配置（global）&quot;&gt;&lt;a href=&quot;#全局配置（global）&quot; class=&quot;headerlink&quot; title=&quot;全局配置（global）&quot;&gt;&lt;/a&gt;全局配置（global）&lt;/h3&gt;&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;参数名&lt;/th&gt;
+&lt;th&gt;值&lt;/th&gt;
+&lt;th&gt;参数含义&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;maxconn&lt;/td&gt;
+&lt;td&gt;20480&lt;/td&gt;
+&lt;td&gt;默认最大连接数&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;daemon&lt;/td&gt;
+&lt;td&gt;&lt;/td&gt;
+&lt;td&gt;以后台形式运行haproxy&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;nbproc&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;进程数量（可以设置多个进程提高性能）&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;pidfile&lt;/td&gt;
+&lt;td&gt;/var/run/haproxy.pid&lt;/td&gt;
+&lt;td&gt;haproxy 的 pid 存放路径，启动进程的用户必须有权限访问此文件&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&quot;默认全局配置（defaults）&quot;&gt;&lt;a href=&quot;#默认全局配置（defaults）&quot; class=&quot;headerlink&quot; title=&quot;默认全局配置（defaults）&quot;&gt;&lt;/a&gt;默认全局配置（defaults）&lt;/h3&gt;&lt;p&gt;这些参数可以被利用配置到frontend，backend，listen组件&lt;/p&gt;
+&lt;p&gt;option 参数可以同时配置多个&lt;/p&gt;
+&lt;p&gt;balance 只可配置一个*&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="技术一路走到黑" scheme="https://amosannn.github.io/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
+    
+    
+      <category term="Haproxy" scheme="https://amosannn.github.io/tags/Haproxy/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Airflow 如何让用户只能看到自己创建的 Dag</title>
+    <link href="https://amosannn.github.io/2018/12/24/airflow-create-user-and-filter-dags-by-owner/"/>
+    <id>https://amosannn.github.io/2018/12/24/airflow-create-user-and-filter-dags-by-owner/</id>
+    <published>2018-12-24T01:55:30.000Z</published>
+    <updated>2018-12-29T03:32:22.328Z</updated>
+    
+    <content type="html"><![CDATA[<p>Airflow 是个很奇怪的东西，直到 1.10 它都没有权限系统，自带的创建用户和密码验证，只能作为一扇挡着外人的门。只要打开这扇门，里面的所有 <code>Owner</code> 下的 Dag 都会完完全全展示在你面前并且受你掌控。</p>
+<p>究其原因，便是 airflow 自带的用户创建默认是 <code>superuser</code>，虽然话是这么说，创建个普通 user 就行了，但在一系列尝试后，我发现，它并没有提供其他等级的用户给你选择，只有 <code>superuser</code> 。。</p>
+<p>所以在尝试了这一系列操作之后，我觉得有必要使用官方建议的 <code>LDAP</code>，虽然它看起来很麻烦的样子。</p>
+<p>然而经过一番探查，我发现 <code>LDAP</code> 的作用并不是 filter dags by ower，他只是细粒度的分配登录权限。而真正的分发 Dag 到个人账户下，还是得等待 airflow 新版本的发布（当前版本该选项不生效）。</p>
+<hr>
+<p><a href="https://stackoverflow.com/questions/47205798/airflow-webserver-not-filtering-dags-by-owner" target="_blank" rel="external">airflow webserver not filtering dags by owner</a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;Airflow 是个很奇怪的东西，直到 1.10 它都没有权限系统，自带的创建用户和密码验证，只能作为一扇挡着外人的门。只要打开这扇门，里面的所有 &lt;code&gt;Owner&lt;/code&gt; 下的 Dag 都会完完全全展示在你面前并且受你掌控。&lt;/p&gt;
+&lt;p&gt;究其原因，便是 ai
+    
+    </summary>
+    
+      <category term="技术一路走到黑" scheme="https://amosannn.github.io/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
+    
+    
+      <category term="Airflow" scheme="https://amosannn.github.io/tags/Airflow/"/>
+    
+      <category term="LDAP" scheme="https://amosannn.github.io/tags/LDAP/"/>
+    
+  </entry>
+  
+  <entry>
     <title>使用 Grafana + Graphite 进行数据预警监控</title>
     <link href="https://amosannn.github.io/2018/12/17/data-alert-by-graphite-and-grafana/"/>
     <id>https://amosannn.github.io/2018/12/17/data-alert-by-graphite-and-grafana/</id>
     <published>2018-12-17T01:55:25.000Z</published>
-    <updated>2018-12-18T04:13:21.715Z</updated>
+    <updated>2019-05-16T02:37:54.865Z</updated>
     
-    <content type="html"><![CDATA[<p><img src="../images/grafana/DeepinScrot-0552.png" alt=""></p>
+    <content type="html"><![CDATA[<p><img src="../images/grafana/DeepinScrot-2637.png" alt=""></p>
 <h1 id="向-Graphite-写入数据"><a href="#向-Graphite-写入数据" class="headerlink" title="向 Graphite 写入数据"></a>向 Graphite 写入数据</h1><p>Graphite 的数据主要以 <code>whisper</code> 的格式存储在 <code>carbon</code> 这个组件中，而向其中填充数据的话我们有多种方式，这里演示两种常用手段。</p>
 <h2 id="使用-python"><a href="#使用-python" class="headerlink" title="使用 python"></a>使用 python</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ pip3 install graphyte</div></pre></td></tr></table></figure>
 <p>这里使用了 <code>graphyte</code>，用法很简单，只需要指定写入的 series 对应的值即可，写入的时间戳与 tag 是附加选项，可写可不写。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">graphyte.send(series, value, timestamp, &#123;<span class="string">'tag_name'</span>: tag_value, <span class="string">'tag_name'</span>: <span class="string">'tag_value'</span>&#125;)</div></pre></td></tr></table></figure>
 <h2 id="使用-curl"><a href="#使用-curl" class="headerlink" title="使用 curl"></a>使用 curl</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ echo &quot;foo.bar 3 `date +%s`&quot; | nc 127.0.0.1 2003</div></pre></td></tr></table></figure>
-<p>当数据准备好了之后便按你的喜好来设置土星的样式</p>
+<p>当数据准备好了之后便按你的喜好来设置图形的样式</p>
 <h1 id="设置预警"><a href="#设置预警" class="headerlink" title="设置预警"></a>设置预警</h1><p>进入到 <code>Grafana</code> 中的 Alert 标签下，主要需要设置以下几个参数</p>
 <ol>
 <li>Alert Config</li>
@@ -42,7 +545,7 @@
 <blockquote>
 <p>torkelo: you cannot control what time of day it will evaluate, it will evaluate every 24 hours. So if it was more than 24 hours since last evaluation it will evaluate (no matter what time of day)</p>
 </blockquote>
-<p>所以，<strong>grafana 对小时级、天级或在精确时间点触发预警的支持是很不友好的</strong>。</p>
+<p>所以，<strong>grafana 对小时级、天级或在精确时间点触发预警的支持是很不友好的</strong>。<br><a id="more"></a></p>
 <p>例如，你想让你的数据在每个整点触发一次数据比对，至少在当前的最新版本(v5.4.2)，都是不支持的。</p>
 <p>而在 <code>Evaluate every</code> 的配置下，你也<strong>无法保证它的执行时间</strong>。</p>
 <p>举个栗子，你做了这样的设置</p>
@@ -65,8 +568,27 @@
     
     <summary type="html">
     
-      &lt;p&gt;&lt;img src=&quot;../images/grafana/DeepinScrot-0552.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
-&lt;h1 id=&quot;向-Graphite-写入数据&quot;&gt;&lt;a href=&quot;#向-Graphite-写入数据&quot; class=&quot;headerlink&quot; titl
+      &lt;p&gt;&lt;img src=&quot;../images/grafana/DeepinScrot-2637.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
+&lt;h1 id=&quot;向-Graphite-写入数据&quot;&gt;&lt;a href=&quot;#向-Graphite-写入数据&quot; class=&quot;headerlink&quot; title=&quot;向 Graphite 写入数据&quot;&gt;&lt;/a&gt;向 Graphite 写入数据&lt;/h1&gt;&lt;p&gt;Graphite 的数据主要以 &lt;code&gt;whisper&lt;/code&gt; 的格式存储在 &lt;code&gt;carbon&lt;/code&gt; 这个组件中，而向其中填充数据的话我们有多种方式，这里演示两种常用手段。&lt;/p&gt;
+&lt;h2 id=&quot;使用-python&quot;&gt;&lt;a href=&quot;#使用-python&quot; class=&quot;headerlink&quot; title=&quot;使用 python&quot;&gt;&lt;/a&gt;使用 python&lt;/h2&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;$ pip3 install graphyte&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;这里使用了 &lt;code&gt;graphyte&lt;/code&gt;，用法很简单，只需要指定写入的 series 对应的值即可，写入的时间戳与 tag 是附加选项，可写可不写。&lt;/p&gt;
+&lt;figure class=&quot;highlight python&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;graphyte.send(series, value, timestamp, &amp;#123;&lt;span class=&quot;string&quot;&gt;&#39;tag_name&#39;&lt;/span&gt;: tag_value, &lt;span class=&quot;string&quot;&gt;&#39;tag_name&#39;&lt;/span&gt;: &lt;span class=&quot;string&quot;&gt;&#39;tag_value&#39;&lt;/span&gt;&amp;#125;)&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;h2 id=&quot;使用-curl&quot;&gt;&lt;a href=&quot;#使用-curl&quot; class=&quot;headerlink&quot; title=&quot;使用 curl&quot;&gt;&lt;/a&gt;使用 curl&lt;/h2&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;$ echo &amp;quot;foo.bar 3 `date +%s`&amp;quot; | nc 127.0.0.1 2003&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;p&gt;当数据准备好了之后便按你的喜好来设置图形的样式&lt;/p&gt;
+&lt;h1 id=&quot;设置预警&quot;&gt;&lt;a href=&quot;#设置预警&quot; class=&quot;headerlink&quot; title=&quot;设置预警&quot;&gt;&lt;/a&gt;设置预警&lt;/h1&gt;&lt;p&gt;进入到 &lt;code&gt;Grafana&lt;/code&gt; 中的 Alert 标签下，主要需要设置以下几个参数&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Alert Config&lt;/li&gt;
+&lt;li&gt;Conditions&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;如果想在设置的阈值触发时发送消息通知，则需要进一步设置 &lt;code&gt;Notifications&lt;/code&gt; 以及 &lt;code&gt;Alert Rules&lt;/code&gt; 和 &lt;code&gt;Notification channels&lt;/code&gt;&lt;/p&gt;
+&lt;h2 id=&quot;Alert-Config&quot;&gt;&lt;a href=&quot;#Alert-Config&quot; class=&quot;headerlink&quot; title=&quot;Alert Config&quot;&gt;&lt;/a&gt;Alert Config&lt;/h2&gt;&lt;p&gt;主要关注 &lt;code&gt;Evaluate every&lt;/code&gt; 这个选项&lt;/p&gt;
+&lt;p&gt;我猜想 Grafana 的开发团队对它的定义为时效性高的预警通知工具，对于数据异常的及时发现，对比的间隔时间显然是越短越好。&lt;/p&gt;
+&lt;p&gt;它们希望你将比对的时间间隔缩短，30s、60s、120s，这样发现数据异常的速度也就越快。&lt;/p&gt;
+&lt;p&gt;今年年初，开发者在一条 issue 下做过这样一个答复&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;torkelo: you cannot control what time of day it will evaluate, it will evaluate every 24 hours. So if it was more than 24 hours since last evaluation it will evaluate (no matter what time of day)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;所以，&lt;strong&gt;grafana 对小时级、天级或在精确时间点触发预警的支持是很不友好的&lt;/strong&gt;。&lt;br&gt;
     
     </summary>
     
@@ -990,7 +1512,7 @@
     <link href="https://amosannn.github.io/2018/10/29/airflow_install_and_more/"/>
     <id>https://amosannn.github.io/2018/10/29/airflow_install_and_more/</id>
     <published>2018-10-29T11:58:16.000Z</published>
-    <updated>2018-11-06T08:27:11.230Z</updated>
+    <updated>2019-01-08T04:22:54.243Z</updated>
     
     <content type="html"><![CDATA[<h2 id="有啥用"><a href="#有啥用" class="headerlink" title="有啥用"></a>有啥用</h2><p><code>Airflow</code> 简单来说就是管理和调度各种离线定时的 Job，用以替代 <code>crontab</code>， 可以把它看作是个高级版的 <code>crontab</code>。</p>
 <p>如果 <code>crontab</code>  的规模达到百千万，管理起来会非常复杂。这个时候可以考虑将任务迁移到 <code>Airflow</code>，你将可以清楚地分辨出哪些 DAG 是稳定的，哪些不那么见状，需要优化。如果 DAG 不足以打动你，强交互性、友好的界面管理、重跑任务以及合适的报警级别足以让你感觉相见恨晚。</p>
@@ -1001,7 +1523,7 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ pip3 install apache-airflow</div></pre></td></tr></table></figure>
 <p>如果你想安装 1.8.0 的 <code>Airflow</code></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ pip3 install airflow</div></pre></td></tr></table></figure>
-<h3 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ airflow inidb</div></pre></td></tr></table></figure>
+<h3 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ airflow initdb</div></pre></td></tr></table></figure>
 <p>初始化后默认会在 <code>~/</code> 下生成 <code>airflow</code> 文件夹，如果想更换 <code>MySQL</code> 或其他数据库做为元数据存储，那么在配置文件中修改配置后重新初始化即可。</p>
 <p>关于如何在 python3 中安装 <code>MySQL</code>，此处不做赘述。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ vi ~/airflow/airflow.cfg</div><div class="line">sql_alchemy_conn = mysql://username:password@host:port/airflow</div></pre></td></tr></table></figure>
@@ -1442,126 +1964,6 @@
       <category term="jedis" scheme="https://amosannn.github.io/tags/jedis/"/>
     
       <category term="redis" scheme="https://amosannn.github.io/tags/redis/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Vue开发路上遇到的坑儿们</title>
-    <link href="https://amosannn.github.io/2018/01/24/vue-error-collection/"/>
-    <id>https://amosannn.github.io/2018/01/24/vue-error-collection/</id>
-    <published>2018-01-24T02:52:06.000Z</published>
-    <updated>2018-01-24T11:18:10.000Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="开篇"><a href="#开篇" class="headerlink" title="开篇"></a>开篇</h1><p>此文仅用于记录vue开发中遇到的各种奇葩事。</p>
-<h1 id="错误"><a href="#错误" class="headerlink" title="错误"></a>错误</h1><h2 id="项目不报错但是路由不加载"><a href="#项目不报错但是路由不加载" class="headerlink" title="项目不报错但是路由不加载"></a>项目不报错但是路由不加载</h2><p>前方预警：这是个低级错误Orz<br>index.js<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">routes: [</div><div class="line">    &#123;</div><div class="line">      path: &apos;/&apos;,</div><div class="line">      name: &apos;Index&apos;,</div><div class="line">      component: &#123;</div><div class="line">        nav: Navv,</div><div class="line">        main: Index,</div><div class="line">        footer: Footter</div><div class="line">      &#125;</div><div class="line">    &#125;</div><div class="line">]</div></pre></td></tr></table></figure></p>
-<p>App.vue<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">&lt;template&gt;</div><div class="line">  &lt;div id=&quot;app&quot;&gt;</div><div class="line">    &lt;router-view name=&quot;nav&quot;&gt;&lt;/router-view&gt;</div><div class="line">    &lt;router-view name=&quot;main&quot;&gt;&lt;/router-view&gt;</div><div class="line">    &lt;router-view name=&quot;footer&quot;&gt;&lt;/router-view&gt;</div><div class="line">  &lt;/div&gt;</div><div class="line">&lt;/template&gt;</div></pre></td></tr></table></figure></p>
-<p>如果你和我一样是只小白菜，可能咋一看会发现没什么毛病，仔细一看就会发现路由配置里的<code>components</code>被我写成了·component·。。<br>vue中到目前为止我知道的两种路由配置方式:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">// 第一种</div><div class="line">...</div><div class="line">component: navv</div><div class="line">...</div><div class="line">// 第二种</div><div class="line">components: &#123;</div><div class="line">	navv</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>over, 经验值 +1</p>
-<h2 id="Failed-to-execute-‘setAttribute’-on-‘Element’-‘method-’-is-not-a-valid-attribute-name"><a href="#Failed-to-execute-‘setAttribute’-on-‘Element’-‘method-’-is-not-a-valid-attribute-name" class="headerlink" title="Failed to execute ‘setAttribute’ on ‘Element’: ‘method+’ is not a valid attribute name."></a>Failed to execute ‘setAttribute’ on ‘Element’: ‘method+’ is not a valid attribute name.</h2><p>由于项目中引入了饿了么开发的组件库·element-ui·，所以一度以为是和我引入的css文件起了冲突？？甚至我还去执行了<code>npm uninstall element-ui</code>这条命令。最后实在没办法了，一段一段代码排查问题，找到一个诡异的地方。。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;form action=&quot;/listTopic&quot; method+=&quot;post&quot;&gt;</div><div class="line">  &lt;input name=&quot;topicName&quot; type=&quot;text&quot; class=&quot;search-input&quot; placeholder=&quot;搜索你感兴趣的内容...&quot;&gt;</div><div class="line">  &lt;button type=&quot;submit&quot; class=&quot;search-button&quot;&gt;&lt;i class=&quot;sprite-search&quot;&gt;&lt;/i&gt;&lt;/button&gt;</div><div class="line">&lt;/form&gt;</div></pre></td></tr></table></figure></p>
-<p>噗。。form标签下的method方法多了个+号。。。想拿头去撞豆腐了。<br>ok，经验值 +1</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;开篇&quot;&gt;&lt;a href=&quot;#开篇&quot; class=&quot;headerlink&quot; title=&quot;开篇&quot;&gt;&lt;/a&gt;开篇&lt;/h1&gt;&lt;p&gt;此文仅用于记录vue开发中遇到的各种奇葩事。&lt;/p&gt;
-&lt;h1 id=&quot;错误&quot;&gt;&lt;a href=&quot;#错误&quot; class=&quot;headerlink
-    
-    </summary>
-    
-    
-      <category term="vue" scheme="https://amosannn.github.io/tags/vue/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>如何删除自己安装的python(干净、无残留)</title>
-    <link href="https://amosannn.github.io/2017/12/24/remove-your-own-python/"/>
-    <id>https://amosannn.github.io/2017/12/24/remove-your-own-python/</id>
-    <published>2017-12-24T13:27:15.000Z</published>
-    <updated>2017-12-24T22:33:54.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>最近又折腾起了python，于是发现很久以前的自己在各个地方留下了python的足迹，简直就是个更新日志。。<br>既然习惯了brew这个管家，那就把以前的坑都填好吧！</p>
-<p>安装软件的时候很快活，卸载的时候就难受的不行，不熟悉系统目录，你就根本卸不干净。<br>当然市面上有很多pkg卸载软件，但是强迫症的自己总觉得它卸不干净~。~</p>
-<p>搜了一票国内论坛。。还是跑去StackOverFlow，找到了一个靠谱回答。<br>答主提供了python官网的反馈页面，是一位不知如何完整卸载python的网友提交的反馈。<br>一个叫<code>Ned Deily</code>的朋友提取了安装目录并将其制成卸载脚本（详情见参考链接）<br>知道了该删哪就可以动手了…</p>
-<a id="more"></a>
-<ol>
-<li><p>python框架</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo rm -rf /Library/Frameworks/Python.framework/Versions/x.x</div></pre></td></tr></table></figure>
-</li>
-<li><p>python应用目录</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo rm -rf &quot;/Applications/Python x.x&quot;</div></pre></td></tr></table></figure>
-</li>
-<li><p><code>/usr/local/bin</code>下的软连接</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">cd /usr/local/bin/</div><div class="line">ls -l /usr/local/bin | grep &apos;../Library/Frameworks/Python.framework/Versions/x.x&apos; | awk &apos;&#123;print $9&#125;&apos; | tr -d @ | xargs rm</div><div class="line"># 如果想检查一下有没有删干净</div><div class="line">ls -l /usr/local/bin | grep &apos;../Library/Frameworks/Python.framework/Versions/x.x&apos;</div></pre></td></tr></table></figure>
-</li>
-<li><p>若有环境变量等系统配置文件的配置，需另行手动删除</p>
-<ul>
-<li>~/.bash_login</li>
-<li>~/.bash_profile</li>
-<li>~/.cshrc</li>
-<li>~/.profile</li>
-<li>~/.tcshrc</li>
-<li>~/.zprofile</li>
-</ul>
-</li>
-</ol>
-<p>以上的<code>x.x</code>都为python版本号，自行替换即可。</p>
-<hr>
-<p>参考链接：<br><a href="https://bugs.python.org/issue7107" target="_blank" rel="external">Python Bug Tracker</a><br><a href="https://stackoverflow.com/questions/3819449/how-to-uninstall-python-2-7-on-a-mac-os-x-10-6-4/3819829#3819829" target="_blank" rel="external">How to uninstall Python 2.7 on a Mac OS X 10.6.4?</a></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;最近又折腾起了python，于是发现很久以前的自己在各个地方留下了python的足迹，简直就是个更新日志。。&lt;br&gt;既然习惯了brew这个管家，那就把以前的坑都填好吧！&lt;/p&gt;
-&lt;p&gt;安装软件的时候很快活，卸载的时候就难受的不行，不熟悉系统目录，你就根本卸不干净。&lt;br&gt;当然市面上有很多pkg卸载软件，但是强迫症的自己总觉得它卸不干净~。~&lt;/p&gt;
-&lt;p&gt;搜了一票国内论坛。。还是跑去StackOverFlow，找到了一个靠谱回答。&lt;br&gt;答主提供了python官网的反馈页面，是一位不知如何完整卸载python的网友提交的反馈。&lt;br&gt;一个叫&lt;code&gt;Ned Deily&lt;/code&gt;的朋友提取了安装目录并将其制成卸载脚本（详情见参考链接）&lt;br&gt;知道了该删哪就可以动手了…&lt;/p&gt;
-    
-    </summary>
-    
-    
-      <category term="mac" scheme="https://amosannn.github.io/tags/mac/"/>
-    
-      <category term="python" scheme="https://amosannn.github.io/tags/python/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Redis从安装到踩坑</title>
-    <link href="https://amosannn.github.io/2017/11/29/redis-install/"/>
-    <id>https://amosannn.github.io/2017/11/29/redis-install/</id>
-    <published>2017-11-29T08:13:02.000Z</published>
-    <updated>2017-12-24T22:28:56.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>先贴Redis官网：<a href="https://redis.io/download" target="_blank" rel="external">https://redis.io/download</a></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">$ wget http://download.redis.io/releases/redis-4.0.2.tar.gz</div><div class="line">$ tar xzf redis-4.0.2.tar.gz</div><div class="line">$ cd redis-4.0.2</div><div class="line">$ make</div></pre></td></tr></table></figure>
-<p>如果没有安装gcc，则会抛出这样的错误：<br><img src="/images/redis_install/redis_install_error.png" alt=""><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ yum install gcc</div></pre></td></tr></table></figure></p>
-<p>在执行一次make可能会再抛出这样一个错误：<br><img src="/images/redis_install/redis_install_error2.png" alt=""></p>
-<p>这样的话便在make后加上参数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ make MALLOC=libc</div></pre></td></tr></table></figure></p>
-<p>编译完成后<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ src/redis-server  redis.conf</div></pre></td></tr></table></figure></p>
-<a id="more"></a>
-<p>当看到这个画面redis就启动完成了<br><img src="/images/redis_install/redis_running.png" alt=""></p>
-<p>新建一个链接（开启新的终端或新的ssh标签页）<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ cd /usr/local/redis-4.0.2</div><div class="line">$ src/redis-cli</div></pre></td></tr></table></figure></p>
-<p><img src="/images/redis_install/redis_test.png" alt=""><br>至此大功告成，如果想学习redis命令，则点击：xxx.xxx/xxx</p>
-<p>二：redis开启外部访问<br>远程连接redis访问被拒绝，初步推断为redis配置问题。<br>开了另一台服务器redis-cli远程连接，发现如下错误<br><img src="/images/redis_install/denied_of_protected_mode.png" alt=""><br>由图中可知，要想外部访问当前redis服务，需关闭安全模式。</p>
-<p>关闭安全模式<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">vi redis.conf</div><div class="line"># 更改protected-mode 由yes 改成 no</div></pre></td></tr></table></figure></p>
-<p>关闭并重启后发现依旧访问被拒。<br><img src="/images/redis_install/denied_of_127_binded.png" alt=""></p>
-<p>一波操作之后发现，需修改默认配置文件中的bind配置<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"># 更改 bind 127.0.0.1 为 bind 0.0.0.0</div><div class="line"># 重启redis后便可使用cmd或terminal测试连接</div><div class="line"></div><div class="line">$ redis-cli -h &#123;redis_host&#125; -p &#123;redis_port&#125;</div></pre></td></tr></table></figure></p>
-<p>其中<code>{redis_host}</code>就是远程的Redis服务所在服务器地址，<code>{redis_port}</code>就是Redis服务端口（默认端口为6379）。<br>例如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[root@VM_77_16_centos src]# ./redis-cli -h 你的ip -p 6379</div></pre></td></tr></table></figure></p>
-<p>大功告成<br><img src="/images/redis_install/external_access_success.png" alt=""></p>
-<p>三：redis的基本操作<br>关闭redis的两种方法<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"># 无密码</div><div class="line"># redis-cli shutdown</div><div class="line"></div><div class="line"># 有密码</div><div class="line"># redis-cli -a password shutdown</div><div class="line"></div><div class="line"># 查询redis的pid，关闭进程</div><div class="line"># ps aux | grep redis</div><div class="line"># kill -9 pid</div></pre></td></tr></table></figure></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;先贴Redis官网：&lt;a href=&quot;https://redis.io/download&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;https://redis.io/download&lt;/a&gt;&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;3&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;4&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;$ wget http://download.redis.io/releases/redis-4.0.2.tar.gz&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;$ tar xzf redis-4.0.2.tar.gz&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;$ cd redis-4.0.2&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;$ make&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-&lt;p&gt;如果没有安装gcc，则会抛出这样的错误：&lt;br&gt;&lt;img src=&quot;/images/redis_install/redis_install_error.png&quot; alt=&quot;&quot;&gt;&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;$ yum install gcc&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
-&lt;p&gt;在执行一次make可能会再抛出这样一个错误：&lt;br&gt;&lt;img src=&quot;/images/redis_install/redis_install_error2.png&quot; alt=&quot;&quot;&gt;&lt;/p&gt;
-&lt;p&gt;这样的话便在make后加上参数&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;$ make MALLOC=libc&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
-&lt;p&gt;编译完成后&lt;br&gt;&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;$ src/redis-server  redis.conf&lt;/div&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/p&gt;
-    
-    </summary>
-    
     
   </entry>
   
