@@ -347,6 +347,203 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/01/30/jedispool-could-not-return-resource-error/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Amosannn">
+      <meta itemprop="description" content="start from zero">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?s=400&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&v=4">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Amosannn">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2018/01/30/jedispool-could-not-return-resource-error/" class="post-title-link" itemprop="https://amosannn.github.io/page/3/index.html">JedisPool报错：Could not return the resource to the pool</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-01-30 15:08:45 / 修改时间：23:58:00" itemprop="dateCreated datePublished" datetime="2018-01-30T15:08:45+08:00">2018-01-30</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2018/01/30/jedispool-could-not-return-resource-error/" class="leancloud_visitors" data-flag-title="JedisPool报错：Could not return the resource to the pool">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">2.5k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">2 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Bug的起源和解法"><a href="#Bug的起源和解法" class="headerlink" title="Bug的起源和解法"></a>Bug的起源和解法</h1><p>这个错误来的实在猝不及防，第一次请求可以成功使用<code>JedisPool</code>，而第二次请求便会报错，在翻遍了所有相关博客后一度以为是自己的配置出了错，于是不断修改配置文件中的redis连接池参数。<br>折腾老半天之后，没有帮助TAT<br>这时，我想起10年前的某个午后，蝉鸣的空气中传来的几分安定，出神地趴在窗边看麻雀扑腾的我，被一声厉呵带回现实。之后便到了标准环节–”下课到办公室找我”。之后的事情便记不太清了，只是我深深地记得当时的心境，想不出的问题换个角度想，一定会有不同的发现。<br>那就回归报错吧，“无法将资源返回到池”，再回想到我的jedisPool对象，旷的一声，仿佛天旋地转一般，一切的一切突然都变透彻了。</p>
+<h2 id="错误根源及出错原因"><a href="#错误根源及出错原因" class="headerlink" title="错误根源及出错原因"></a>错误根源及出错原因</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">followUser</span><span class="params">(Integer localUserId, Integer userId)</span> </span>&#123;</div><div class="line">  <span class="keyword">try</span> (Jedis jedis = jedisPool.getResource()) &#123;</div><div class="line">    jedis.zadd(localUserId + RedisKey.FOLLOW_USER, System.currentTimeMillis(),</div><div class="line">        String.valueOf(userId));</div><div class="line">    jedis.zadd(userId + RedisKey.FOLLOWED_USER, System.currentTimeMillis(),</div><div class="line">        String.valueOf(localUserId));</div><div class="line">  &#125; <span class="keyword">catch</span> (JedisException e) &#123;</div><div class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</div><div class="line">  &#125;</div><div class="line">  jedisPool.close();<span class="comment">// 问题就出在这里</span></div><div class="line">  <span class="keyword">return</span> <span class="keyword">true</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>JedisPool在configuration类中初始化（项目启动时有spring自动扫描）<br>然而在每个业务类调用完之后就被手动关闭，自然执行完第一次后就不再能取出resource的，也无法return。<br>解决这个bug只需把每个service实现类中的<code>jedisPool.close()</code>删去即可。</p>
+<h2 id="为什么会出现这种写法"><a href="#为什么会出现这种写法" class="headerlink" title="为什么会出现这种写法"></a>为什么会出现这种写法</h2><p>说到这个就不得不提起Jedis的wiki<br>官方po出的demo是这样使用jedis的：  </p>
+<h3 id="首先引入pom"><a href="#首先引入pom" class="headerlink" title="首先引入pom"></a>首先引入pom</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">&lt;dependency&gt;</div><div class="line">    &lt;groupId&gt;redis.clients&lt;/groupId&gt;</div><div class="line">    &lt;artifactId&gt;jedis&lt;/artifactId&gt;</div><div class="line">    &lt;version&gt;2.9.0&lt;/version&gt;</div><div class="line">    &lt;type&gt;jar&lt;/type&gt;</div><div class="line">    &lt;scope&gt;compile&lt;/scope&gt;</div><div class="line">&lt;/dependency&gt;</div></pre></td></tr></table></figure>
+<h3 id="然后实例化JedisPool"><a href="#然后实例化JedisPool" class="headerlink" title="然后实例化JedisPool"></a>然后实例化JedisPool</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">JedisPool pool = <span class="keyword">new</span> JedisPool(<span class="keyword">new</span> JedisPoolConfig(), <span class="string">"localhost"</span>);</div></pre></td></tr></table></figure>
+<h3 id="接着实例化jedis有两种方法"><a href="#接着实例化jedis有两种方法" class="headerlink" title="接着实例化jedis有两种方法"></a>接着实例化jedis有两种方法</h3><ol>
+<li><p>try-with-resource法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/// Jedis implements Closeable. Hence, the jedis instance will be auto-closed after the last statement.</span></div><div class="line"><span class="keyword">try</span> (Jedis jedis = pool.getResource()) &#123;</div><div class="line">  <span class="comment">/// ... do stuff here ... for example</span></div><div class="line">  jedis.set(<span class="string">"foo"</span>, <span class="string">"bar"</span>);</div><div class="line">  String foobar = jedis.get(<span class="string">"foo"</span>);</div><div class="line">  jedis.zadd(<span class="string">"sose"</span>, <span class="number">0</span>, <span class="string">"car"</span>); jedis.zadd(<span class="string">"sose"</span>, <span class="number">0</span>, <span class="string">"bike"</span>); </div><div class="line">  Set&lt;String&gt; sose = jedis.zrange(<span class="string">"sose"</span>, <span class="number">0</span>, -<span class="number">1</span>);</div><div class="line">&#125;</div><div class="line"><span class="comment">/// ... when closing your application:</span></div><div class="line">pool.close();<span class="comment">// 这便是原罪</span></div></pre></td></tr></table></figure>
+</li>
+<li><p>手动关闭jedis法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">Jedis jedis = <span class="keyword">null</span>;</div><div class="line"><span class="keyword">try</span> &#123;</div><div class="line">  jedis = pool.getResource();</div><div class="line">  <span class="comment">/// ... do stuff here ... for example</span></div><div class="line">  jedis.set(<span class="string">"foo"</span>, <span class="string">"bar"</span>);</div><div class="line">  String foobar = jedis.get(<span class="string">"foo"</span>);</div><div class="line">  jedis.zadd(<span class="string">"sose"</span>, <span class="number">0</span>, <span class="string">"car"</span>); jedis.zadd(<span class="string">"sose"</span>, <span class="number">0</span>, <span class="string">"bike"</span>); </div><div class="line">  Set&lt;String&gt; sose = jedis.zrange(<span class="string">"sose"</span>, <span class="number">0</span>, -<span class="number">1</span>);</div><div class="line">&#125; <span class="keyword">finally</span> &#123;</div><div class="line">  <span class="comment">// You have to close jedis object. If you don't close then</span></div><div class="line">  <span class="comment">// it doesn't release back to pool and you can't get a new</span></div><div class="line">  <span class="comment">// resource from pool.</span></div><div class="line">  <span class="keyword">if</span> (jedis != <span class="keyword">null</span>) &#123;</div><div class="line">    jedis.close();</div><div class="line">  &#125;</div><div class="line">&#125;</div><div class="line"><span class="comment">/// ... when closing your application:</span></div><div class="line">pool.close();</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>虽然不在报错了，但是现在不关的话又不知道在哪能关的了它了。。。</p>
+<hr>
+<p>双手奉上： <a href="https://github.com/xetorthio/jedis/wiki/Getting-started" target="_blank" rel="external">Jedis官方指引</a></p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+       
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/01/24/vue-error-collection/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2237,205 +2434,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2017/06/01/github-blog-binding-domain/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Amosannn">
-      <meta itemprop="description" content="start from zero">
-      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?s=400&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&v=4">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Amosannn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2017/06/01/github-blog-binding-domain/" class="post-title-link" itemprop="https://amosannn.github.io/page/3/index.html">给GitHub Pages绑定域名 附namesilo域名优惠券</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2017-06-01 19:51:17" itemprop="dateCreated datePublished" datetime="2017-06-01T19:51:17+08:00">2017-06-01</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2017-06-02 08:01:44" itemprop="dateModified" datetime="2017-06-02T08:01:44+08:00">2017-06-02</time>
-              
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/2017/06/01/github-blog-binding-domain/" class="leancloud_visitors" data-flag-title="给GitHub Pages绑定域名 附namesilo域名优惠券">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数：</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-            <div class="post-symbolscount">
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-file-word-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">本文字数：</span>
-                
-                <span title="本文字数">1.3k</span>
-              
-
-              
-                <span class="post-meta-divider">|</span>
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-clock-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
-                
-                <span title="阅读时长">1 分钟</span>
-              
-            </div>
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body han-init-context" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>在GitHub上托管Hexo博客，访问地址自然是username.github.io，如果想用自己的域名访问这个网址，怎么做呢？<br>本文从域名选购到域名绑定一条龙,给你一个更清晰的操作流程。<br>
-          <!--noindex-->
-          
-            <div class="post-button text-center">
-              <a class="btn" href="/2017/06/01/github-blog-binding-domain/" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-         
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-       
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2487,7 +2485,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">37</span>
+                    <span class="site-state-item-count">38</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -2593,7 +2591,11 @@
                     
                       
                     
-                    <span class="site-state-item-count">39</span>
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">41</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -2677,7 +2679,7 @@
       <i class="fa fa-area-chart"></i>
     </span>
     
-    <span title="站点总字数">82k</span>
+    <span title="站点总字数">85k</span>
   
 
   
@@ -2686,7 +2688,7 @@
       <i class="fa fa-coffee"></i>
     </span>
     
-    <span title="站点阅读时长">1:14</span>
+    <span title="站点阅读时长">1:17</span>
   
 </div>
 

@@ -347,6 +347,219 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2019/05/30/how-to-get-return-of-python-click-command/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Amosannn">
+      <meta itemprop="description" content="start from zero">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?s=400&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&v=4">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Amosannn">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/05/30/how-to-get-return-of-python-click-command/" class="post-title-link" itemprop="https://amosannn.github.io/index.html">Click 如何调用 Command 函数并取得返回值</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-05-30 15:55:25 / 修改时间：17:14:49" itemprop="dateCreated datePublished" datetime="2019-05-30T15:55:25+08:00">2019-05-30</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/技术一路走到黑/" itemprop="url" rel="index"><span itemprop="name">技术一路走到黑</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2019/05/30/how-to-get-return-of-python-click-command/" class="leancloud_visitors" data-flag-title="Click 如何调用 Command 函数并取得返回值">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">3.5k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">3 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <p>在项目的演进过程中，都会经历项目需求从少至多，由简单到复杂的过程。在这个不停追加的过程中，项目结构也会从一个小脚本就能搞定变化到需要由几个小脚本配合共同支撑，项目的代码也会从精简干练慢慢变到冗余、重合度高。</p>
+<p>这时候，为了让项目结构更加稳健，易用性更高，可读性更好，是需要重建程序入口，把脚本工程化的。</p>
+<p>看起来很复杂，实际上就是在项目演进的不同阶段适时地重构，每个优秀的项目都是经过千（多）锤（次）百（重）炼（构）才能形成的。</p>
+<p>今天就从程序的入口开始，记录一次改造。（中间省略 1000 字为重构的细节及方法…）</p>
+<p>在最初的版本，程序入口直接使用了简单粗暴的 if - else，带来的问题就是，无论如何封装抽象，都无法改变可读性极差的结果。于是在无力演进的情况下，选择一款 CLI 构建工具，提高可持续性，防止自己重造车轮。</p>
+<h1 id="CLI-构建工具-Click"><a href="#CLI-构建工具-Click" class="headerlink" title="CLI 构建工具 Click"></a>CLI 构建工具 Click</h1><p><code>Click</code> 的基础使用方法和高级特性都可以从<a href="https://click.palletsprojects.com/en/7.x/options/#name-your-options" target="_blank" rel="external">官方文档</a>获取</p>
+<p>以下谨记录个人使用到的，以及我认为最常用的操作。</p>
+<h2 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h2><p>夏天来了，案例使用了冰淇淋，这样看起来会清凉一些。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> click</div><div class="line"></div><div class="line"><span class="meta">@click.group()</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">test_group</span><span class="params">()</span>:</span></div><div class="line">    <span class="keyword">pass</span></div><div class="line"></div><div class="line"><span class="meta">@click.command()</span></div><div class="line"><span class="meta">@click.option('--brand', default=1, prompt='请选择品牌：1.和路雪 2.雀巢 3.五羊 4.其它', help='小卖部品牌分类：1.和路雪 2.雀巢 3.五羊 4.其它')</span></div><div class="line"><span class="meta">@click.option('--category', default=1, prompt='请选择类别：1.雪糕 2.冰棍 3.杯装', help='冰淇淋类别：1.雪糕 2.冰棍 3.杯装')</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">ice_cream_selection</span><span class="params">(brand, category)</span>:</span></div><div class="line">    <span class="string">"""冰淇淋订购程序"""</span></div><div class="line">    print(brand, category)</div><div class="line">    <span class="keyword">if</span> category == <span class="number">3</span>:</div><div class="line">        result = taste_selection()</div><div class="line">        print(result)</div><div class="line">    print(<span class="string">"finished!"</span>)</div><div class="line"></div><div class="line"><span class="meta">@click.command()</span></div><div class="line"><span class="meta">@click.option('--selected', default=0, prompt='请选择口味：1.香草味 2.巧克力味')</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">taste_selection</span><span class="params">(selected)</span>:</span></div><div class="line">    <span class="keyword">return</span> click.echo(selected)</div><div class="line"></div><div class="line">test_group.add_command(ice_cream_selection)</div><div class="line">test_group.add_command(taste_selection)</div><div class="line"></div><div class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</div><div class="line">    ice_cream_selection()</div><div class="line">    <span class="comment">#test_group()</span></div></pre></td></tr></table></figure>
+          <!--noindex-->
+          
+            <div class="post-button text-center">
+              <a class="btn" href="/2019/05/30/how-to-get-return-of-python-click-command/" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+         
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+       
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2019/04/30/haproxy-listen-vs-frontend/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2522,238 +2735,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2018/10/31/airflow-dag-does-not-follow-the-schedule-configuration-execution/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Amosannn">
-      <meta itemprop="description" content="start from zero">
-      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?s=400&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&v=4">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Amosannn">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2018/10/31/airflow-dag-does-not-follow-the-schedule-configuration-execution/" class="post-title-link" itemprop="https://amosannn.github.io/index.html">Airflow 不遵循调度配置执行</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2018-10-31 16:45:11" itemprop="dateCreated datePublished" datetime="2018-10-31T16:45:11+08:00">2018-10-31</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2018-11-06 16:40:19" itemprop="dateModified" datetime="2018-11-06T16:40:19+08:00">2018-11-06</time>
-              
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/技术一路走到黑/" itemprop="url" rel="index"><span itemprop="name">技术一路走到黑</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-             <span id="/2018/10/31/airflow-dag-does-not-follow-the-schedule-configuration-execution/" class="leancloud_visitors" data-flag-title="Airflow 不遵循调度配置执行">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数：</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-            <div class="post-symbolscount">
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-file-word-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">本文字数：</span>
-                
-                <span title="本文字数">1.4k</span>
-              
-
-              
-                <span class="post-meta-divider">|</span>
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-clock-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
-                
-                <span title="阅读时长">1 分钟</span>
-              
-            </div>
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body han-init-context" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>在 Airflow 的使用过程中，曾多次遇到令人惊奇的现象，其中之一便是它没有按照 dag 中的配置执行。</p>
-<p>可能你也会遇到这样的情况，为什么配置了 <code>schedule_interval</code> 和 <code>start_date</code>，但是依旧没有按照调度配置的时间自动执行。</p>
-<h2 id="举个栗子"><a href="#举个栗子" class="headerlink" title="举个栗子"></a>举个栗子</h2><p>比如我这么配：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">from</span> datetime <span class="keyword">import</span> datetime, timedelta, timedelta</div><div class="line"></div><div class="line">default_args = &#123;</div><div class="line">    <span class="string">'owner'</span>: <span class="string">'amos'</span>,</div><div class="line">    <span class="string">'depends_on_past'</span>: <span class="keyword">False</span>,</div><div class="line">    <span class="string">'start_date'</span>: datetime.now(),</div><div class="line">&#125;</div><div class="line"></div><div class="line">dag = DAG(<span class="string">'test_rerun_dag'</span>,</div><div class="line">          default_args=default_args,</div><div class="line">          description=<span class="string">'test_rerun_dag'</span>,</div><div class="line">          schedule_interval=<span class="string">"*/1 * * * *"</span>)</div></pre></td></tr></table></figure>
-<p>照理说它应该按照配置中写的，每分钟执行一次操作。可是它没有，是它变心了吗？</p>
-<p>不，不是的。</p>
-<h2 id="这究竟是为什么"><a href="#这究竟是为什么" class="headerlink" title="这究竟是为什么"></a>这究竟是为什么</h2><blockquote>
-<p>Airflow sets execution_date based on the left bound of the schedule period it is covering, not based on when it fires (which would be the right bound of the period) .</p>
-</blockquote>
-<p>原因在于 Airflow 是个有原则的程序，它有个窗口的概念，会把 start_date 开始后，符合 schedule_interval 定义的第一个时间点记为 execution_date，但是会在下个时间点到达时才开始运行。也就是说由于这个窗口的原因，last run 会滞后一个周期。 </p>
-<p>所以，按上面的配置来说，每次当 scheduler 读到了这段 DAG，它会拿小本本记下 start_date 和每分钟执行的操作，准备在下一分钟开始执行了。但是当下一分钟来临的时候，它看了看表，嗯！start_date + 1，那么 execution_date 也 + 1，于是把小本本上的 start_date 划掉重写。所以 start_date 在不断被覆盖的过程中，任务没有像我们预想中的在调度奔跑，反而一直是挂起状态。</p>
-<h2 id="这可咋整啊"><a href="#这可咋整啊" class="headerlink" title="这可咋整啊"></a>这可咋整啊</h2><p>那么如何才能真正地让它规律地执行呢？</p>
-<p>将 start_date 往前错位到上一个周期</p>
-<p>什么意思呢？假如本例中的每分钟执行一次，那就将 start_date 调整到上一分钟的状态</p>
-<blockquote>
-<p><del>‘start_date’: datetime.now()</del></p>
-<p>‘start_date’: datetime.now() - timedelta(minutes=1)</p>
-</blockquote>
-<p>这下 scheduler 就可以在小本本工工整整地记录每一次调度计划，而不用写了划，划了写，把小本本涂得黑黑的了！</p>
-<hr>
-<p>如果你的 dag 趁你不注意卡在running 状态下不能动弹，或许你可以改改调度时间或周期。</p>
-<p>或者试试参考这篇文章：<a href="/2018/11/01/airflow-dag-get-stuck-in-running-state/" title="Airflow 居然趁服务器不注意卡在 running 状态不执行">Airflow 居然趁服务器不注意卡在 running 状态不执行</a></p>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-       
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2805,7 +2786,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">37</span>
+                    <span class="site-state-item-count">38</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -2911,7 +2892,11 @@
                     
                       
                     
-                    <span class="site-state-item-count">39</span>
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">41</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -2995,7 +2980,7 @@
       <i class="fa fa-area-chart"></i>
     </span>
     
-    <span title="站点总字数">82k</span>
+    <span title="站点总字数">85k</span>
   
 
   
@@ -3004,7 +2989,7 @@
       <i class="fa fa-coffee"></i>
     </span>
     
-    <span title="站点阅读时长">1:14</span>
+    <span title="站点阅读时长">1:17</span>
   
 </div>
 

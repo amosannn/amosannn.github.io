@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+  
+  
+  <link rel="stylesheet" media="all" href="/lib/Han/dist/han.min.css?v=3.3">
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '6IQVLUE04L',
+      apiKey: 'b3cf2353e1956cf39bb8fdf838e117f1',
+      indexName: 'amos_blog',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="在项目的演进过程中，都会经历项目需求从少至多，由简单到复杂的过程。在这个不停追加的过程中，项目结构也会从一个小脚本就能搞定变化到需要由几个小脚本配合共同支撑，项目的代码也会从精简干练慢慢变到冗余、重合度高。 这时候，为了让项目结构更加稳健，易用性更高，可读性更好，是需要重建程序入口，把脚本工程化的。 看起来很复杂，实际上就是在项目演进的不同阶段适时地重构，每个优秀的项目都是经过千（多）锤（次）百（">
+<meta name="keywords" content="Python,Click">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Click 如何调用 Command 函数并取得返回值">
+<meta property="og:url" content="https://amosannn.github.io/2019/05/30/how-to-get-return-of-python-click-command/index.html">
+<meta property="og:site_name" content="Amosannn">
+<meta property="og:description" content="在项目的演进过程中，都会经历项目需求从少至多，由简单到复杂的过程。在这个不停追加的过程中，项目结构也会从一个小脚本就能搞定变化到需要由几个小脚本配合共同支撑，项目的代码也会从精简干练慢慢变到冗余、重合度高。 这时候，为了让项目结构更加稳健，易用性更高，可读性更好，是需要重建程序入口，把脚本工程化的。 看起来很复杂，实际上就是在项目演进的不同阶段适时地重构，每个优秀的项目都是经过千（多）锤（次）百（">
+<meta property="og:updated_time" content="2019-05-30T09:14:49.657Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Click 如何调用 Command 函数并取得返回值">
+<meta name="twitter:description" content="在项目的演进过程中，都会经历项目需求从少至多，由简单到复杂的过程。在这个不停追加的过程中，项目结构也会从一个小脚本就能搞定变化到需要由几个小脚本配合共同支撑，项目的代码也会从精简干练慢慢变到冗余、重合度高。 这时候，为了让项目结构更加稳健，易用性更高，可读性更好，是需要重建程序入口，把脚本工程化的。 看起来很复杂，实际上就是在项目演进的不同阶段适时地重构，每个优秀的项目都是经过千（多）锤（次）百（">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Amosannn" type="application/atom+xml" />
+
+
+
+
+  <link rel="canonical" href="https://amosannn.github.io/2019/05/30/how-to-get-return-of-python-click-command/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Click 如何调用 Command 函数并取得返回值 | Amosannn</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Amosannn</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Amo's binary space</p>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://amosannn.github.io/2019/05/30/how-to-get-return-of-python-click-command/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Amosannn">
+      <meta itemprop="description" content="start from zero">
+      <meta itemprop="image" content="https://avatars3.githubusercontent.com/u/16012509?s=400&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&v=4">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Amosannn">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Click 如何调用 Command 函数并取得返回值
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-05-30 15:55:25 / 修改时间：17:14:49" itemprop="dateCreated datePublished" datetime="2019-05-30T15:55:25+08:00">2019-05-30</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/技术一路走到黑/" itemprop="url" rel="index"><span itemprop="name">技术一路走到黑</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2019/05/30/how-to-get-return-of-python-click-command/" class="leancloud_visitors" data-flag-title="Click 如何调用 Command 函数并取得返回值">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">3.5k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">3 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body han-init-context" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在项目的演进过程中，都会经历项目需求从少至多，由简单到复杂的过程。在这个不停追加的过程中，项目结构也会从一个小脚本就能搞定变化到需要由几个小脚本配合共同支撑，项目的代码也会从精简干练慢慢变到冗余、重合度高。</p>
+<p>这时候，为了让项目结构更加稳健，易用性更高，可读性更好，是需要重建程序入口，把脚本工程化的。</p>
+<p>看起来很复杂，实际上就是在项目演进的不同阶段适时地重构，每个优秀的项目都是经过千（多）锤（次）百（重）炼（构）才能形成的。</p>
+<p>今天就从程序的入口开始，记录一次改造。（中间省略 1000 字为重构的细节及方法…）</p>
+<p>在最初的版本，程序入口直接使用了简单粗暴的 if - else，带来的问题就是，无论如何封装抽象，都无法改变可读性极差的结果。于是在无力演进的情况下，选择一款 CLI 构建工具，提高可持续性，防止自己重造车轮。</p>
+<h1 id="CLI-构建工具-Click"><a href="#CLI-构建工具-Click" class="headerlink" title="CLI 构建工具 Click"></a>CLI 构建工具 Click</h1><p><code>Click</code> 的基础使用方法和高级特性都可以从<a href="https://click.palletsprojects.com/en/7.x/options/#name-your-options" target="_blank" rel="external">官方文档</a>获取</p>
+<p>以下谨记录个人使用到的，以及我认为最常用的操作。</p>
+<h2 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h2><p>夏天来了，案例使用了冰淇淋，这样看起来会清凉一些。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> click</div><div class="line"></div><div class="line"><span class="meta">@click.group()</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">test_group</span><span class="params">()</span>:</span></div><div class="line">    <span class="keyword">pass</span></div><div class="line"></div><div class="line"><span class="meta">@click.command()</span></div><div class="line"><span class="meta">@click.option('--brand', default=1, prompt='请选择品牌：1.和路雪 2.雀巢 3.五羊 4.其它', help='小卖部品牌分类：1.和路雪 2.雀巢 3.五羊 4.其它')</span></div><div class="line"><span class="meta">@click.option('--category', default=1, prompt='请选择类别：1.雪糕 2.冰棍 3.杯装', help='冰淇淋类别：1.雪糕 2.冰棍 3.杯装')</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">ice_cream_selection</span><span class="params">(brand, category)</span>:</span></div><div class="line">    <span class="string">"""冰淇淋订购程序"""</span></div><div class="line">    print(brand, category)</div><div class="line">    <span class="keyword">if</span> category == <span class="number">3</span>:</div><div class="line">        result = taste_selection()</div><div class="line">        print(result)</div><div class="line">    print(<span class="string">"finished!"</span>)</div><div class="line"></div><div class="line"><span class="meta">@click.command()</span></div><div class="line"><span class="meta">@click.option('--selected', default=0, prompt='请选择口味：1.香草味 2.巧克力味')</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">taste_selection</span><span class="params">(selected)</span>:</span></div><div class="line">    <span class="keyword">return</span> click.echo(selected)</div><div class="line"></div><div class="line">test_group.add_command(ice_cream_selection)</div><div class="line">test_group.add_command(taste_selection)</div><div class="line"></div><div class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</div><div class="line">    ice_cream_selection()</div><div class="line">    <span class="comment">#test_group()</span></div></pre></td></tr></table></figure>
+<a id="more"></a>
+<p>从上面的案例简单讲解使用方法</p>
+<blockquote>
+<p>@click.command()</p>
+</blockquote>
+<p>将函数注册为 <code>Click</code> 识别的命令</p>
+<blockquote>
+<p>@click.option</p>
+</blockquote>
+<p><code>option</code> 为高度定制该命令的模块</p>
+<ul>
+<li><code>&#39;--brand&#39;</code> 此处声明变量，将会接收来自输入的数据</li>
+<li><code>default</code> 给予变量默认值</li>
+<li><code>prompt</code> 若没有在启动程序时传入该变量，则会在后续作为输入的提示</li>
+<li><code>help</code> 在 –help 时输出的帮助文本</li>
+</ul>
+<p>让我们运行一下上面的程序试试</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">ubuntu@ubuntu:~/project/click-test$ python3 test.py </div><div class="line">请选择品牌：1.和路雪 2.雀巢 3.五羊 4.其它 [1]: </div><div class="line">请选择类别：1.雪糕 2.冰棍 3.杯装 [1]: 3</div><div class="line">1 3</div><div class="line">请选择口味：1.香草味 2.巧克力味 [0]: 1</div><div class="line">1</div></pre></td></tr></table></figure>
+<p>执行的路径和预期中一样，因为没有传入变量参数，所以需要按照预先设定好的 prompt 的提示填充变量。</p>
+<p>再看看帮助功能</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">ubuntu@ubuntu:~/project/click-test$ python3 test.py --help</div><div class="line">Usage: test.py [OPTIONS]</div><div class="line"></div><div class="line">  冰淇淋订购程序</div><div class="line"></div><div class="line">Options:</div><div class="line">  --brand INTEGER     小卖部品牌分类：1.和路雪 2.雀巢 3.五羊 4.其它</div><div class="line">  --category INTEGER  冰淇淋类别：1.雪糕 2.冰棍 3.杯装</div><div class="line">  --help              Show this message and exit.</div></pre></td></tr></table></figure>
+<h2 id="建立组并集合子模块"><a href="#建立组并集合子模块" class="headerlink" title="建立组并集合子模块"></a>建立组并集合子模块</h2><p>为了方便演示，<code>command</code> 写在同一段伪代码里。</p>
+<p>更好的使用方式是，将不同的 <code>command</code> 分布在不同的项目层次、不同的文件夹中，再使用 import 引入。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># test_group.py</span></div><div class="line"><span class="meta">@click.group()</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">test_group</span><span class="params">()</span>:</span></div><div class="line">    <span class="keyword">pass</span></div><div class="line"></div><div class="line"><span class="comment"># 此处省略 command 的定义</span></div><div class="line"></div><div class="line">test_group.add_command(ice_cream_selection)</div><div class="line">test_group.add_command(taste_selection)</div><div class="line"></div><div class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</div><div class="line">    test_group()</div></pre></td></tr></table></figure>
+<p><code>click.group</code> 链接子模块就是这么简单，但是运行的方式会有些不同</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"># 如果你编写 setup.py 并已安装</div><div class="line">$ test_group ice_cream_selection --xxx xx --yyy yy</div><div class="line"></div><div class="line"># 或者你还在调试</div><div class="line">$ python3 test_group.py ice_cream_selection --xxx xx --yyy yy</div></pre></td></tr></table></figure>
+<h2 id="模块调用模块后如何获取返回值"><a href="#模块调用模块后如何获取返回值" class="headerlink" title="模块调用模块后如何获取返回值"></a>模块调用模块后如何获取返回值</h2><p>这是困扰了很久的问题，在程序执行总是会经历需要多重判断，获取一级类目下细分类目的情况，所以返回细分类目给上层倒是个需要的功能。</p>
+<p>然而 <code>Click</code> 并不支持直接返回参数，就像下面这个案例一样，调用了 taste_selection 后，是无法取得选中的口味的！</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@click.command()</span></div><div class="line"><span class="meta">@click.option('--selected', default=0, prompt='请选择口味：1.香草味 2.巧克力味')</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">taste_selection</span><span class="params">(selected)</span>:</span></div><div class="line">    <span class="keyword">return</span> selected</div></pre></td></tr></table></figure>
+<p>经过一番苦痛折磨，甚至尝试引入上下文 <code>context</code> 的方式，依旧无法获取返回值。</p>
+<p>直到看到 Stackoverflow 上的这个回答：<a href="https://stackoverflow.com/a/28814379" target="_blank" rel="external">How do I return a value when @click.option is used to pass a command line argument to a function?</a></p>
+<p>该回答下的另一个答主 <a href="https://stackoverflow.com/users/908494/abarnert" target="_blank" rel="external">abarnert</a> 则给出了为何取不到 Click 返回值的解释：</p>
+<blockquote>
+<p><code>click</code> is trying to make your function into a good command-line citizen, so when you exit your function, it calls <code>sys.exit</code> with the appropriate number (0 if you <code>return</code>, 1 if you <code>raise</code>, and 2 if it failed to parse your arguments). </p>
+<p>What programs usually do when they need to “return” text is to print it to standard output, which is exactly what <code>click.echo</code> is for.</p>
+</blockquote>
+<p>因此，上面的返回只需要用 <code>Click</code> 的标准输出函数封装，即可取得相应的值。</p>
+<ul>
+<li>click.echo(selected)</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@click.command()</span></div><div class="line"><span class="meta">@click.option('--selected', default=0, prompt='请选择口味：1.香草味 2.巧克力味')</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">taste_selection</span><span class="params">(selected)</span>:</span></div><div class="line">    <span class="keyword">return</span> click.echo(selected)</div></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+       
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag"># Python</a>
+          
+            <a href="/tags/Click/" rel="tag"># Click</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/04/30/haproxy-listen-vs-frontend/" rel="next" title="Haproxy 之 Http 代理的两种方式">
+                <i class="fa fa-chevron-left"></i> Haproxy 之 Http 代理的两种方式
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="https://avatars3.githubusercontent.com/u/16012509?s=400&u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&v=4"
+                alt="Amosannn" />
+            
+              <p class="site-author-name" itemprop="name">Amosannn</p>
+              <p class="site-description motion-element" itemprop="description">start from zero</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">38</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                    <span class="site-state-item-count">1</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">41</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/amosannn" title="GitHub &rarr; https://github.com/amosannn" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:amosannn@gmail.com" title="E-Mail &rarr; mailto:amosannn@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#CLI-构建工具-Click"><span class="nav-number">1.</span> <span class="nav-text">CLI 构建工具 Click</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#基本用法"><span class="nav-number">1.1.</span> <span class="nav-text">基本用法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#建立组并集合子模块"><span class="nav-number">1.2.</span> <span class="nav-text">建立组并集合子模块</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#模块调用模块后如何获取返回值"><span class="nav-number">1.3.</span> <span class="nav-text">模块调用模块后如何获取返回值</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Amosannn</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+    <span title="站点总字数">85k</span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    
+    <span title="站点阅读时长">1:17</span>
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a></div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.5.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script>
+    
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url }) })
+        .done(function ({ results }) {
+          if (results.length > 0) {
+            var counter = results[0];
+            
+              var $element = $(document.getElementById(url));
+              $element.find('.leancloud-visitors-count').text(counter.time + 1);
+            
+            Counter('put', `/classes/Counter/${counter.objectId}`, JSON.stringify({ time: { "__op":"Increment", "amount":1 } }))
+            
+            .fail(function ({ responseJSON }) {
+                console.log('Failed to save Visitor num, with error message: ' + responseJSON.error);
+            })
+          } else {
+            
+              Counter('post', '/classes/Counter', JSON.stringify({ title: title, url: url, time: 1}))
+                .done(function () {
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(1);
+                })
+                .fail(function () {
+                  console.log('Failed to create');
+                });
+            
+          }
+        })
+      .fail(function ({ responseJSON }) {
+        console.log('LeanCloud Counter Error:' + responseJSON.code + " " + responseJSON.error);
+      });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "PilWbyvjmtvW38jyokTRyGPx-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "PilWbyvjmtvW38jyokTRyGPx-gzGzoHsz",
+                'X-LC-Key': "xIW2tGgWFlR282cbVadt4ikU",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          addCount(Counter);
+          
+        })
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
