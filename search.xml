@@ -7,25 +7,6 @@
 ]]></content>
   </entry>
   <entry>
-    <title>在SelectProvider注解中使用复杂类型参数（List）</title>
-    <url>/blog/2018/03/03/SelectProvider-use-List-parameter/</url>
-    <content><![CDATA[<p>最近开发中尝试使用注解来代替xml完成Mybatis的sql编写，实现更完(装)整(逼)的无xml编程。结果没写多久就跌进大坑了Orz</p>
-<p>总所周知的是Mybatis支持的注解中有@Select、@Insert、@Update、@Delete这四个基本操作。使用这些注解你可以非常快的完成基础操作，如果想执行一些复杂操作，例如包含where、foreach等xml中一个标签即可完成的操作，便需要用到另一个注解 –&gt; @SelectProvider</p>
-<p>如果你的需求只是传递一些基础类型，那你学习使用SelectProvider的曲线还是很平滑的。如果你的需求是传递一些复杂类型，例如List，那就可能会尴尬了。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Mapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">QuestionMapper</span> </span>&#123;</span><br><span class="line">  <span class="meta">@SelectProvider(type = QuestionSqlProvider.class, method = &quot;listQuestionByQuestionId&quot;)</span></span><br><span class="line">  <span class="function">List&lt;Question&gt; <span class="title">listQuestionByQuestionId</span><span class="params">(<span class="meta">@Param(&quot;idList&quot;)</span> List&lt;Integer&gt; idList)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>一开始我理所当然的把List<Integer>作为输入参数。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">listQuestionByQuestionId</span><span class="params">(<span class="keyword">final</span> List&lt;Integer&gt; idList)</span> </span>&#123;</span><br><span class="line">    StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">    sb.append(<span class="string">&quot;(&quot;</span>);</span><br><span class="line">    <span class="keyword">for</span> (Integer questionId : idList) &#123;</span><br><span class="line">      sb.append(<span class="string">&quot; &#x27;&quot;</span> + questionId + <span class="string">&quot;&#x27;,&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    sb.deleteCharAt(sb.length() - <span class="number">1</span>);</span><br><span class="line">    sb.append(<span class="string">&quot;)&quot;</span>);</span><br><span class="line">    System.out.println(sb.toString());</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> SQL() &#123;&#123;</span><br><span class="line">      SELECT(<span class="string">&quot; question_id,question_title,create_time &quot;</span>);</span><br><span class="line">      FROM(<span class="string">&quot; question &quot;</span>);</span><br><span class="line">      WHERE(<span class="string">&quot; question_id in &quot;</span> + sb.toString());</span><br><span class="line">    &#125;&#125;.toString();</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
-<p>燃鹅。。jvm很无情的抛了个错误出来</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">00:29:39.814 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Could not complete request</span><br><span class="line">org.mybatis.spring.MyBatisSystemException: nested exception is org.apache.ibatis.builder.BuilderException: Error invoking SqlProvider method (com.amosannn.mapper.QuestionSqlProvider.listQuestionByQuestionId).  Cause: org.apache.ibatis.binding.BindingException: Parameter &#x27;arg0&#x27; not found. Available parameters are [idList, param1]</span><br></pre></td></tr></table></figure>
-<p>很难受，Mybatis的官方文档里并没有针对@SelectProvider有更多的demo，翻遍了各大门户网站也没见到有相关的讨论。兜兜转转依旧没有眉目，想到多参数的传递会被Mybatis自动封装进Map，该不会List也是同样被封装进Map吧。结果一试还真是这样。。</p>
-<p>终于摸索出问题的关键，只需把形参由List<Integer>类型替换为Map类型就能接收到前面传来的List了。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QuestionSqlProvider</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> String <span class="title">listQuestionByQuestionId</span><span class="params">(<span class="keyword">final</span> Map&lt;String, Object&gt; map)</span> </span>&#123;</span><br><span class="line">    List&lt;Integer&gt; idList = (List&lt;Integer&gt;)map.get(<span class="string">&quot;idList&quot;</span>);</span><br><span class="line">    StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">    sb.append(<span class="string">&quot;(&quot;</span>);</span><br><span class="line">    <span class="keyword">for</span> (Integer questionId : idList) &#123;</span><br><span class="line">      sb.append(<span class="string">&quot; &#x27;&quot;</span> + questionId + <span class="string">&quot;&#x27;,&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    sb.deleteCharAt(sb.length() - <span class="number">1</span>);</span><br><span class="line">    sb.append(<span class="string">&quot;)&quot;</span>);</span><br><span class="line">    System.out.println(sb.toString());</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> SQL() &#123;&#123;</span><br><span class="line">      SELECT(<span class="string">&quot; question_id,question_title,create_time &quot;</span>);</span><br><span class="line">      FROM(<span class="string">&quot; question &quot;</span>);</span><br><span class="line">      WHERE(<span class="string">&quot; question_id in &quot;</span> + sb.toString());</span><br><span class="line">    &#125;&#125;.toString();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
-      <tags>
-        <tag>Mybatis</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Hive 优化之为外部表创建分区</title>
     <url>/blog/2018/10/26/add-partition-after-creating-external-table-in-hive/</url>
     <content><![CDATA[<p>首先，我们有一个数据量很大的表。其次，对他进行条件查询或其他操作就像看着一只小蜗牛在爬。</p>
@@ -68,6 +49,25 @@
 <li>更改数据结构（id - string –&gt; id - list<string>)</li>
 </ul>
 ]]></content>
+  </entry>
+  <entry>
+    <title>在SelectProvider注解中使用复杂类型参数（List）</title>
+    <url>/blog/2018/03/03/SelectProvider-use-List-parameter/</url>
+    <content><![CDATA[<p>最近开发中尝试使用注解来代替xml完成Mybatis的sql编写，实现更完(装)整(逼)的无xml编程。结果没写多久就跌进大坑了Orz</p>
+<p>总所周知的是Mybatis支持的注解中有@Select、@Insert、@Update、@Delete这四个基本操作。使用这些注解你可以非常快的完成基础操作，如果想执行一些复杂操作，例如包含where、foreach等xml中一个标签即可完成的操作，便需要用到另一个注解 –&gt; @SelectProvider</p>
+<p>如果你的需求只是传递一些基础类型，那你学习使用SelectProvider的曲线还是很平滑的。如果你的需求是传递一些复杂类型，例如List，那就可能会尴尬了。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Mapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">QuestionMapper</span> </span>&#123;</span><br><span class="line">  <span class="meta">@SelectProvider(type = QuestionSqlProvider.class, method = &quot;listQuestionByQuestionId&quot;)</span></span><br><span class="line">  <span class="function">List&lt;Question&gt; <span class="title">listQuestionByQuestionId</span><span class="params">(<span class="meta">@Param(&quot;idList&quot;)</span> List&lt;Integer&gt; idList)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>一开始我理所当然的把List<Integer>作为输入参数。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">listQuestionByQuestionId</span><span class="params">(<span class="keyword">final</span> List&lt;Integer&gt; idList)</span> </span>&#123;</span><br><span class="line">    StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">    sb.append(<span class="string">&quot;(&quot;</span>);</span><br><span class="line">    <span class="keyword">for</span> (Integer questionId : idList) &#123;</span><br><span class="line">      sb.append(<span class="string">&quot; &#x27;&quot;</span> + questionId + <span class="string">&quot;&#x27;,&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    sb.deleteCharAt(sb.length() - <span class="number">1</span>);</span><br><span class="line">    sb.append(<span class="string">&quot;)&quot;</span>);</span><br><span class="line">    System.out.println(sb.toString());</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> SQL() &#123;&#123;</span><br><span class="line">      SELECT(<span class="string">&quot; question_id,question_title,create_time &quot;</span>);</span><br><span class="line">      FROM(<span class="string">&quot; question &quot;</span>);</span><br><span class="line">      WHERE(<span class="string">&quot; question_id in &quot;</span> + sb.toString());</span><br><span class="line">    &#125;&#125;.toString();</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>燃鹅。。jvm很无情的抛了个错误出来</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">00:29:39.814 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Could not complete request</span><br><span class="line">org.mybatis.spring.MyBatisSystemException: nested exception is org.apache.ibatis.builder.BuilderException: Error invoking SqlProvider method (com.amosannn.mapper.QuestionSqlProvider.listQuestionByQuestionId).  Cause: org.apache.ibatis.binding.BindingException: Parameter &#x27;arg0&#x27; not found. Available parameters are [idList, param1]</span><br></pre></td></tr></table></figure>
+<p>很难受，Mybatis的官方文档里并没有针对@SelectProvider有更多的demo，翻遍了各大门户网站也没见到有相关的讨论。兜兜转转依旧没有眉目，想到多参数的传递会被Mybatis自动封装进Map，该不会List也是同样被封装进Map吧。结果一试还真是这样。。</p>
+<p>终于摸索出问题的关键，只需把形参由List<Integer>类型替换为Map类型就能接收到前面传来的List了。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QuestionSqlProvider</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> String <span class="title">listQuestionByQuestionId</span><span class="params">(<span class="keyword">final</span> Map&lt;String, Object&gt; map)</span> </span>&#123;</span><br><span class="line">    List&lt;Integer&gt; idList = (List&lt;Integer&gt;)map.get(<span class="string">&quot;idList&quot;</span>);</span><br><span class="line">    StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">    sb.append(<span class="string">&quot;(&quot;</span>);</span><br><span class="line">    <span class="keyword">for</span> (Integer questionId : idList) &#123;</span><br><span class="line">      sb.append(<span class="string">&quot; &#x27;&quot;</span> + questionId + <span class="string">&quot;&#x27;,&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    sb.deleteCharAt(sb.length() - <span class="number">1</span>);</span><br><span class="line">    sb.append(<span class="string">&quot;)&quot;</span>);</span><br><span class="line">    System.out.println(sb.toString());</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> SQL() &#123;&#123;</span><br><span class="line">      SELECT(<span class="string">&quot; question_id,question_title,create_time &quot;</span>);</span><br><span class="line">      FROM(<span class="string">&quot; question &quot;</span>);</span><br><span class="line">      WHERE(<span class="string">&quot; question_id in &quot;</span> + sb.toString());</span><br><span class="line">    &#125;&#125;.toString();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      <tags>
+        <tag>Mybatis</tag>
+      </tags>
   </entry>
   <entry>
     <title>Airflow 概念梳理</title>
@@ -144,6 +144,32 @@
       </tags>
   </entry>
   <entry>
+    <title>Airflow 居然趁服务器不注意卡在 running 状态不执行</title>
+    <url>/blog/2018/11/01/airflow-dag-get-stuck-in-running-state/</url>
+    <content><![CDATA[<p>就像这样，这小子坏得很。</p>
+<p><img src="/images/airflow/1541489895790.png" alt="1541489895790"></p>
+<h2 id="初现端倪"><a href="#初现端倪" class="headerlink" title="初现端倪"></a>初现端倪</h2><p>好在 <code>Task Instance Details</code> 中可以看到这小子心里都在想些啥，这是十分关键的，以及具有重大突破性的调查入口！</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">depends_on_past is true for this task&#x27;s DAG, but the previous task instance has not run yet.</span><br></pre></td></tr></table></figure>
+
+<p>做为一个新来的 dag，旗下每一个格子都是小白块，怎么可能会有前置依赖没执行？十分任性！</p>
+<h2 id="顺藤摸瓜"><a href="#顺藤摸瓜" class="headerlink" title="顺藤摸瓜"></a>顺藤摸瓜</h2><p>找到问题所在就好办了</p>
+<p>前往代码中查看，我确实将 <code>depends_on_past</code> 置为 True` 了，但是每个 task 之间的依赖更是没有问题。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">default_args = &#123;</span><br><span class="line">    &#x27;owner&#x27;: &#x27;amos&#x27;,</span><br><span class="line">    &#x27;depends_on_past&#x27;: True,</span><br><span class="line">    # &#x27;start_date&#x27;: airflow.utils.dates.days_ago(1),</span><br><span class="line">    &#x27;start_date&#x27;: datetime.now(),</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>尝试着将 <code>depends_on_past</code> 置为 <code>False</code> ，Airflow 立马开始了属于他自己的奔跑（按照依赖关系奔跑）！</p>
+<h2 id="别出纰漏"><a href="#别出纰漏" class="headerlink" title="别出纰漏"></a>别出纰漏</h2><p>顺便一提，还有一种可能会导致这种情况的发生</p>
+<p>那就是没有开启这个 dag，也就是 <code>trigger</code> 的状态为 <code>off</code>，这样会把任务挂起，直至开启 dag 才会执行。</p>
+<hr>
+<h2 id="了解更多"><a href="#了解更多" class="headerlink" title="了解更多"></a>了解更多</h2><p><a href="https://stackoverflow.com/questions/51261841/airflow-dag-get-stuck-in-running-state">AirFlow DAG Get stuck in running state</a></p>
+]]></content>
+      <categories>
+        <category>技术一路走到黑</category>
+      </categories>
+      <tags>
+        <tag>Airflow</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Airflow 不遵循调度配置执行</title>
     <url>/blog/2018/10/31/airflow-dag-does-not-follow-the-schedule-configuration-execution/</url>
     <content><![CDATA[<p>在 Airflow 的使用过程中，曾多次遇到令人惊奇的现象，其中之一便是它没有按照 dag 中的配置执行。</p>
@@ -171,32 +197,6 @@
 <hr>
 <p>如果你的 dag 趁你不注意卡在running 状态下不能动弹，或许你可以改改调度时间或周期。</p>
 <p>或者试试参考这篇文章：<a href="/blog/2018/11/01/airflow-dag-get-stuck-in-running-state/" title="Airflow 居然趁服务器不注意卡在 running 状态不执行">Airflow 居然趁服务器不注意卡在 running 状态不执行</a></p>
-]]></content>
-      <categories>
-        <category>技术一路走到黑</category>
-      </categories>
-      <tags>
-        <tag>Airflow</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Airflow 居然趁服务器不注意卡在 running 状态不执行</title>
-    <url>/blog/2018/11/01/airflow-dag-get-stuck-in-running-state/</url>
-    <content><![CDATA[<p>就像这样，这小子坏得很。</p>
-<p><img src="/images/airflow/1541489895790.png" alt="1541489895790"></p>
-<h2 id="初现端倪"><a href="#初现端倪" class="headerlink" title="初现端倪"></a>初现端倪</h2><p>好在 <code>Task Instance Details</code> 中可以看到这小子心里都在想些啥，这是十分关键的，以及具有重大突破性的调查入口！</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">depends_on_past is true for this task&#x27;s DAG, but the previous task instance has not run yet.</span><br></pre></td></tr></table></figure>
-
-<p>做为一个新来的 dag，旗下每一个格子都是小白块，怎么可能会有前置依赖没执行？十分任性！</p>
-<h2 id="顺藤摸瓜"><a href="#顺藤摸瓜" class="headerlink" title="顺藤摸瓜"></a>顺藤摸瓜</h2><p>找到问题所在就好办了</p>
-<p>前往代码中查看，我确实将 <code>depends_on_past</code> 置为 True` 了，但是每个 task 之间的依赖更是没有问题。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">default_args = &#123;</span><br><span class="line">    &#x27;owner&#x27;: &#x27;amos&#x27;,</span><br><span class="line">    &#x27;depends_on_past&#x27;: True,</span><br><span class="line">    # &#x27;start_date&#x27;: airflow.utils.dates.days_ago(1),</span><br><span class="line">    &#x27;start_date&#x27;: datetime.now(),</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>尝试着将 <code>depends_on_past</code> 置为 <code>False</code> ，Airflow 立马开始了属于他自己的奔跑（按照依赖关系奔跑）！</p>
-<h2 id="别出纰漏"><a href="#别出纰漏" class="headerlink" title="别出纰漏"></a>别出纰漏</h2><p>顺便一提，还有一种可能会导致这种情况的发生</p>
-<p>那就是没有开启这个 dag，也就是 <code>trigger</code> 的状态为 <code>off</code>，这样会把任务挂起，直至开启 dag 才会执行。</p>
-<hr>
-<h2 id="了解更多"><a href="#了解更多" class="headerlink" title="了解更多"></a>了解更多</h2><p><a href="https://stackoverflow.com/questions/51261841/airflow-dag-get-stuck-in-running-state">AirFlow DAG Get stuck in running state</a></p>
 ]]></content>
       <categories>
         <category>技术一路走到黑</category>
@@ -273,6 +273,32 @@
       </tags>
   </entry>
   <entry>
+    <title>懒汉式单例中双重检查的好处</title>
+    <url>/blog/2017/07/27/benefits-of-singleton-pattern-double-checking/</url>
+    <content><![CDATA[<p>记得前阵子面试金山时碰到了这样一个问题</p>
+<p>1）下面哪一种写法更好，为什么？<br>2）请写出另一种单例模式。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton singleton;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (singleton == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (Singleton.class) &#123;</span><br><span class="line">                singleton = <span class="keyword">new</span> Singleton();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> singleton;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">volatile</span> Singleton singleton;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (singleton == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (Singleton.class) &#123;</span><br><span class="line">                <span class="keyword">if</span> (singleton == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    singleton = <span class="keyword">new</span> Singleton();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> singleton;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>很显然，第一种代码块是线程不安全的。<br>比如说这种情况，有一个线程调用了getInstance()，但执行到if(singleton==null)这一步时，另一个线程也进入了这个方法，那么便会造成最终创建了两个Singleton实例。<br>而若是第二种代码块，在同步锁中加入第二次验证，就不怕多个线程同时进入方法体导致的多个实例被创建了。</p>
+<p>以上两个方法块俗称懒汉式单例模式，意为调用时再创建实例对象。</p>
+<p>另一种单例模式称为饿汉式单例模式，不同的点在于类装载时便完成了类实例化，以下两种方法块都是饿汉式的表现方法，是一样的。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> Singleton instance = <span class="keyword">new</span> Singleton();</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> &#123;</span><br><span class="line">     instance = <span class="keyword">new</span> Singleton();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最后再推荐个与双重检查一样线程安全的，静态内部类实现的懒汉式单例模式。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> class <span class="title">Singleton</span><span class="params">()</span></span>&#123;</span><br><span class="line">     <span class="keyword">private</span> Singleton&#123;&#125;;</span><br><span class="line">     <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">LazyHolder</span></span>&#123;</span><br><span class="line">          <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Singleton INSTANCE = <span class="keyword">new</span> Singleton();</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">          <span class="keyword">return</span> LazyHolder.INSTANCE;</span><br><span class="line">     &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这种方式跟饿汉式方式采用的机制类似，但又有不同。两者都是采用了类装载的机制来保证初始化实例时只有一个线程。不同的地方在饿汉式方式是只要Singleton类被装载就会实例化，没有Lazy-Loading的作用，而静态内部类方式在Singleton类被装载时并不会立即实例化，而是在需要实例化时，调用getInstance方法，才会装载SingletonInstance类，从而完成Singleton的实例化。</p>
+<p>类的静态属性只会在第一次加载类的时候初始化，所以在这里，JVM帮助我们保证了线程的安全性，在类进行初始化时，别的线程是无法进入的。</p>
+]]></content>
+      <categories>
+        <category>技术一路走到黑</category>
+      </categories>
+      <tags>
+        <tag>java</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>axios 添加登录拦截器后出现 preflight response 错误</title>
     <url>/blog/2018/04/02/axios-intercepter-perflight-response-error/</url>
     <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>为了加强网站安全性，给除了登录注册等特殊页面外的页面路由都加上了访问控制。然后问题就出现了，接口请求没有返回值了！抛了这样一个错误：</p>
@@ -306,32 +332,6 @@
         <tag>Vue</tag>
         <tag>axios</tag>
         <tag>CORS</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>懒汉式单例中双重检查的好处</title>
-    <url>/blog/2017/07/27/benefits-of-singleton-pattern-double-checking/</url>
-    <content><![CDATA[<p>记得前阵子面试金山时碰到了这样一个问题</p>
-<p>1）下面哪一种写法更好，为什么？<br>2）请写出另一种单例模式。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton singleton;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (singleton == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (Singleton.class) &#123;</span><br><span class="line">                singleton = <span class="keyword">new</span> Singleton();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> singleton;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">volatile</span> Singleton singleton;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (singleton == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (Singleton.class) &#123;</span><br><span class="line">                <span class="keyword">if</span> (singleton == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    singleton = <span class="keyword">new</span> Singleton();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> singleton;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>很显然，第一种代码块是线程不安全的。<br>比如说这种情况，有一个线程调用了getInstance()，但执行到if(singleton==null)这一步时，另一个线程也进入了这个方法，那么便会造成最终创建了两个Singleton实例。<br>而若是第二种代码块，在同步锁中加入第二次验证，就不怕多个线程同时进入方法体导致的多个实例被创建了。</p>
-<p>以上两个方法块俗称懒汉式单例模式，意为调用时再创建实例对象。</p>
-<p>另一种单例模式称为饿汉式单例模式，不同的点在于类装载时便完成了类实例化，以下两种方法块都是饿汉式的表现方法，是一样的。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> Singleton instance = <span class="keyword">new</span> Singleton();</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> &#123;</span><br><span class="line">     instance = <span class="keyword">new</span> Singleton();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>最后再推荐个与双重检查一样线程安全的，静态内部类实现的懒汉式单例模式。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> class <span class="title">Singleton</span><span class="params">()</span></span>&#123;</span><br><span class="line">     <span class="keyword">private</span> Singleton&#123;&#125;;</span><br><span class="line">     <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">LazyHolder</span></span>&#123;</span><br><span class="line">          <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Singleton INSTANCE = <span class="keyword">new</span> Singleton();</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">          <span class="keyword">return</span> LazyHolder.INSTANCE;</span><br><span class="line">     &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这种方式跟饿汉式方式采用的机制类似，但又有不同。两者都是采用了类装载的机制来保证初始化实例时只有一个线程。不同的地方在饿汉式方式是只要Singleton类被装载就会实例化，没有Lazy-Loading的作用，而静态内部类方式在Singleton类被装载时并不会立即实例化，而是在需要实例化时，调用getInstance方法，才会装载SingletonInstance类，从而完成Singleton的实例化。</p>
-<p>类的静态属性只会在第一次加载类的时候初始化，所以在这里，JVM帮助我们保证了线程的安全性，在类进行初始化时，别的线程是无法进入的。</p>
-]]></content>
-      <categories>
-        <category>技术一路走到黑</category>
-      </categories>
-      <tags>
-        <tag>java</tag>
       </tags>
   </entry>
   <entry>
@@ -501,64 +501,6 @@
       <tags>
         <tag>GitHub</tag>
         <tag>BFG</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Docker + Nginx 镜像部署 Vue 项目</title>
-    <url>/blog/2018/03/28/deploy-the-vue-project-using-docker-and-nginx/</url>
-    <content><![CDATA[<h1 id="简单介绍-Docker"><a href="#简单介绍-Docker" class="headerlink" title="简单介绍 Docker"></a>简单介绍 Docker</h1><p>Docker 真是个好东西，很好的降低了不同环境发版的兼容性问题。无论是 Linux, Windows 或是 Mac OS，再也不用怕系统环境不同，软件版本不同导致的项目无法启动。这些问题只需要自定义 Docker 镜像，并在 Docker 中启动，就能搞定部署啦。</p>
-<h1 id="部署-Vue-项目"><a href="#部署-Vue-项目" class="headerlink" title="部署 Vue 项目"></a>部署 Vue 项目</h1><p>传统的部署一般为编译后放在 Nginx 目录下，或者放在 Tomcat 目录下。玩了有一阵子 Docker 了，就试试用 Docker 来部署吧。</p>
-<h2 id="本地操作"><a href="#本地操作" class="headerlink" title="本地操作"></a>本地操作</h2><p>首先给本地的vue项目打包</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">npm run build</span><br></pre></td></tr></table></figure>
-
-<p>执行命令之后项目根目录下会出现 dist 文件夹，将其上传至服务器。</p>
-<h2 id="服务器操作"><a href="#服务器操作" class="headerlink" title="服务器操作"></a>服务器操作</h2><h3 id="编写-Dockerfile"><a href="#编写-Dockerfile" class="headerlink" title="编写 Dockerfile"></a>编写 Dockerfile</h3><p>新建 Dockerfile</p>
-<blockquote>
-<p>vi Dockerfile</p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#导入nginx镜像</span><br><span class="line">FROM nginx:1.13.7</span><br><span class="line">MAINTAINER amosannn &lt;amosannn@gmail.com&gt;</span><br><span class="line">#把当前打包工程的html复制到虚拟地址</span><br><span class="line">COPY dist/ /usr/share/nginx/html/</span><br><span class="line">#使用自定义nginx.conf配置端口和监听</span><br><span class="line">RUN rm /etc/nginx/conf.d/default.conf</span><br><span class="line">ADD default.conf /etc/nginx/conf.d/</span><br><span class="line"></span><br><span class="line">RUN /bin/bash -c &#x27;echo init ok!!!&#x27;</span><br></pre></td></tr></table></figure>
-
-<h3 id="Nginx配置"><a href="#Nginx配置" class="headerlink" title="Nginx配置"></a>Nginx配置</h3><p>新建<code>default.conf</code></p>
-<blockquote>
-<p>vi default.conf</p>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">server &#123;</span><br><span class="line"># 项目中定义的端口号</span><br><span class="line">    listen       8000; </span><br><span class="line">    server_name  localhost;</span><br><span class="line"></span><br><span class="line">    #charset koi8-r;</span><br><span class="line">    #access_log  /var/log/nginx/log/host.access.log  main;</span><br><span class="line"></span><br><span class="line">    location / &#123;</span><br><span class="line">        root   /usr/share/nginx/html;</span><br><span class="line">        index  index.html index.htm;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    #error_page  404              /404.html;</span><br><span class="line"></span><br><span class="line">    # redirect server error pages to the static page /50x.html</span><br><span class="line">    #</span><br><span class="line">    error_page   500 502 503 504  /50x.html;</span><br><span class="line">    location = /50x.html &#123;</span><br><span class="line">        root   html;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="Docker-打包"><a href="#Docker-打包" class="headerlink" title="Docker 打包"></a>Docker 打包</h3><p>打包前项目目录下应该有这几个文件(夹)：<code>default.conf</code>,<code> dist</code>,<code>Dockerfile</code></p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">docker build -t zhiliao:v1 .</span><br></pre></td></tr></table></figure>
-
-<p>别忘了末尾的小点点</p>
-<p>最后出现这两条提示即为打包成功</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Successfully built 6f656946fde3</span><br><span class="line">Successfully tagged zhiliao:v1</span><br></pre></td></tr></table></figure>
-
-<h3 id="查看镜像"><a href="#查看镜像" class="headerlink" title="查看镜像"></a>查看镜像</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">docker images</span><br></pre></td></tr></table></figure>
-
-<p>如果在结果中看到，则为打包成功</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">zhiliao             latest              c5d9c47be079        17 minutes ago      111MB</span><br></pre></td></tr></table></figure>
-
-<h3 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">docker run -d -p 80:8000 zhiliao:v1</span><br></pre></td></tr></table></figure>
-
-<p>命令中的<code>-d</code>意为后台运行</p>
-<p>-p 为端口号，前半部分为外网访问的端口，后半部分为 Nginx 反向代理寻找的内部端口</p>
-<h3 id="查看运行结果"><a href="#查看运行结果" class="headerlink" title="查看运行结果"></a>查看运行结果</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">docker ps </span><br></pre></td></tr></table></figure>
-
-<p>这条命令等价于<code>docker container ls</code>，加上 -a 则可显示全部</p>
- <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">[root@VM_108_54_centos zhiliao-vue]# docker ps -a</span><br><span class="line">CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                      PORTS               NAMES</span><br><span class="line">bdd5842a4cae        zhiliao:v1          &quot;nginx -g &#x27;daemon ...&quot;   42 seconds ago      Exited (1) 41 seconds ago                       frosty_joliot</span><br></pre></td></tr></table></figure>
-
-<h3 id="查找日志"><a href="#查找日志" class="headerlink" title="查找日志"></a>查找日志</h3><p>如果遇到程序崩溃或者镜像启动失败</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">docker logs &#x27;CONTAINER ID&#x27;</span><br></pre></td></tr></table></figure>
-
-<p>使用 ps 命令可以找到到 <code>CONTAINER ID</code></p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">[root@VM_108_54_centos zhiliao-vue]# docker logs bdd5842a4cae</span><br><span class="line">2018/03/28 07:11:51 [emerg] 1#1: unknown directive &quot;//这里使用项目中的端口号&quot; in /etc/nginx/conf.d/default.conf:3</span><br><span class="line">nginx: [emerg] unknown directive &quot;//这里使用项目中的端口号&quot; in /etc/nginx/conf.d/default.conf:3</span><br></pre></td></tr></table></figure>
-
-<hr>
-<p>参考链接：</p>
-<p><a href="https://yeasy.gitbooks.io/docker_practice/content/image/build.html">使用 Dockerfile 定制镜像</a></p>
-]]></content>
-      <tags>
-        <tag>Vue</tag>
-        <tag>Docker</tag>
-        <tag>Nginx</tag>
       </tags>
   </entry>
   <entry>
@@ -978,6 +920,39 @@
       </tags>
   </entry>
   <entry>
+    <title>Haproxy 之 Http 代理的两种方式</title>
+    <url>/blog/2019/04/30/haproxy-listen-vs-frontend/</url>
+    <content><![CDATA[<h2 id="listen-与-frontend-backend-的配置区别"><a href="#listen-与-frontend-backend-的配置区别" class="headerlink" title="listen 与 (frontend + backend) 的配置区别"></a>listen 与 (frontend + backend) 的配置区别</h2><h3 id="frontend-backend-的配置示例及运行流程"><a href="#frontend-backend-的配置示例及运行流程" class="headerlink" title="frontend + backend 的配置示例及运行流程"></a>frontend + backend 的配置示例及运行流程</h3><p>这是一个 HTTP 代理在所有接口上监听端口 80 的简单配置，请求进入后的运行流程如下：</p>
+<ol>
+<li><code>frontend</code> 监听 80 端口</li>
+<li>请求被 <code>frontend</code> 转发到 <code>backend</code> 的 servers 中</li>
+<li>请求进入运行在 127.0.0.1:8000 的 server1 中</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># Simple configuration for an HTTP proxy listening on port 80 on all</span><br><span class="line"># interfaces and forwarding requests to a single backend &quot;servers&quot; with a</span><br><span class="line"># single server &quot;server1&quot; listening on 127.0.0.1:8000</span><br><span class="line"></span><br><span class="line">global</span><br><span class="line">daemon</span><br><span class="line">maxconn 256</span><br><span class="line"></span><br><span class="line">defaults</span><br><span class="line">mode http</span><br><span class="line">timeout connect 5000ms</span><br><span class="line">timeout client 50000ms</span><br><span class="line">timeout server 50000ms</span><br><span class="line"></span><br><span class="line">frontend http-in</span><br><span class="line">bind *:80</span><br><span class="line">default_backend servers</span><br><span class="line"></span><br><span class="line">backend servers</span><br><span class="line">server server1 127.0.0.1:8000 maxconn 32</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<span id="more"></span>
+
+<h3 id="listen-的配置示例及运行流程"><a href="#listen-的配置示例及运行流程" class="headerlink" title="listen 的配置示例及运行流程"></a>listen 的配置示例及运行流程</h3><p>使用单个 <code>listen</code> 块定义的相同配置。更精简但不那么富有表现力，尤其是在HTTP模式下。</p>
+<ol>
+<li>请求进入 80 端口</li>
+<li>转发入运行在 127.0.0.1:8000 的 server1 中</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># The same configuration defined with a single listen block. Shorter but</span><br><span class="line"># less expressive, especially in HTTP mode.</span><br><span class="line"></span><br><span class="line">global</span><br><span class="line">daemon</span><br><span class="line">maxconn 256</span><br><span class="line"></span><br><span class="line">defaults</span><br><span class="line">mode http</span><br><span class="line">timeout connect 5000ms</span><br><span class="line">timeout client 50000ms</span><br><span class="line">timeout server 50000ms</span><br><span class="line"></span><br><span class="line">listen http-in</span><br><span class="line">bind *:80</span><br><span class="line">server server1 127.0.0.1:8000 maxconn 32</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="相关命令"><a href="#相关命令" class="headerlink" title="相关命令"></a>相关命令</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 修改配置并重启</span><br><span class="line">sudo vi /etc/haproxy/haproxy.cfg</span><br><span class="line">haproxy -c -f /etc/haproxy/haproxy.cfg</span><br><span class="line">sudo service haproxy restart</span><br><span class="line"></span><br><span class="line"># 设置权重</span><br><span class="line">echo &#x27;set weight read_only-back/slave1 0&#x27; | sudo socat stdio /run/haproxy/admin.sock</span><br><span class="line"></span><br><span class="line">echo &#x27;set server read_only-back/slave1 agent up&#x27; | sudo socat stdio /run/haproxy/admin.sock</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<hr>
+<h2 id="了解更多"><a href="#了解更多" class="headerlink" title="了解更多"></a>了解更多</h2><p><a href="http://cbonte.github.io/haproxy-dconv/">HAProxy 各版本官方文档</a></p>
+]]></content>
+      <categories>
+        <category>技术一路走到黑</category>
+      </categories>
+      <tags>
+        <tag>Haproxy</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>mac下的hexo安装出现异常</title>
     <url>/blog/2017/06/22/hexo-installation-error-on-mac/</url>
     <content><![CDATA[<p>将hexo从win迁移到mac时发生了安装错误。</p>
@@ -1016,39 +991,6 @@
       </categories>
       <tags>
         <tag>hexo</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Haproxy 之 Http 代理的两种方式</title>
-    <url>/blog/2019/04/30/haproxy-listen-vs-frontend/</url>
-    <content><![CDATA[<h2 id="listen-与-frontend-backend-的配置区别"><a href="#listen-与-frontend-backend-的配置区别" class="headerlink" title="listen 与 (frontend + backend) 的配置区别"></a>listen 与 (frontend + backend) 的配置区别</h2><h3 id="frontend-backend-的配置示例及运行流程"><a href="#frontend-backend-的配置示例及运行流程" class="headerlink" title="frontend + backend 的配置示例及运行流程"></a>frontend + backend 的配置示例及运行流程</h3><p>这是一个 HTTP 代理在所有接口上监听端口 80 的简单配置，请求进入后的运行流程如下：</p>
-<ol>
-<li><code>frontend</code> 监听 80 端口</li>
-<li>请求被 <code>frontend</code> 转发到 <code>backend</code> 的 servers 中</li>
-<li>请求进入运行在 127.0.0.1:8000 的 server1 中</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># Simple configuration for an HTTP proxy listening on port 80 on all</span><br><span class="line"># interfaces and forwarding requests to a single backend &quot;servers&quot; with a</span><br><span class="line"># single server &quot;server1&quot; listening on 127.0.0.1:8000</span><br><span class="line"></span><br><span class="line">global</span><br><span class="line">daemon</span><br><span class="line">maxconn 256</span><br><span class="line"></span><br><span class="line">defaults</span><br><span class="line">mode http</span><br><span class="line">timeout connect 5000ms</span><br><span class="line">timeout client 50000ms</span><br><span class="line">timeout server 50000ms</span><br><span class="line"></span><br><span class="line">frontend http-in</span><br><span class="line">bind *:80</span><br><span class="line">default_backend servers</span><br><span class="line"></span><br><span class="line">backend servers</span><br><span class="line">server server1 127.0.0.1:8000 maxconn 32</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<span id="more"></span>
-
-<h3 id="listen-的配置示例及运行流程"><a href="#listen-的配置示例及运行流程" class="headerlink" title="listen 的配置示例及运行流程"></a>listen 的配置示例及运行流程</h3><p>使用单个 <code>listen</code> 块定义的相同配置。更精简但不那么富有表现力，尤其是在HTTP模式下。</p>
-<ol>
-<li>请求进入 80 端口</li>
-<li>转发入运行在 127.0.0.1:8000 的 server1 中</li>
-</ol>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># The same configuration defined with a single listen block. Shorter but</span><br><span class="line"># less expressive, especially in HTTP mode.</span><br><span class="line"></span><br><span class="line">global</span><br><span class="line">daemon</span><br><span class="line">maxconn 256</span><br><span class="line"></span><br><span class="line">defaults</span><br><span class="line">mode http</span><br><span class="line">timeout connect 5000ms</span><br><span class="line">timeout client 50000ms</span><br><span class="line">timeout server 50000ms</span><br><span class="line"></span><br><span class="line">listen http-in</span><br><span class="line">bind *:80</span><br><span class="line">server server1 127.0.0.1:8000 maxconn 32</span><br></pre></td></tr></table></figure>
-
-
-<h2 id="相关命令"><a href="#相关命令" class="headerlink" title="相关命令"></a>相关命令</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 修改配置并重启</span><br><span class="line">sudo vi /etc/haproxy/haproxy.cfg</span><br><span class="line">haproxy -c -f /etc/haproxy/haproxy.cfg</span><br><span class="line">sudo service haproxy restart</span><br><span class="line"></span><br><span class="line"># 设置权重</span><br><span class="line">echo &#x27;set weight read_only-back/slave1 0&#x27; | sudo socat stdio /run/haproxy/admin.sock</span><br><span class="line"></span><br><span class="line">echo &#x27;set server read_only-back/slave1 agent up&#x27; | sudo socat stdio /run/haproxy/admin.sock</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-
-<hr>
-<h2 id="了解更多"><a href="#了解更多" class="headerlink" title="了解更多"></a>了解更多</h2><p><a href="http://cbonte.github.io/haproxy-dconv/">HAProxy 各版本官方文档</a></p>
-]]></content>
-      <categories>
-        <category>技术一路走到黑</category>
-      </categories>
-      <tags>
-        <tag>Haproxy</tag>
       </tags>
   </entry>
   <entry>
@@ -1555,31 +1497,6 @@
       </tags>
   </entry>
   <entry>
-    <title>MySQL的default约束用法</title>
-    <url>/blog/2017/05/31/mysql-default-constraint/</url>
-    <content><![CDATA[<p>在sql最基本的curd语句使用熟练后，我开始发现提高数据库的稳定性和易用性需要一些其他的东西，比如<code>constraint</code>(约束)。</p>
-<p>我就一个没经过数据加密的user表演示一下<code>default约束</code>的用法。</p>
-<h2 id="建表语句中使用"><a href="#建表语句中使用" class="headerlink" title="建表语句中使用"></a>建表语句中使用</h2><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> <span class="keyword">user</span>(</span><br><span class="line">	id <span class="type">int</span>(<span class="number">11</span>) <span class="keyword">not</span> <span class="keyword">null</span> auto_increment,</span><br><span class="line">	username <span class="type">varchar</span>(<span class="number">255</span>) <span class="keyword">default</span> <span class="keyword">null</span>,</span><br><span class="line">	status <span class="type">varchar</span>(<span class="number">255</span>) <span class="keyword">default</span> &quot;active&quot;;</span><br><span class="line">	<span class="keyword">primary</span> key (id)</span><br><span class="line">) engine<span class="operator">=</span>InnoDB <span class="keyword">default</span> charset<span class="operator">=</span>utf8;</span><br></pre></td></tr></table></figure>
-
-<h2 id="已有表结构？使用alter插入字段"><a href="#已有表结构？使用alter插入字段" class="headerlink" title="已有表结构？使用alter插入字段"></a>已有表结构？使用alter插入字段</h2><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> <span class="keyword">user</span> <span class="keyword">add</span> status <span class="type">varchar</span>(<span class="number">255</span>) <span class="keyword">default</span> &quot;active&quot;;</span><br></pre></td></tr></table></figure>
-
-<h2 id="有默认值的表如何添加数据"><a href="#有默认值的表如何添加数据" class="headerlink" title="有默认值的表如何添加数据"></a>有默认值的表如何添加数据</h2><p>那么表结构已经有了<code>default约束</code>，在插入值的时候如何处理字段的默认值呢？<br>传入null？空字符串？或者是不填？都不行！</p>
-<span id="more"></span>
-<p>答案是<code>传入default关键字</code>，表示插入字段预设的默认值。</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> <span class="keyword">user</span> <span class="keyword">values</span>(<span class="keyword">null</span>, &quot;c&quot;, &quot;c&quot;, <span class="keyword">default</span>);</span><br></pre></td></tr></table></figure>
-<p>你想覆盖default约束传入自定义值？ 填写对应类型的值就行了。</p>
-<hr>
-<p>参考链接：<br><a href="https://www.w3schools.com/sql/sql_default.asp">SQL DEFAULT Constraint</a></p>
-]]></content>
-      <categories>
-        <category>技术一路走到黑</category>
-      </categories>
-      <tags>
-        <tag>MySQL</tag>
-        <tag>Database</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Redis从安装到踩坑</title>
     <url>/blog/2017/11/29/redis-install/</url>
     <content><![CDATA[<p>先贴Redis官网：<a href="https://redis.io/download">https://redis.io/download</a></p>
@@ -1643,6 +1560,31 @@
       <tags>
         <tag>mac</tag>
         <tag>python</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>MySQL的default约束用法</title>
+    <url>/blog/2017/05/31/mysql-default-constraint/</url>
+    <content><![CDATA[<p>在sql最基本的curd语句使用熟练后，我开始发现提高数据库的稳定性和易用性需要一些其他的东西，比如<code>constraint</code>(约束)。</p>
+<p>我就一个没经过数据加密的user表演示一下<code>default约束</code>的用法。</p>
+<h2 id="建表语句中使用"><a href="#建表语句中使用" class="headerlink" title="建表语句中使用"></a>建表语句中使用</h2><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> <span class="keyword">user</span>(</span><br><span class="line">	id <span class="type">int</span>(<span class="number">11</span>) <span class="keyword">not</span> <span class="keyword">null</span> auto_increment,</span><br><span class="line">	username <span class="type">varchar</span>(<span class="number">255</span>) <span class="keyword">default</span> <span class="keyword">null</span>,</span><br><span class="line">	status <span class="type">varchar</span>(<span class="number">255</span>) <span class="keyword">default</span> &quot;active&quot;;</span><br><span class="line">	<span class="keyword">primary</span> key (id)</span><br><span class="line">) engine<span class="operator">=</span>InnoDB <span class="keyword">default</span> charset<span class="operator">=</span>utf8;</span><br></pre></td></tr></table></figure>
+
+<h2 id="已有表结构？使用alter插入字段"><a href="#已有表结构？使用alter插入字段" class="headerlink" title="已有表结构？使用alter插入字段"></a>已有表结构？使用alter插入字段</h2><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> <span class="keyword">user</span> <span class="keyword">add</span> status <span class="type">varchar</span>(<span class="number">255</span>) <span class="keyword">default</span> &quot;active&quot;;</span><br></pre></td></tr></table></figure>
+
+<h2 id="有默认值的表如何添加数据"><a href="#有默认值的表如何添加数据" class="headerlink" title="有默认值的表如何添加数据"></a>有默认值的表如何添加数据</h2><p>那么表结构已经有了<code>default约束</code>，在插入值的时候如何处理字段的默认值呢？<br>传入null？空字符串？或者是不填？都不行！</p>
+<span id="more"></span>
+<p>答案是<code>传入default关键字</code>，表示插入字段预设的默认值。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> <span class="keyword">user</span> <span class="keyword">values</span>(<span class="keyword">null</span>, &quot;c&quot;, &quot;c&quot;, <span class="keyword">default</span>);</span><br></pre></td></tr></table></figure>
+<p>你想覆盖default约束传入自定义值？ 填写对应类型的值就行了。</p>
+<hr>
+<p>参考链接：<br><a href="https://www.w3schools.com/sql/sql_default.asp">SQL DEFAULT Constraint</a></p>
+]]></content>
+      <categories>
+        <category>技术一路走到黑</category>
+      </categories>
+      <tags>
+        <tag>MySQL</tag>
+        <tag>Database</tag>
       </tags>
   </entry>
   <entry>
@@ -1733,47 +1675,6 @@
       <tags>
         <tag>Transaction</tag>
         <tag>SQL</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>解决Vue前后端分离跨域问题</title>
-    <url>/blog/2018/03/22/solove-vue-cross-domain-problems/</url>
-    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>用Vue写了几个页面，发现request传到后端没带上cookies，心想不对劲，Postman明明可以访问啊。再仔细看看，后端已经开放了跨域访问，不需要<code>HttpServletRequest</code>的接口也可以成功请求。一定就是前端请求缺少请求头或是某些参数了。上网查了一下还真是这样，又跳过了一个坑，很开心啦～</p>
-<h1 id="前后端跨域设置"><a href="#前后端跨域设置" class="headerlink" title="前后端跨域设置"></a>前后端跨域设置</h1><h2 id="Vue"><a href="#Vue" class="headerlink" title="Vue"></a>Vue</h2><blockquote>
-<p>main.js 设置</p>
-</blockquote>
-<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> axios <span class="keyword">from</span> <span class="string">&#x27;axios&#x27;</span></span><br><span class="line"></span><br><span class="line">axios.defaults.withCredentials=<span class="literal">true</span>;</span><br><span class="line">Vue.prototype.$http = axios;</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>请求需带上withCredentials</p>
-</blockquote>
-<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="title">getData</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.$axios.get(<span class="string">&#x27;http://127.0.0.1:8080/xxx/xxxxx&#x27;</span>,&#123;</span><br><span class="line">          <span class="attr">headers</span>: &#123;</span><br><span class="line">            <span class="string">&quot;Content-Type&quot;</span>:<span class="string">&quot;application/json;charset=utf-8&quot;</span></span><br><span class="line">          &#125;,</span><br><span class="line">          <span class="attr">withCredentials</span> : <span class="literal">true</span></span><br><span class="line">        &#125;).then( <span class="function">(<span class="params">response</span>) =&gt;</span> &#123;</span><br><span class="line">          <span class="keyword">if</span>( response.data.code === <span class="string">&#x27;0000&#x27;</span>)&#123;</span><br><span class="line">            <span class="built_in">this</span>.items = response.data.data.xxx;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="built_in">this</span>.items)</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="SpringMVC"><a href="#SpringMVC" class="headerlink" title="SpringMVC"></a>SpringMVC</h2><p>加上一个跨域用Interceptor</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CorsInterceptor</span> <span class="keyword">implements</span> <span class="title">HandlerInterceptor</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">preHandle</span><span class="params">(HttpServletRequest request, HttpServletResponse response,</span></span></span><br><span class="line"><span class="params"><span class="function">      Object handler)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    response.setHeader(<span class="string">&quot;Access-Control-Allow-Origin&quot;</span>, <span class="string">&quot;*&quot;</span>);</span><br><span class="line">    response.setHeader(<span class="string">&quot;Access-Control-Allow-Methods&quot;</span>, <span class="string">&quot;*&quot;</span>);</span><br><span class="line">    response.setHeader(<span class="string">&quot;Access-Control-Max-Age&quot;</span>, <span class="string">&quot;3600&quot;</span>);</span><br><span class="line">    response.setHeader(<span class="string">&quot;Access-Control-Allow-Headers&quot;</span>, <span class="string">&quot;Origin, X-Requested-With, Content-Type, Accept&quot;</span>);</span><br><span class="line">    response.setHeader(<span class="string">&quot;Access-Control-Allow-Credentials&quot;</span>,<span class="string">&quot;true&quot;</span>); <span class="comment">//是否允许浏览器携带用户身份信息（cookie）</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">postHandle</span><span class="params">(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, ModelAndView modelAndView)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">afterCompletion</span><span class="params">(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, Exception e)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="可能遇到的问题"><a href="#可能遇到的问题" class="headerlink" title="可能遇到的问题"></a>可能遇到的问题</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">response.setHeader(<span class="string">&quot;Access-Control-Allow-Origin&quot;</span>, <span class="string">&quot;*&quot;</span>);</span><br></pre></td></tr></table></figure>
-
-<p>请求源地址如果写了<code>*</code>很可能会被拒绝访问。</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">Failed to load http://127.0.0.1:8080/zhiliao/login: Response to preflight request doesn&#x27;t pass access control check: The value of the &#x27;Access-Control-Allow-Origin&#x27; header in the response must not be the wildcard &#x27;*&#x27; when the request&#x27;s credentials mode is &#x27;include&#x27;. Origin &#x27;http://127.0.0.1:8000&#x27; is therefore not allowed access. The credentials mode of requests initiated by the XMLHttpRequest is controlled by the withCredentials attribute.</span><br></pre></td></tr></table></figure>
-
-<p>如果出现这样的报错，那就得指定地址啦！    </p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">response.setHeader(&quot;Access-Control-Allow-Origin&quot;, &quot;http://127.0.0.1:8000&quot;);</span><br></pre></td></tr></table></figure>
-
-<p>这里依旧有个小坑：指定地址为<code>http://127.0.0.1:8000</code>的时候前端页面若是<code>localhost</code>是无法访问的。</p>
-<h1 id="看看axios官方文档"><a href="#看看axios官方文档" class="headerlink" title="看看axios官方文档"></a>看看axios官方文档</h1><p><a href="https://github.com/axios/axios#request-config">axios官方配置说明</a></p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">// `timeout` specifies the number of milliseconds before the request times out.</span><br><span class="line">// If the request takes longer than `timeout`, the request will be aborted.</span><br><span class="line">timeout: 1000,</span><br><span class="line"></span><br><span class="line">// `withCredentials` indicates whether or not cross-site Access-Control requests</span><br><span class="line">// should be made using credentials</span><br><span class="line">withCredentials: false, // default</span><br><span class="line"></span><br><span class="line">// `adapter` allows custom handling of requests which makes testing easier.</span><br><span class="line">// Return a promise and supply a valid response (see lib/adapters/README.md).</span><br><span class="line">adapter: function (config) &#123;</span><br><span class="line">  /* ... */</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
-
-<p>配置文件中<code>withCredentials</code>默认是关闭的，手动修改配置文件或在项目中重定义即可。</p>
-]]></content>
-      <tags>
-        <tag>Vue</tag>
-        <tag>CORS</tag>
-        <tag>SpringBoot</tag>
       </tags>
   </entry>
   <entry>
@@ -2223,32 +2124,6 @@
       </tags>
   </entry>
   <entry>
-    <title>MyBatis一对一映射注解@One的使用及理解</title>
-    <url>/blog/2018/03/08/the-use-and-understanding-of-one-annotated-by-mybatis/</url>
-    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>本着更深入地使用注解来开发，慢慢地发现脱离了XML的MyBatis好多好多的坑。我觉得很大的原因还是来自于官方文档的不完善，以及使用注解开发持久层的人并不多见，导致网络上的相关讨论过于贫瘠并重复化，毕竟对于复杂查询的支持，我认为还没有在XML里写一条SQL方便呢～  </p>
-<p>所以这篇文章用于补充一语带过的官方文档，记录下自己趟过的坑。</p>
-<h1 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h1><h2 id="一对一映射"><a href="#一对一映射" class="headerlink" title="一对一映射"></a>一对一映射</h2><p>注解化一对一映射其实就是将XML中的<code>ResultType</code>属性对应的实体写在<code>@Results</code>注解中。其中的<code>@Result</code>填入实体的属性，而若该属性为实体中的实体，则需要@One注解引入。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Select(&quot;select answer_id, answer_content, liked_count, create_time, question_id, user_id from answer where create_time &gt; #&#123;createTime&#125; order by liked_count desc, create_time desc limit 0,10&quot;)</span></span><br><span class="line"><span class="meta">@Results(&#123;</span></span><br><span class="line"><span class="meta">    @Result(id = true, column = &quot;answer_id&quot;, property = &quot;answerId&quot;, javaType = Integer.class),</span></span><br><span class="line"><span class="meta">    @Result(column = &quot;answer_content&quot;, property = &quot;answerContent&quot;),</span></span><br><span class="line"><span class="meta">    @Result(column = &quot;liked_count&quot;, property = &quot;likedCount&quot;, javaType = Integer.class, jdbcType = JdbcType.INTEGER),</span></span><br><span class="line"><span class="meta">    @Result(column = &quot;create_time&quot;, property = &quot;createTime&quot;),</span></span><br><span class="line"><span class="meta">    @Result(column = &quot;question_id&quot;, property = &quot;question&quot;, javaType = Question.class,</span></span><br><span class="line"><span class="meta">        one = @One(select = &quot;selectQuestionById&quot;)),</span></span><br><span class="line"><span class="meta">    @Result(column = &quot;user_id&quot;, property = &quot;user&quot;,</span></span><br><span class="line"><span class="meta">        one = @One(select = &quot;selectUserById&quot;))</span></span><br><span class="line"><span class="meta">&#125;)</span></span><br><span class="line"><span class="function">List&lt;Answer&gt; <span class="title">listAnswerByCreateTime</span><span class="params">(<span class="meta">@Param(&quot;createTime&quot;)</span> <span class="keyword">long</span> createTime)</span></span>;</span><br></pre></td></tr></table></figure>
-
-<p>值得注意的是，映射中的<code>property</code>属性的值不可和其他实体属性一样，应该填写所返回的实体名称。</p>
-<p>例如下面代码，我返回的实体为<code>Answer</code>类下的<code>Question</code>类，则<code>property</code>中不可写<code>questionId</code>，而得写<code>question</code>。同时@One中select属性对应的方法若在不同类，则需要写出完整的包名（com.xxx.xxx.getxxxByxx）。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Result(column = &quot;question_id&quot;, property = &quot;question&quot;, javaType = Question.class,</span></span><br><span class="line"><span class="meta">        one = @One(select = &quot;selectQuestionById&quot;))</span></span><br></pre></td></tr></table></figure>
-
-<p>需要注意的是，从@One传递过来的查询条件也需要在主查询语句中查询出来，也就是上面的<code>listAnswerByCreateTime</code>方法需要查询出question_id和user_id，千万别漏了。否则报你错哦！</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Select(&quot;select question_id, question_title from question where question_id = #&#123;questionId&#125;&quot;)</span></span><br><span class="line"><span class="meta">@ResultType(Question.class)</span></span><br><span class="line"><span class="function">Question <span class="title">selectQuestionById</span><span class="params">(<span class="meta">@Param(&quot;questionId&quot;)</span> Integer questionId)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Select(&quot;select user_id, username, avatar_url, simple_desc from user where user_id = #&#123;userId&#125;&quot;)</span></span><br><span class="line"><span class="meta">@ResultType(User.class)</span></span><br><span class="line"><span class="function">User <span class="title">selectUserById</span><span class="params">(<span class="meta">@Param(&quot;userId&quot;)</span> Integer userId)</span></span>;</span><br></pre></td></tr></table></figure>
-
-
-
-<p>由此查询得出的结果集为</p>
-<figure class="highlight json"><table><tr><td class="code"><pre><span class="line"><span class="string">&quot;answerList&quot;</span>: [</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="attr">&quot;answerId&quot;</span>: <span class="number">42</span>,</span><br><span class="line">                <span class="attr">&quot;answerContent&quot;</span>: <span class="string">&quot;这是回答！&quot;</span>,</span><br><span class="line">                <span class="attr">&quot;likedCount&quot;</span>: <span class="number">3</span>,</span><br><span class="line">                <span class="attr">&quot;createTime&quot;</span>: <span class="number">1520508016650</span>,</span><br><span class="line">                <span class="attr">&quot;userId&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                <span class="attr">&quot;questionId&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                <span class="attr">&quot;likeState&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                <span class="attr">&quot;commentCount&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                <span class="attr">&quot;question&quot;</span>: &#123;</span><br><span class="line">                    <span class="attr">&quot;questionId&quot;</span>: <span class="number">1</span>,</span><br><span class="line">                    <span class="attr">&quot;questionTitle&quot;</span>: <span class="string">&quot;Spring，Django，Rails，Express这些框架技术的出现都是为了解决什么问题，现在这些框架都应用在哪些方面？&quot;</span>,</span><br><span class="line">                    <span class="attr">&quot;createTime&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">&quot;userId&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">&quot;user&quot;</span>: <span class="literal">null</span></span><br><span class="line">                &#125;,</span><br><span class="line">                <span class="attr">&quot;user&quot;</span>: &#123;</span><br><span class="line">                    <span class="attr">&quot;userId&quot;</span>: <span class="number">11218</span>,</span><br><span class="line">                    <span class="attr">&quot;weiboUserId&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">&quot;email&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">&quot;username&quot;</span>: <span class="string">&quot;amosamos&quot;</span>,</span><br><span class="line">                    <span class="attr">&quot;password&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">&quot;joinTime&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">&quot;avatarUrl&quot;</span>: <span class="string">&quot;https://avatars3.githubusercontent.com/u/16012509?s=400&amp;u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&amp;v=4&quot;</span></span><br><span class="line">                &#125;,</span><br><span class="line">                <span class="attr">&quot;answerCommentList&quot;</span>: <span class="literal">null</span></span><br><span class="line">            &#125;</span><br><span class="line">        ]</span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <tags>
-        <tag>SpringBoot</tag>
-        <tag>MyBatis</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Java mail 报错 trying to connect to host &quot;*.*.com&quot;, port 587, isSSL true的另一种解决办法</title>
     <url>/blog/2017/07/18/trying-to-connect-to-host/</url>
     <content><![CDATA[<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DEBUG SMTP: trying to connect to host &quot;xxx.xxx.com&quot;, port 587, isSSL true</span><br><span class="line">send failed... the exception is javax.mail.MessagingException: Could not connect to SMTP host: xxx.xxx.com, port: 587;</span><br><span class="line">  nested exception is:</span><br><span class="line">javax.net.ssl.SSLException: Unrecognized SSL message, plaintext connection?</span><br></pre></td></tr></table></figure>
@@ -2293,6 +2168,64 @@
       </tags>
   </entry>
   <entry>
+    <title>Docker + Nginx 镜像部署 Vue 项目</title>
+    <url>/blog/2018/03/28/deploy-the-vue-project-using-docker-and-nginx/</url>
+    <content><![CDATA[<h1 id="简单介绍-Docker"><a href="#简单介绍-Docker" class="headerlink" title="简单介绍 Docker"></a>简单介绍 Docker</h1><p>Docker 真是个好东西，很好的降低了不同环境发版的兼容性问题。无论是 Linux, Windows 或是 Mac OS，再也不用怕系统环境不同，软件版本不同导致的项目无法启动。这些问题只需要自定义 Docker 镜像，并在 Docker 中启动，就能搞定部署啦。</p>
+<h1 id="部署-Vue-项目"><a href="#部署-Vue-项目" class="headerlink" title="部署 Vue 项目"></a>部署 Vue 项目</h1><p>传统的部署一般为编译后放在 Nginx 目录下，或者放在 Tomcat 目录下。玩了有一阵子 Docker 了，就试试用 Docker 来部署吧。</p>
+<h2 id="本地操作"><a href="#本地操作" class="headerlink" title="本地操作"></a>本地操作</h2><p>首先给本地的vue项目打包</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">npm run build</span><br></pre></td></tr></table></figure>
+
+<p>执行命令之后项目根目录下会出现 dist 文件夹，将其上传至服务器。</p>
+<h2 id="服务器操作"><a href="#服务器操作" class="headerlink" title="服务器操作"></a>服务器操作</h2><h3 id="编写-Dockerfile"><a href="#编写-Dockerfile" class="headerlink" title="编写 Dockerfile"></a>编写 Dockerfile</h3><p>新建 Dockerfile</p>
+<blockquote>
+<p>vi Dockerfile</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#导入nginx镜像</span><br><span class="line">FROM nginx:1.13.7</span><br><span class="line">MAINTAINER amosannn &lt;amosannn@gmail.com&gt;</span><br><span class="line">#把当前打包工程的html复制到虚拟地址</span><br><span class="line">COPY dist/ /usr/share/nginx/html/</span><br><span class="line">#使用自定义nginx.conf配置端口和监听</span><br><span class="line">RUN rm /etc/nginx/conf.d/default.conf</span><br><span class="line">ADD default.conf /etc/nginx/conf.d/</span><br><span class="line"></span><br><span class="line">RUN /bin/bash -c &#x27;echo init ok!!!&#x27;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Nginx配置"><a href="#Nginx配置" class="headerlink" title="Nginx配置"></a>Nginx配置</h3><p>新建<code>default.conf</code></p>
+<blockquote>
+<p>vi default.conf</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">server &#123;</span><br><span class="line"># 项目中定义的端口号</span><br><span class="line">    listen       8000; </span><br><span class="line">    server_name  localhost;</span><br><span class="line"></span><br><span class="line">    #charset koi8-r;</span><br><span class="line">    #access_log  /var/log/nginx/log/host.access.log  main;</span><br><span class="line"></span><br><span class="line">    location / &#123;</span><br><span class="line">        root   /usr/share/nginx/html;</span><br><span class="line">        index  index.html index.htm;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    #error_page  404              /404.html;</span><br><span class="line"></span><br><span class="line">    # redirect server error pages to the static page /50x.html</span><br><span class="line">    #</span><br><span class="line">    error_page   500 502 503 504  /50x.html;</span><br><span class="line">    location = /50x.html &#123;</span><br><span class="line">        root   html;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Docker-打包"><a href="#Docker-打包" class="headerlink" title="Docker 打包"></a>Docker 打包</h3><p>打包前项目目录下应该有这几个文件(夹)：<code>default.conf</code>,<code> dist</code>,<code>Dockerfile</code></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">docker build -t zhiliao:v1 .</span><br></pre></td></tr></table></figure>
+
+<p>别忘了末尾的小点点</p>
+<p>最后出现这两条提示即为打包成功</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Successfully built 6f656946fde3</span><br><span class="line">Successfully tagged zhiliao:v1</span><br></pre></td></tr></table></figure>
+
+<h3 id="查看镜像"><a href="#查看镜像" class="headerlink" title="查看镜像"></a>查看镜像</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">docker images</span><br></pre></td></tr></table></figure>
+
+<p>如果在结果中看到，则为打包成功</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">zhiliao             latest              c5d9c47be079        17 minutes ago      111MB</span><br></pre></td></tr></table></figure>
+
+<h3 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">docker run -d -p 80:8000 zhiliao:v1</span><br></pre></td></tr></table></figure>
+
+<p>命令中的<code>-d</code>意为后台运行</p>
+<p>-p 为端口号，前半部分为外网访问的端口，后半部分为 Nginx 反向代理寻找的内部端口</p>
+<h3 id="查看运行结果"><a href="#查看运行结果" class="headerlink" title="查看运行结果"></a>查看运行结果</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">docker ps </span><br></pre></td></tr></table></figure>
+
+<p>这条命令等价于<code>docker container ls</code>，加上 -a 则可显示全部</p>
+ <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">[root@VM_108_54_centos zhiliao-vue]# docker ps -a</span><br><span class="line">CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                      PORTS               NAMES</span><br><span class="line">bdd5842a4cae        zhiliao:v1          &quot;nginx -g &#x27;daemon ...&quot;   42 seconds ago      Exited (1) 41 seconds ago                       frosty_joliot</span><br></pre></td></tr></table></figure>
+
+<h3 id="查找日志"><a href="#查找日志" class="headerlink" title="查找日志"></a>查找日志</h3><p>如果遇到程序崩溃或者镜像启动失败</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">docker logs &#x27;CONTAINER ID&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>使用 ps 命令可以找到到 <code>CONTAINER ID</code></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">[root@VM_108_54_centos zhiliao-vue]# docker logs bdd5842a4cae</span><br><span class="line">2018/03/28 07:11:51 [emerg] 1#1: unknown directive &quot;//这里使用项目中的端口号&quot; in /etc/nginx/conf.d/default.conf:3</span><br><span class="line">nginx: [emerg] unknown directive &quot;//这里使用项目中的端口号&quot; in /etc/nginx/conf.d/default.conf:3</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>参考链接：</p>
+<p><a href="https://yeasy.gitbooks.io/docker_practice/content/image/build.html">使用 Dockerfile 定制镜像</a></p>
+]]></content>
+      <tags>
+        <tag>Vue</tag>
+        <tag>Docker</tag>
+        <tag>Nginx</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Java如何防范XSS攻击</title>
     <url>/blog/2017/05/27/xss/</url>
     <content><![CDATA[<h1 id="什么是XSS"><a href="#什么是XSS" class="headerlink" title="什么是XSS"></a>什么是XSS</h1><p>XSS攻击：跨站脚本攻击(Cross Site Scripting)，为不和层叠样式表(Cascading Style Sheets, CSS)的缩写混淆，故将跨站脚本攻击缩写为XSS。</p>
@@ -2323,6 +2256,73 @@
       <tags>
         <tag>java</tag>
         <tag>Network Security</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>解决Vue前后端分离跨域问题</title>
+    <url>/blog/2018/03/22/solove-vue-cross-domain-problems/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>用Vue写了几个页面，发现request传到后端没带上cookies，心想不对劲，Postman明明可以访问啊。再仔细看看，后端已经开放了跨域访问，不需要<code>HttpServletRequest</code>的接口也可以成功请求。一定就是前端请求缺少请求头或是某些参数了。上网查了一下还真是这样，又跳过了一个坑，很开心啦～</p>
+<h1 id="前后端跨域设置"><a href="#前后端跨域设置" class="headerlink" title="前后端跨域设置"></a>前后端跨域设置</h1><h2 id="Vue"><a href="#Vue" class="headerlink" title="Vue"></a>Vue</h2><blockquote>
+<p>main.js 设置</p>
+</blockquote>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> axios <span class="keyword">from</span> <span class="string">&#x27;axios&#x27;</span></span><br><span class="line"></span><br><span class="line">axios.defaults.withCredentials=<span class="literal">true</span>;</span><br><span class="line">Vue.prototype.$http = axios;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>请求需带上withCredentials</p>
+</blockquote>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="title">getData</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.$axios.get(<span class="string">&#x27;http://127.0.0.1:8080/xxx/xxxxx&#x27;</span>,&#123;</span><br><span class="line">          <span class="attr">headers</span>: &#123;</span><br><span class="line">            <span class="string">&quot;Content-Type&quot;</span>:<span class="string">&quot;application/json;charset=utf-8&quot;</span></span><br><span class="line">          &#125;,</span><br><span class="line">          <span class="attr">withCredentials</span> : <span class="literal">true</span></span><br><span class="line">        &#125;).then( <span class="function">(<span class="params">response</span>) =&gt;</span> &#123;</span><br><span class="line">          <span class="keyword">if</span>( response.data.code === <span class="string">&#x27;0000&#x27;</span>)&#123;</span><br><span class="line">            <span class="built_in">this</span>.items = response.data.data.xxx;</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="built_in">this</span>.items)</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;)</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="SpringMVC"><a href="#SpringMVC" class="headerlink" title="SpringMVC"></a>SpringMVC</h2><p>加上一个跨域用Interceptor</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CorsInterceptor</span> <span class="keyword">implements</span> <span class="title">HandlerInterceptor</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">preHandle</span><span class="params">(HttpServletRequest request, HttpServletResponse response,</span></span></span><br><span class="line"><span class="params"><span class="function">      Object handler)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    response.setHeader(<span class="string">&quot;Access-Control-Allow-Origin&quot;</span>, <span class="string">&quot;*&quot;</span>);</span><br><span class="line">    response.setHeader(<span class="string">&quot;Access-Control-Allow-Methods&quot;</span>, <span class="string">&quot;*&quot;</span>);</span><br><span class="line">    response.setHeader(<span class="string">&quot;Access-Control-Max-Age&quot;</span>, <span class="string">&quot;3600&quot;</span>);</span><br><span class="line">    response.setHeader(<span class="string">&quot;Access-Control-Allow-Headers&quot;</span>, <span class="string">&quot;Origin, X-Requested-With, Content-Type, Accept&quot;</span>);</span><br><span class="line">    response.setHeader(<span class="string">&quot;Access-Control-Allow-Credentials&quot;</span>,<span class="string">&quot;true&quot;</span>); <span class="comment">//是否允许浏览器携带用户身份信息（cookie）</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">postHandle</span><span class="params">(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, ModelAndView modelAndView)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">afterCompletion</span><span class="params">(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, Exception e)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="可能遇到的问题"><a href="#可能遇到的问题" class="headerlink" title="可能遇到的问题"></a>可能遇到的问题</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">response.setHeader(<span class="string">&quot;Access-Control-Allow-Origin&quot;</span>, <span class="string">&quot;*&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>请求源地址如果写了<code>*</code>很可能会被拒绝访问。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">Failed to load http://127.0.0.1:8080/zhiliao/login: Response to preflight request doesn&#x27;t pass access control check: The value of the &#x27;Access-Control-Allow-Origin&#x27; header in the response must not be the wildcard &#x27;*&#x27; when the request&#x27;s credentials mode is &#x27;include&#x27;. Origin &#x27;http://127.0.0.1:8000&#x27; is therefore not allowed access. The credentials mode of requests initiated by the XMLHttpRequest is controlled by the withCredentials attribute.</span><br></pre></td></tr></table></figure>
+
+<p>如果出现这样的报错，那就得指定地址啦！    </p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">response.setHeader(&quot;Access-Control-Allow-Origin&quot;, &quot;http://127.0.0.1:8000&quot;);</span><br></pre></td></tr></table></figure>
+
+<p>这里依旧有个小坑：指定地址为<code>http://127.0.0.1:8000</code>的时候前端页面若是<code>localhost</code>是无法访问的。</p>
+<h1 id="看看axios官方文档"><a href="#看看axios官方文档" class="headerlink" title="看看axios官方文档"></a>看看axios官方文档</h1><p><a href="https://github.com/axios/axios#request-config">axios官方配置说明</a></p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">// `timeout` specifies the number of milliseconds before the request times out.</span><br><span class="line">// If the request takes longer than `timeout`, the request will be aborted.</span><br><span class="line">timeout: 1000,</span><br><span class="line"></span><br><span class="line">// `withCredentials` indicates whether or not cross-site Access-Control requests</span><br><span class="line">// should be made using credentials</span><br><span class="line">withCredentials: false, // default</span><br><span class="line"></span><br><span class="line">// `adapter` allows custom handling of requests which makes testing easier.</span><br><span class="line">// Return a promise and supply a valid response (see lib/adapters/README.md).</span><br><span class="line">adapter: function (config) &#123;</span><br><span class="line">  /* ... */</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+
+<p>配置文件中<code>withCredentials</code>默认是关闭的，手动修改配置文件或在项目中重定义即可。</p>
+]]></content>
+      <tags>
+        <tag>Vue</tag>
+        <tag>CORS</tag>
+        <tag>SpringBoot</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>MyBatis一对一映射注解@One的使用及理解</title>
+    <url>/blog/2018/03/08/the-use-and-understanding-of-one-annotated-by-mybatis/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>本着更深入地使用注解来开发，慢慢地发现脱离了XML的MyBatis好多好多的坑。我觉得很大的原因还是来自于官方文档的不完善，以及使用注解开发持久层的人并不多见，导致网络上的相关讨论过于贫瘠并重复化，毕竟对于复杂查询的支持，我认为还没有在XML里写一条SQL方便呢～  </p>
+<p>所以这篇文章用于补充一语带过的官方文档，记录下自己趟过的坑。</p>
+<h1 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h1><h2 id="一对一映射"><a href="#一对一映射" class="headerlink" title="一对一映射"></a>一对一映射</h2><p>注解化一对一映射其实就是将XML中的<code>ResultType</code>属性对应的实体写在<code>@Results</code>注解中。其中的<code>@Result</code>填入实体的属性，而若该属性为实体中的实体，则需要@One注解引入。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Select(&quot;select answer_id, answer_content, liked_count, create_time, question_id, user_id from answer where create_time &gt; #&#123;createTime&#125; order by liked_count desc, create_time desc limit 0,10&quot;)</span></span><br><span class="line"><span class="meta">@Results(&#123;</span></span><br><span class="line"><span class="meta">    @Result(id = true, column = &quot;answer_id&quot;, property = &quot;answerId&quot;, javaType = Integer.class),</span></span><br><span class="line"><span class="meta">    @Result(column = &quot;answer_content&quot;, property = &quot;answerContent&quot;),</span></span><br><span class="line"><span class="meta">    @Result(column = &quot;liked_count&quot;, property = &quot;likedCount&quot;, javaType = Integer.class, jdbcType = JdbcType.INTEGER),</span></span><br><span class="line"><span class="meta">    @Result(column = &quot;create_time&quot;, property = &quot;createTime&quot;),</span></span><br><span class="line"><span class="meta">    @Result(column = &quot;question_id&quot;, property = &quot;question&quot;, javaType = Question.class,</span></span><br><span class="line"><span class="meta">        one = @One(select = &quot;selectQuestionById&quot;)),</span></span><br><span class="line"><span class="meta">    @Result(column = &quot;user_id&quot;, property = &quot;user&quot;,</span></span><br><span class="line"><span class="meta">        one = @One(select = &quot;selectUserById&quot;))</span></span><br><span class="line"><span class="meta">&#125;)</span></span><br><span class="line"><span class="function">List&lt;Answer&gt; <span class="title">listAnswerByCreateTime</span><span class="params">(<span class="meta">@Param(&quot;createTime&quot;)</span> <span class="keyword">long</span> createTime)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>值得注意的是，映射中的<code>property</code>属性的值不可和其他实体属性一样，应该填写所返回的实体名称。</p>
+<p>例如下面代码，我返回的实体为<code>Answer</code>类下的<code>Question</code>类，则<code>property</code>中不可写<code>questionId</code>，而得写<code>question</code>。同时@One中select属性对应的方法若在不同类，则需要写出完整的包名（com.xxx.xxx.getxxxByxx）。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Result(column = &quot;question_id&quot;, property = &quot;question&quot;, javaType = Question.class,</span></span><br><span class="line"><span class="meta">        one = @One(select = &quot;selectQuestionById&quot;))</span></span><br></pre></td></tr></table></figure>
+
+<p>需要注意的是，从@One传递过来的查询条件也需要在主查询语句中查询出来，也就是上面的<code>listAnswerByCreateTime</code>方法需要查询出question_id和user_id，千万别漏了。否则报你错哦！</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Select(&quot;select question_id, question_title from question where question_id = #&#123;questionId&#125;&quot;)</span></span><br><span class="line"><span class="meta">@ResultType(Question.class)</span></span><br><span class="line"><span class="function">Question <span class="title">selectQuestionById</span><span class="params">(<span class="meta">@Param(&quot;questionId&quot;)</span> Integer questionId)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Select(&quot;select user_id, username, avatar_url, simple_desc from user where user_id = #&#123;userId&#125;&quot;)</span></span><br><span class="line"><span class="meta">@ResultType(User.class)</span></span><br><span class="line"><span class="function">User <span class="title">selectUserById</span><span class="params">(<span class="meta">@Param(&quot;userId&quot;)</span> Integer userId)</span></span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>由此查询得出的结果集为</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><span class="line"><span class="string">&quot;answerList&quot;</span>: [</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="attr">&quot;answerId&quot;</span>: <span class="number">42</span>,</span><br><span class="line">                <span class="attr">&quot;answerContent&quot;</span>: <span class="string">&quot;这是回答！&quot;</span>,</span><br><span class="line">                <span class="attr">&quot;likedCount&quot;</span>: <span class="number">3</span>,</span><br><span class="line">                <span class="attr">&quot;createTime&quot;</span>: <span class="number">1520508016650</span>,</span><br><span class="line">                <span class="attr">&quot;userId&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                <span class="attr">&quot;questionId&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                <span class="attr">&quot;likeState&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                <span class="attr">&quot;commentCount&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                <span class="attr">&quot;question&quot;</span>: &#123;</span><br><span class="line">                    <span class="attr">&quot;questionId&quot;</span>: <span class="number">1</span>,</span><br><span class="line">                    <span class="attr">&quot;questionTitle&quot;</span>: <span class="string">&quot;Spring，Django，Rails，Express这些框架技术的出现都是为了解决什么问题，现在这些框架都应用在哪些方面？&quot;</span>,</span><br><span class="line">                    <span class="attr">&quot;createTime&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">&quot;userId&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">&quot;user&quot;</span>: <span class="literal">null</span></span><br><span class="line">                &#125;,</span><br><span class="line">                <span class="attr">&quot;user&quot;</span>: &#123;</span><br><span class="line">                    <span class="attr">&quot;userId&quot;</span>: <span class="number">11218</span>,</span><br><span class="line">                    <span class="attr">&quot;weiboUserId&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">&quot;email&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">&quot;username&quot;</span>: <span class="string">&quot;amosamos&quot;</span>,</span><br><span class="line">                    <span class="attr">&quot;password&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">&quot;joinTime&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">&quot;avatarUrl&quot;</span>: <span class="string">&quot;https://avatars3.githubusercontent.com/u/16012509?s=400&amp;u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&amp;v=4&quot;</span></span><br><span class="line">                &#125;,</span><br><span class="line">                <span class="attr">&quot;answerCommentList&quot;</span>: <span class="literal">null</span></span><br><span class="line">            &#125;</span><br><span class="line">        ]</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <tags>
+        <tag>SpringBoot</tag>
+        <tag>MyBatis</tag>
       </tags>
   </entry>
 </search>
