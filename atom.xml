@@ -3,11 +3,11 @@
   <title>Amos&#39;s Blog</title>
   
   <subtitle>大数据｜容器化｜♾️</subtitle>
-  <link href="https://amosannn.github.io/blog/atom.xml" rel="self"/>
+  <link href="https://amosannn.github.io/atom.xml" rel="self"/>
   
-  <link href="https://amosannn.github.io/blog/"/>
+  <link href="https://amosannn.github.io/"/>
   <updated>2019-05-30T09:16:43.000Z</updated>
-  <id>https://amosannn.github.io/blog/</id>
+  <id>https://amosannn.github.io/</id>
   
   <author>
     <name>amosolin</name>
@@ -18,8 +18,8 @@
   
   <entry>
     <title>Click 如何调用 Command 函数并取得返回值</title>
-    <link href="https://amosannn.github.io/blog/2019/05/30/how-to-get-return-of-python-click-command/"/>
-    <id>https://amosannn.github.io/blog/2019/05/30/how-to-get-return-of-python-click-command/</id>
+    <link href="https://amosannn.github.io/2019/05/30/how-to-get-return-of-python-click-command/"/>
+    <id>https://amosannn.github.io/2019/05/30/how-to-get-return-of-python-click-command/</id>
     <published>2019-05-30T07:55:25.000Z</published>
     <updated>2019-05-30T09:16:43.000Z</updated>
     
@@ -38,19 +38,19 @@
     
     
     
-    <category term="技术一路走到黑" scheme="https://amosannn.github.io/blog/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
+    <category term="技术一路走到黑" scheme="https://amosannn.github.io/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
     
     
-    <category term="Python" scheme="https://amosannn.github.io/blog/tags/Python/"/>
+    <category term="Python" scheme="https://amosannn.github.io/tags/Python/"/>
     
-    <category term="Click" scheme="https://amosannn.github.io/blog/tags/Click/"/>
+    <category term="Click" scheme="https://amosannn.github.io/tags/Click/"/>
     
   </entry>
   
   <entry>
     <title>Haproxy 之 Http 代理的两种方式</title>
-    <link href="https://amosannn.github.io/blog/2019/04/30/haproxy-listen-vs-frontend/"/>
-    <id>https://amosannn.github.io/blog/2019/04/30/haproxy-listen-vs-frontend/</id>
+    <link href="https://amosannn.github.io/2019/04/30/haproxy-listen-vs-frontend/"/>
+    <id>https://amosannn.github.io/2019/04/30/haproxy-listen-vs-frontend/</id>
     <published>2019-04-30T01:55:30.000Z</published>
     <updated>2019-05-16T02:33:47.000Z</updated>
     
@@ -67,17 +67,17 @@
     
     
     
-    <category term="技术一路走到黑" scheme="https://amosannn.github.io/blog/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
+    <category term="技术一路走到黑" scheme="https://amosannn.github.io/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
     
     
-    <category term="Haproxy" scheme="https://amosannn.github.io/blog/tags/Haproxy/"/>
+    <category term="Haproxy" scheme="https://amosannn.github.io/tags/Haproxy/"/>
     
   </entry>
   
   <entry>
     <title>Haproxy 之常用配置详解</title>
-    <link href="https://amosannn.github.io/blog/2019/04/28/haproxy-common-configuration-analysis/"/>
-    <id>https://amosannn.github.io/blog/2019/04/28/haproxy-common-configuration-analysis/</id>
+    <link href="https://amosannn.github.io/2019/04/28/haproxy-common-configuration-analysis/"/>
+    <id>https://amosannn.github.io/2019/04/28/haproxy-common-configuration-analysis/</id>
     <published>2019-04-28T01:55:30.000Z</published>
     <updated>2019-05-16T02:34:48.000Z</updated>
     
@@ -125,17 +125,17 @@
     
     
     
-    <category term="技术一路走到黑" scheme="https://amosannn.github.io/blog/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
+    <category term="技术一路走到黑" scheme="https://amosannn.github.io/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
     
     
-    <category term="Haproxy" scheme="https://amosannn.github.io/blog/tags/Haproxy/"/>
+    <category term="Haproxy" scheme="https://amosannn.github.io/tags/Haproxy/"/>
     
   </entry>
   
   <entry>
     <title>Airflow 如何让用户只能看到自己创建的 Dag</title>
-    <link href="https://amosannn.github.io/blog/2018/12/24/airflow-create-user-and-filter-dags-by-owner/"/>
-    <id>https://amosannn.github.io/blog/2018/12/24/airflow-create-user-and-filter-dags-by-owner/</id>
+    <link href="https://amosannn.github.io/2018/12/24/airflow-create-user-and-filter-dags-by-owner/"/>
+    <id>https://amosannn.github.io/2018/12/24/airflow-create-user-and-filter-dags-by-owner/</id>
     <published>2018-12-24T01:55:30.000Z</published>
     <updated>2018-12-29T03:32:22.000Z</updated>
     
@@ -150,19 +150,19 @@
     
     
     
-    <category term="技术一路走到黑" scheme="https://amosannn.github.io/blog/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
+    <category term="技术一路走到黑" scheme="https://amosannn.github.io/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
     
     
-    <category term="Airflow" scheme="https://amosannn.github.io/blog/tags/Airflow/"/>
+    <category term="Airflow" scheme="https://amosannn.github.io/tags/Airflow/"/>
     
-    <category term="LDAP" scheme="https://amosannn.github.io/blog/tags/LDAP/"/>
+    <category term="LDAP" scheme="https://amosannn.github.io/tags/LDAP/"/>
     
   </entry>
   
   <entry>
     <title>使用 Grafana + Graphite 进行数据预警监控</title>
-    <link href="https://amosannn.github.io/blog/2018/12/17/data-alert-by-graphite-and-grafana/"/>
-    <id>https://amosannn.github.io/blog/2018/12/17/data-alert-by-graphite-and-grafana/</id>
+    <link href="https://amosannn.github.io/2018/12/17/data-alert-by-graphite-and-grafana/"/>
+    <id>https://amosannn.github.io/2018/12/17/data-alert-by-graphite-and-grafana/</id>
     <published>2018-12-17T01:55:25.000Z</published>
     <updated>2019-05-16T02:37:54.000Z</updated>
     
@@ -198,19 +198,19 @@
     
     
     
-    <category term="技术一路走到黑" scheme="https://amosannn.github.io/blog/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
+    <category term="技术一路走到黑" scheme="https://amosannn.github.io/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
     
     
-    <category term="Graphite" scheme="https://amosannn.github.io/blog/tags/Graphite/"/>
+    <category term="Graphite" scheme="https://amosannn.github.io/tags/Graphite/"/>
     
-    <category term="Grafana" scheme="https://amosannn.github.io/blog/tags/Grafana/"/>
+    <category term="Grafana" scheme="https://amosannn.github.io/tags/Grafana/"/>
     
   </entry>
   
   <entry>
     <title>Graphite 之把它装起来</title>
-    <link href="https://amosannn.github.io/blog/2018/11/29/install-graphite/"/>
-    <id>https://amosannn.github.io/blog/2018/11/29/install-graphite/</id>
+    <link href="https://amosannn.github.io/2018/11/29/install-graphite/"/>
+    <id>https://amosannn.github.io/2018/11/29/install-graphite/</id>
     <published>2018-11-29T08:41:17.000Z</published>
     <updated>2018-11-30T10:58:11.000Z</updated>
     
@@ -226,17 +226,17 @@
     
     
     
-    <category term="技术一路走到黑" scheme="https://amosannn.github.io/blog/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
+    <category term="技术一路走到黑" scheme="https://amosannn.github.io/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
     
     
-    <category term="Graphite" scheme="https://amosannn.github.io/blog/tags/Graphite/"/>
+    <category term="Graphite" scheme="https://amosannn.github.io/tags/Graphite/"/>
     
   </entry>
   
   <entry>
     <title>Sqoop 之 job 工具</title>
-    <link href="https://amosannn.github.io/blog/2018/11/19/sqoop-job-guide/"/>
-    <id>https://amosannn.github.io/blog/2018/11/19/sqoop-job-guide/</id>
+    <link href="https://amosannn.github.io/2018/11/19/sqoop-job-guide/"/>
+    <id>https://amosannn.github.io/2018/11/19/sqoop-job-guide/</id>
     <published>2018-11-19T03:20:50.000Z</published>
     <updated>2018-11-20T03:56:07.000Z</updated>
     
@@ -250,19 +250,19 @@
     
     
     
-    <category term="技术一路走到黑" scheme="https://amosannn.github.io/blog/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
+    <category term="技术一路走到黑" scheme="https://amosannn.github.io/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
     
     
-    <category term="Sqoop" scheme="https://amosannn.github.io/blog/tags/Sqoop/"/>
+    <category term="Sqoop" scheme="https://amosannn.github.io/tags/Sqoop/"/>
     
-    <category term="Crontab" scheme="https://amosannn.github.io/blog/tags/Crontab/"/>
+    <category term="Crontab" scheme="https://amosannn.github.io/tags/Crontab/"/>
     
   </entry>
   
   <entry>
     <title>Sqoop 之常用命令与防坑指南</title>
-    <link href="https://amosannn.github.io/blog/2018/11/13/sqoop-common-command/"/>
-    <id>https://amosannn.github.io/blog/2018/11/13/sqoop-common-command/</id>
+    <link href="https://amosannn.github.io/2018/11/13/sqoop-common-command/"/>
+    <id>https://amosannn.github.io/2018/11/13/sqoop-common-command/</id>
     <published>2018-11-13T06:26:55.000Z</published>
     <updated>2018-11-13T10:16:02.000Z</updated>
     
@@ -311,23 +311,23 @@
     
     
     
-    <category term="技术一路走到黑" scheme="https://amosannn.github.io/blog/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
+    <category term="技术一路走到黑" scheme="https://amosannn.github.io/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
     
     
-    <category term="MySQL" scheme="https://amosannn.github.io/blog/tags/MySQL/"/>
+    <category term="MySQL" scheme="https://amosannn.github.io/tags/MySQL/"/>
     
-    <category term="Sqoop" scheme="https://amosannn.github.io/blog/tags/Sqoop/"/>
+    <category term="Sqoop" scheme="https://amosannn.github.io/tags/Sqoop/"/>
     
-    <category term="Hive" scheme="https://amosannn.github.io/blog/tags/Hive/"/>
+    <category term="Hive" scheme="https://amosannn.github.io/tags/Hive/"/>
     
-    <category term="CDH" scheme="https://amosannn.github.io/blog/tags/CDH/"/>
+    <category term="CDH" scheme="https://amosannn.github.io/tags/CDH/"/>
     
   </entry>
   
   <entry>
     <title>Impala 优化之统计数据预存储「compute stats」</title>
-    <link href="https://amosannn.github.io/blog/2018/11/12/impala-compute-stats/"/>
-    <id>https://amosannn.github.io/blog/2018/11/12/impala-compute-stats/</id>
+    <link href="https://amosannn.github.io/2018/11/12/impala-compute-stats/"/>
+    <id>https://amosannn.github.io/2018/11/12/impala-compute-stats/</id>
     <published>2018-11-12T04:25:42.000Z</published>
     <updated>2018-11-12T11:53:40.000Z</updated>
     
@@ -342,17 +342,17 @@
     
     
     
-    <category term="技术一路走到黑" scheme="https://amosannn.github.io/blog/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
+    <category term="技术一路走到黑" scheme="https://amosannn.github.io/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
     
     
-    <category term="Impala" scheme="https://amosannn.github.io/blog/tags/Impala/"/>
+    <category term="Impala" scheme="https://amosannn.github.io/tags/Impala/"/>
     
   </entry>
   
   <entry>
     <title>Airflow 居然趁服务器不注意卡在 running 状态不执行</title>
-    <link href="https://amosannn.github.io/blog/2018/11/01/airflow-dag-get-stuck-in-running-state/"/>
-    <id>https://amosannn.github.io/blog/2018/11/01/airflow-dag-get-stuck-in-running-state/</id>
+    <link href="https://amosannn.github.io/2018/11/01/airflow-dag-get-stuck-in-running-state/"/>
+    <id>https://amosannn.github.io/2018/11/01/airflow-dag-get-stuck-in-running-state/</id>
     <published>2018-11-01T03:11:16.000Z</published>
     <updated>2018-11-06T07:54:34.000Z</updated>
     
@@ -368,21 +368,21 @@
     
     
     
-    <category term="技术一路走到黑" scheme="https://amosannn.github.io/blog/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
+    <category term="技术一路走到黑" scheme="https://amosannn.github.io/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
     
     
-    <category term="Airflow" scheme="https://amosannn.github.io/blog/tags/Airflow/"/>
+    <category term="Airflow" scheme="https://amosannn.github.io/tags/Airflow/"/>
     
   </entry>
   
   <entry>
     <title>Airflow 不遵循调度配置执行</title>
-    <link href="https://amosannn.github.io/blog/2018/10/31/airflow-dag-does-not-follow-the-schedule-configuration-execution/"/>
-    <id>https://amosannn.github.io/blog/2018/10/31/airflow-dag-does-not-follow-the-schedule-configuration-execution/</id>
+    <link href="https://amosannn.github.io/2018/10/31/airflow-dag-does-not-follow-the-schedule-configuration-execution/"/>
+    <id>https://amosannn.github.io/2018/10/31/airflow-dag-does-not-follow-the-schedule-configuration-execution/</id>
     <published>2018-10-31T08:45:11.000Z</published>
     <updated>2018-11-06T08:40:19.000Z</updated>
     
-    <content type="html"><![CDATA[<p>在 Airflow 的使用过程中，曾多次遇到令人惊奇的现象，其中之一便是它没有按照 dag 中的配置执行。</p><p>可能你也会遇到这样的情况，为什么配置了 <code>schedule_interval</code> 和 <code>start_date</code>，但是依旧没有按照调度配置的时间自动执行。</p><h2 id="举个栗子"><a href="#举个栗子" class="headerlink" title="举个栗子"></a>举个栗子</h2><p>比如我这么配：</p><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> datetime <span class="keyword">import</span> datetime, timedelta, timedelta</span><br><span class="line"></span><br><span class="line">default_args = &#123;</span><br><span class="line">    <span class="string">&#x27;owner&#x27;</span>: <span class="string">&#x27;amos&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;depends_on_past&#x27;</span>: <span class="literal">False</span>,</span><br><span class="line">    <span class="string">&#x27;start_date&#x27;</span>: datetime.now(),</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">dag = DAG(<span class="string">&#x27;test_rerun_dag&#x27;</span>,</span><br><span class="line">          default_args=default_args,</span><br><span class="line">          description=<span class="string">&#x27;test_rerun_dag&#x27;</span>,</span><br><span class="line">          schedule_interval=<span class="string">&quot;*/1 * * * *&quot;</span>)</span><br></pre></td></tr></table></figure><p>照理说它应该按照配置中写的，每分钟执行一次操作。可是它没有，是它变心了吗？</p><p>不，不是的。</p><h2 id="这究竟是为什么"><a href="#这究竟是为什么" class="headerlink" title="这究竟是为什么"></a>这究竟是为什么</h2><blockquote><p>Airflow sets execution_date based on the left bound of the schedule period it is covering, not based on when it fires (which would be the right bound of the period) .</p></blockquote><p>原因在于 Airflow 是个有原则的程序，它有个窗口的概念，会把 start_date 开始后，符合 schedule_interval 定义的第一个时间点记为 execution_date，但是会在下个时间点到达时才开始运行。也就是说由于这个窗口的原因，last run 会滞后一个周期。 </p><p>所以，按上面的配置来说，每次当 scheduler 读到了这段 DAG，它会拿小本本记下 start_date 和每分钟执行的操作，准备在下一分钟开始执行了。但是当下一分钟来临的时候，它看了看表，嗯！start_date + 1，那么 execution_date 也 + 1，于是把小本本上的 start_date 划掉重写。所以 start_date 在不断被覆盖的过程中，任务没有像我们预想中的在调度奔跑，反而一直是挂起状态。</p><h2 id="这可咋整啊"><a href="#这可咋整啊" class="headerlink" title="这可咋整啊"></a>这可咋整啊</h2><p>那么如何才能真正地让它规律地执行呢？</p><p>将 start_date 往前错位到上一个周期</p><p>什么意思呢？假如本例中的每分钟执行一次，那就将 start_date 调整到上一分钟的状态</p><blockquote><p><del>‘start_date’: datetime.now()</del></p></blockquote><blockquote><p>‘start_date’: datetime.now() - timedelta(minutes=1)</p></blockquote><p>这下 scheduler 就可以在小本本工工整整地记录每一次调度计划，而不用写了划，划了写，把小本本涂得黑黑的了！</p><hr><p>如果你的 dag 趁你不注意卡在running 状态下不能动弹，或许你可以改改调度时间或周期。</p><p>或者试试参考这篇文章：<a href="/blog/2018/11/01/airflow-dag-get-stuck-in-running-state/" title="Airflow 居然趁服务器不注意卡在 running 状态不执行">Airflow 居然趁服务器不注意卡在 running 状态不执行</a></p>]]></content>
+    <content type="html"><![CDATA[<p>在 Airflow 的使用过程中，曾多次遇到令人惊奇的现象，其中之一便是它没有按照 dag 中的配置执行。</p><p>可能你也会遇到这样的情况，为什么配置了 <code>schedule_interval</code> 和 <code>start_date</code>，但是依旧没有按照调度配置的时间自动执行。</p><h2 id="举个栗子"><a href="#举个栗子" class="headerlink" title="举个栗子"></a>举个栗子</h2><p>比如我这么配：</p><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> datetime <span class="keyword">import</span> datetime, timedelta, timedelta</span><br><span class="line"></span><br><span class="line">default_args = &#123;</span><br><span class="line">    <span class="string">&#x27;owner&#x27;</span>: <span class="string">&#x27;amos&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;depends_on_past&#x27;</span>: <span class="literal">False</span>,</span><br><span class="line">    <span class="string">&#x27;start_date&#x27;</span>: datetime.now(),</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">dag = DAG(<span class="string">&#x27;test_rerun_dag&#x27;</span>,</span><br><span class="line">          default_args=default_args,</span><br><span class="line">          description=<span class="string">&#x27;test_rerun_dag&#x27;</span>,</span><br><span class="line">          schedule_interval=<span class="string">&quot;*/1 * * * *&quot;</span>)</span><br></pre></td></tr></table></figure><p>照理说它应该按照配置中写的，每分钟执行一次操作。可是它没有，是它变心了吗？</p><p>不，不是的。</p><h2 id="这究竟是为什么"><a href="#这究竟是为什么" class="headerlink" title="这究竟是为什么"></a>这究竟是为什么</h2><blockquote><p>Airflow sets execution_date based on the left bound of the schedule period it is covering, not based on when it fires (which would be the right bound of the period) .</p></blockquote><p>原因在于 Airflow 是个有原则的程序，它有个窗口的概念，会把 start_date 开始后，符合 schedule_interval 定义的第一个时间点记为 execution_date，但是会在下个时间点到达时才开始运行。也就是说由于这个窗口的原因，last run 会滞后一个周期。 </p><p>所以，按上面的配置来说，每次当 scheduler 读到了这段 DAG，它会拿小本本记下 start_date 和每分钟执行的操作，准备在下一分钟开始执行了。但是当下一分钟来临的时候，它看了看表，嗯！start_date + 1，那么 execution_date 也 + 1，于是把小本本上的 start_date 划掉重写。所以 start_date 在不断被覆盖的过程中，任务没有像我们预想中的在调度奔跑，反而一直是挂起状态。</p><h2 id="这可咋整啊"><a href="#这可咋整啊" class="headerlink" title="这可咋整啊"></a>这可咋整啊</h2><p>那么如何才能真正地让它规律地执行呢？</p><p>将 start_date 往前错位到上一个周期</p><p>什么意思呢？假如本例中的每分钟执行一次，那就将 start_date 调整到上一分钟的状态</p><blockquote><p><del>‘start_date’: datetime.now()</del></p></blockquote><blockquote><p>‘start_date’: datetime.now() - timedelta(minutes=1)</p></blockquote><p>这下 scheduler 就可以在小本本工工整整地记录每一次调度计划，而不用写了划，划了写，把小本本涂得黑黑的了！</p><hr><p>如果你的 dag 趁你不注意卡在running 状态下不能动弹，或许你可以改改调度时间或周期。</p><p>或者试试参考这篇文章：<a href="/2018/11/01/airflow-dag-get-stuck-in-running-state/" title="Airflow 居然趁服务器不注意卡在 running 状态不执行">Airflow 居然趁服务器不注意卡在 running 状态不执行</a></p>]]></content>
     
     
       
@@ -393,17 +393,17 @@
     
     
     
-    <category term="技术一路走到黑" scheme="https://amosannn.github.io/blog/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
+    <category term="技术一路走到黑" scheme="https://amosannn.github.io/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
     
     
-    <category term="Airflow" scheme="https://amosannn.github.io/blog/tags/Airflow/"/>
+    <category term="Airflow" scheme="https://amosannn.github.io/tags/Airflow/"/>
     
   </entry>
   
   <entry>
     <title>Airflow 概念梳理</title>
-    <link href="https://amosannn.github.io/blog/2018/10/30/airflow-concept-combing/"/>
-    <id>https://amosannn.github.io/blog/2018/10/30/airflow-concept-combing/</id>
+    <link href="https://amosannn.github.io/2018/10/30/airflow-concept-combing/"/>
+    <id>https://amosannn.github.io/2018/10/30/airflow-concept-combing/</id>
     <published>2018-10-30T11:18:16.000Z</published>
     <updated>2018-11-26T07:44:59.000Z</updated>
     
@@ -419,17 +419,17 @@
     
     
     
-    <category term="技术一路走到黑" scheme="https://amosannn.github.io/blog/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
+    <category term="技术一路走到黑" scheme="https://amosannn.github.io/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
     
     
-    <category term="Airflow" scheme="https://amosannn.github.io/blog/tags/Airflow/"/>
+    <category term="Airflow" scheme="https://amosannn.github.io/tags/Airflow/"/>
     
   </entry>
   
   <entry>
     <title>Airflow 安装及跳坑指南</title>
-    <link href="https://amosannn.github.io/blog/2018/10/29/airflow_install_and_more/"/>
-    <id>https://amosannn.github.io/blog/2018/10/29/airflow_install_and_more/</id>
+    <link href="https://amosannn.github.io/2018/10/29/airflow_install_and_more/"/>
+    <id>https://amosannn.github.io/2018/10/29/airflow_install_and_more/</id>
     <published>2018-10-29T11:58:16.000Z</published>
     <updated>2019-01-08T04:22:54.000Z</updated>
     
@@ -443,17 +443,17 @@
     
     
     
-    <category term="技术一路走到黑" scheme="https://amosannn.github.io/blog/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
+    <category term="技术一路走到黑" scheme="https://amosannn.github.io/categories/%E6%8A%80%E6%9C%AF%E4%B8%80%E8%B7%AF%E8%B5%B0%E5%88%B0%E9%BB%91/"/>
     
     
-    <category term="airflow" scheme="https://amosannn.github.io/blog/tags/airflow/"/>
+    <category term="airflow" scheme="https://amosannn.github.io/tags/airflow/"/>
     
   </entry>
   
   <entry>
     <title>Hive 优化之为外部表创建分区</title>
-    <link href="https://amosannn.github.io/blog/2018/10/26/add-partition-after-creating-external-table-in-hive/"/>
-    <id>https://amosannn.github.io/blog/2018/10/26/add-partition-after-creating-external-table-in-hive/</id>
+    <link href="https://amosannn.github.io/2018/10/26/add-partition-after-creating-external-table-in-hive/"/>
+    <id>https://amosannn.github.io/2018/10/26/add-partition-after-creating-external-table-in-hive/</id>
     <published>2018-10-26T06:18:52.000Z</published>
     <updated>2018-11-26T07:41:28.000Z</updated>
     
@@ -474,8 +474,8 @@
   
   <entry>
     <title>axios 添加登录拦截器后出现 preflight response 错误</title>
-    <link href="https://amosannn.github.io/blog/2018/04/02/axios-intercepter-perflight-response-error/"/>
-    <id>https://amosannn.github.io/blog/2018/04/02/axios-intercepter-perflight-response-error/</id>
+    <link href="https://amosannn.github.io/2018/04/02/axios-intercepter-perflight-response-error/"/>
+    <id>https://amosannn.github.io/2018/04/02/axios-intercepter-perflight-response-error/</id>
     <published>2018-04-02T08:26:26.000Z</published>
     <updated>2018-04-02T17:14:02.000Z</updated>
     
@@ -490,18 +490,18 @@
     
     
     
-    <category term="Vue" scheme="https://amosannn.github.io/blog/tags/Vue/"/>
+    <category term="Vue" scheme="https://amosannn.github.io/tags/Vue/"/>
     
-    <category term="axios" scheme="https://amosannn.github.io/blog/tags/axios/"/>
+    <category term="axios" scheme="https://amosannn.github.io/tags/axios/"/>
     
-    <category term="CORS" scheme="https://amosannn.github.io/blog/tags/CORS/"/>
+    <category term="CORS" scheme="https://amosannn.github.io/tags/CORS/"/>
     
   </entry>
   
   <entry>
     <title>Docker + Nginx 镜像部署 Vue 项目</title>
-    <link href="https://amosannn.github.io/blog/2018/03/28/deploy-the-vue-project-using-docker-and-nginx/"/>
-    <id>https://amosannn.github.io/blog/2018/03/28/deploy-the-vue-project-using-docker-and-nginx/</id>
+    <link href="https://amosannn.github.io/2018/03/28/deploy-the-vue-project-using-docker-and-nginx/"/>
+    <id>https://amosannn.github.io/2018/03/28/deploy-the-vue-project-using-docker-and-nginx/</id>
     <published>2018-03-28T07:23:57.000Z</published>
     <updated>2018-03-28T17:36:14.000Z</updated>
     
@@ -516,18 +516,18 @@
     
     
     
-    <category term="Vue" scheme="https://amosannn.github.io/blog/tags/Vue/"/>
+    <category term="Vue" scheme="https://amosannn.github.io/tags/Vue/"/>
     
-    <category term="Docker" scheme="https://amosannn.github.io/blog/tags/Docker/"/>
+    <category term="Docker" scheme="https://amosannn.github.io/tags/Docker/"/>
     
-    <category term="Nginx" scheme="https://amosannn.github.io/blog/tags/Nginx/"/>
+    <category term="Nginx" scheme="https://amosannn.github.io/tags/Nginx/"/>
     
   </entry>
   
   <entry>
     <title>解决Vue前后端分离跨域问题</title>
-    <link href="https://amosannn.github.io/blog/2018/03/22/solove-vue-cross-domain-problems/"/>
-    <id>https://amosannn.github.io/blog/2018/03/22/solove-vue-cross-domain-problems/</id>
+    <link href="https://amosannn.github.io/2018/03/22/solove-vue-cross-domain-problems/"/>
+    <id>https://amosannn.github.io/2018/03/22/solove-vue-cross-domain-problems/</id>
     <published>2018-03-22T01:11:58.000Z</published>
     <updated>2018-03-22T13:17:12.000Z</updated>
     
@@ -542,18 +542,18 @@
     
     
     
-    <category term="Vue" scheme="https://amosannn.github.io/blog/tags/Vue/"/>
+    <category term="Vue" scheme="https://amosannn.github.io/tags/Vue/"/>
     
-    <category term="CORS" scheme="https://amosannn.github.io/blog/tags/CORS/"/>
+    <category term="CORS" scheme="https://amosannn.github.io/tags/CORS/"/>
     
-    <category term="SpringBoot" scheme="https://amosannn.github.io/blog/tags/SpringBoot/"/>
+    <category term="SpringBoot" scheme="https://amosannn.github.io/tags/SpringBoot/"/>
     
   </entry>
   
   <entry>
     <title>什么是分布式事务</title>
-    <link href="https://amosannn.github.io/blog/2018/03/19/simple-to-understand-transaction/"/>
-    <id>https://amosannn.github.io/blog/2018/03/19/simple-to-understand-transaction/</id>
+    <link href="https://amosannn.github.io/2018/03/19/simple-to-understand-transaction/"/>
+    <id>https://amosannn.github.io/2018/03/19/simple-to-understand-transaction/</id>
     <published>2018-03-19T09:27:21.000Z</published>
     <updated>2018-03-19T18:46:44.000Z</updated>
     
@@ -568,16 +568,16 @@
     
     
     
-    <category term="Transaction" scheme="https://amosannn.github.io/blog/tags/Transaction/"/>
+    <category term="Transaction" scheme="https://amosannn.github.io/tags/Transaction/"/>
     
-    <category term="SQL" scheme="https://amosannn.github.io/blog/tags/SQL/"/>
+    <category term="SQL" scheme="https://amosannn.github.io/tags/SQL/"/>
     
   </entry>
   
   <entry>
     <title>MyBatis一对一映射注解@One的使用及理解</title>
-    <link href="https://amosannn.github.io/blog/2018/03/08/the-use-and-understanding-of-one-annotated-by-mybatis/"/>
-    <id>https://amosannn.github.io/blog/2018/03/08/the-use-and-understanding-of-one-annotated-by-mybatis/</id>
+    <link href="https://amosannn.github.io/2018/03/08/the-use-and-understanding-of-one-annotated-by-mybatis/"/>
+    <id>https://amosannn.github.io/2018/03/08/the-use-and-understanding-of-one-annotated-by-mybatis/</id>
     <published>2018-03-08T12:32:21.000Z</published>
     <updated>2018-03-08T23:35:12.000Z</updated>
     
@@ -592,16 +592,16 @@
     
     
     
-    <category term="MyBatis" scheme="https://amosannn.github.io/blog/tags/MyBatis/"/>
+    <category term="SpringBoot" scheme="https://amosannn.github.io/tags/SpringBoot/"/>
     
-    <category term="SpringBoot" scheme="https://amosannn.github.io/blog/tags/SpringBoot/"/>
+    <category term="MyBatis" scheme="https://amosannn.github.io/tags/MyBatis/"/>
     
   </entry>
   
   <entry>
     <title>在SelectProvider注解中使用复杂类型参数（List）</title>
-    <link href="https://amosannn.github.io/blog/2018/03/03/SelectProvider-use-List-parameter/"/>
-    <id>https://amosannn.github.io/blog/2018/03/03/SelectProvider-use-List-parameter/</id>
+    <link href="https://amosannn.github.io/2018/03/03/SelectProvider-use-List-parameter/"/>
+    <id>https://amosannn.github.io/2018/03/03/SelectProvider-use-List-parameter/</id>
     <published>2018-03-03T15:50:39.000Z</published>
     <updated>2018-03-04T00:39:44.000Z</updated>
     
@@ -617,7 +617,7 @@
     
     
     
-    <category term="Mybatis" scheme="https://amosannn.github.io/blog/tags/Mybatis/"/>
+    <category term="Mybatis" scheme="https://amosannn.github.io/tags/Mybatis/"/>
     
   </entry>
   
