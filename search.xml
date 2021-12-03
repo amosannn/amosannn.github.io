@@ -1,6 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>在SelectProvider注解中使用复杂类型参数（List）</title>
+    <url>/blog/2018/03/03/SelectProvider-use-List-parameter/</url>
+    <content><![CDATA[<p>最近开发中尝试使用注解来代替xml完成Mybatis的sql编写，实现更完(装)整(逼)的无xml编程。结果没写多久就跌进大坑了Orz</p>
+<p>总所周知的是Mybatis支持的注解中有@Select、@Insert、@Update、@Delete这四个基本操作。使用这些注解你可以非常快的完成基础操作，如果想执行一些复杂操作，例如包含where、foreach等xml中一个标签即可完成的操作，便需要用到另一个注解 –&gt; @SelectProvider</p>
+<p>如果你的需求只是传递一些基础类型，那你学习使用SelectProvider的曲线还是很平滑的。如果你的需求是传递一些复杂类型，例如List，那就可能会尴尬了。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Mapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">QuestionMapper</span> </span>&#123;</span><br><span class="line">  <span class="meta">@SelectProvider(type = QuestionSqlProvider.class, method = &quot;listQuestionByQuestionId&quot;)</span></span><br><span class="line">  <span class="function">List&lt;Question&gt; <span class="title">listQuestionByQuestionId</span><span class="params">(<span class="meta">@Param(&quot;idList&quot;)</span> List&lt;Integer&gt; idList)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>一开始我理所当然的把List<Integer>作为输入参数。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">listQuestionByQuestionId</span><span class="params">(<span class="keyword">final</span> List&lt;Integer&gt; idList)</span> </span>&#123;</span><br><span class="line">    StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">    sb.append(<span class="string">&quot;(&quot;</span>);</span><br><span class="line">    <span class="keyword">for</span> (Integer questionId : idList) &#123;</span><br><span class="line">      sb.append(<span class="string">&quot; &#x27;&quot;</span> + questionId + <span class="string">&quot;&#x27;,&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    sb.deleteCharAt(sb.length() - <span class="number">1</span>);</span><br><span class="line">    sb.append(<span class="string">&quot;)&quot;</span>);</span><br><span class="line">    System.out.println(sb.toString());</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> SQL() &#123;&#123;</span><br><span class="line">      SELECT(<span class="string">&quot; question_id,question_title,create_time &quot;</span>);</span><br><span class="line">      FROM(<span class="string">&quot; question &quot;</span>);</span><br><span class="line">      WHERE(<span class="string">&quot; question_id in &quot;</span> + sb.toString());</span><br><span class="line">    &#125;&#125;.toString();</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>燃鹅。。jvm很无情的抛了个错误出来</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">00:29:39.814 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Could not complete request</span><br><span class="line">org.mybatis.spring.MyBatisSystemException: nested exception is org.apache.ibatis.builder.BuilderException: Error invoking SqlProvider method (com.amosannn.mapper.QuestionSqlProvider.listQuestionByQuestionId).  Cause: org.apache.ibatis.binding.BindingException: Parameter &#x27;arg0&#x27; not found. Available parameters are [idList, param1]</span><br></pre></td></tr></table></figure>
+<p>很难受，Mybatis的官方文档里并没有针对@SelectProvider有更多的demo，翻遍了各大门户网站也没见到有相关的讨论。兜兜转转依旧没有眉目，想到多参数的传递会被Mybatis自动封装进Map，该不会List也是同样被封装进Map吧。结果一试还真是这样。。</p>
+<p>终于摸索出问题的关键，只需把形参由List<Integer>类型替换为Map类型就能接收到前面传来的List了。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QuestionSqlProvider</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> String <span class="title">listQuestionByQuestionId</span><span class="params">(<span class="keyword">final</span> Map&lt;String, Object&gt; map)</span> </span>&#123;</span><br><span class="line">    List&lt;Integer&gt; idList = (List&lt;Integer&gt;)map.get(<span class="string">&quot;idList&quot;</span>);</span><br><span class="line">    StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">    sb.append(<span class="string">&quot;(&quot;</span>);</span><br><span class="line">    <span class="keyword">for</span> (Integer questionId : idList) &#123;</span><br><span class="line">      sb.append(<span class="string">&quot; &#x27;&quot;</span> + questionId + <span class="string">&quot;&#x27;,&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    sb.deleteCharAt(sb.length() - <span class="number">1</span>);</span><br><span class="line">    sb.append(<span class="string">&quot;)&quot;</span>);</span><br><span class="line">    System.out.println(sb.toString());</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> SQL() &#123;&#123;</span><br><span class="line">      SELECT(<span class="string">&quot; question_id,question_title,create_time &quot;</span>);</span><br><span class="line">      FROM(<span class="string">&quot; question &quot;</span>);</span><br><span class="line">      WHERE(<span class="string">&quot; question_id in &quot;</span> + sb.toString());</span><br><span class="line">    &#125;&#125;.toString();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      <tags>
+        <tag>Mybatis</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Hello Hexo</title>
     <url>/blog/2017/04/16/Hello-Hexo/</url>
     <content><![CDATA[<p>阿盛的技术博客诞生。</p>
@@ -49,25 +68,6 @@
 <li>更改数据结构（id - string –&gt; id - list<string>)</li>
 </ul>
 ]]></content>
-  </entry>
-  <entry>
-    <title>在SelectProvider注解中使用复杂类型参数（List）</title>
-    <url>/blog/2018/03/03/SelectProvider-use-List-parameter/</url>
-    <content><![CDATA[<p>最近开发中尝试使用注解来代替xml完成Mybatis的sql编写，实现更完(装)整(逼)的无xml编程。结果没写多久就跌进大坑了Orz</p>
-<p>总所周知的是Mybatis支持的注解中有@Select、@Insert、@Update、@Delete这四个基本操作。使用这些注解你可以非常快的完成基础操作，如果想执行一些复杂操作，例如包含where、foreach等xml中一个标签即可完成的操作，便需要用到另一个注解 –&gt; @SelectProvider</p>
-<p>如果你的需求只是传递一些基础类型，那你学习使用SelectProvider的曲线还是很平滑的。如果你的需求是传递一些复杂类型，例如List，那就可能会尴尬了。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Mapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">QuestionMapper</span> </span>&#123;</span><br><span class="line">  <span class="meta">@SelectProvider(type = QuestionSqlProvider.class, method = &quot;listQuestionByQuestionId&quot;)</span></span><br><span class="line">  <span class="function">List&lt;Question&gt; <span class="title">listQuestionByQuestionId</span><span class="params">(<span class="meta">@Param(&quot;idList&quot;)</span> List&lt;Integer&gt; idList)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>一开始我理所当然的把List<Integer>作为输入参数。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">listQuestionByQuestionId</span><span class="params">(<span class="keyword">final</span> List&lt;Integer&gt; idList)</span> </span>&#123;</span><br><span class="line">    StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">    sb.append(<span class="string">&quot;(&quot;</span>);</span><br><span class="line">    <span class="keyword">for</span> (Integer questionId : idList) &#123;</span><br><span class="line">      sb.append(<span class="string">&quot; &#x27;&quot;</span> + questionId + <span class="string">&quot;&#x27;,&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    sb.deleteCharAt(sb.length() - <span class="number">1</span>);</span><br><span class="line">    sb.append(<span class="string">&quot;)&quot;</span>);</span><br><span class="line">    System.out.println(sb.toString());</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> SQL() &#123;&#123;</span><br><span class="line">      SELECT(<span class="string">&quot; question_id,question_title,create_time &quot;</span>);</span><br><span class="line">      FROM(<span class="string">&quot; question &quot;</span>);</span><br><span class="line">      WHERE(<span class="string">&quot; question_id in &quot;</span> + sb.toString());</span><br><span class="line">    &#125;&#125;.toString();</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
-<p>燃鹅。。jvm很无情的抛了个错误出来</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">00:29:39.814 [http-nio-8080-exec-1] DEBUG o.s.web.servlet.DispatcherServlet - Could not complete request</span><br><span class="line">org.mybatis.spring.MyBatisSystemException: nested exception is org.apache.ibatis.builder.BuilderException: Error invoking SqlProvider method (com.amosannn.mapper.QuestionSqlProvider.listQuestionByQuestionId).  Cause: org.apache.ibatis.binding.BindingException: Parameter &#x27;arg0&#x27; not found. Available parameters are [idList, param1]</span><br></pre></td></tr></table></figure>
-<p>很难受，Mybatis的官方文档里并没有针对@SelectProvider有更多的demo，翻遍了各大门户网站也没见到有相关的讨论。兜兜转转依旧没有眉目，想到多参数的传递会被Mybatis自动封装进Map，该不会List也是同样被封装进Map吧。结果一试还真是这样。。</p>
-<p>终于摸索出问题的关键，只需把形参由List<Integer>类型替换为Map类型就能接收到前面传来的List了。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QuestionSqlProvider</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> String <span class="title">listQuestionByQuestionId</span><span class="params">(<span class="keyword">final</span> Map&lt;String, Object&gt; map)</span> </span>&#123;</span><br><span class="line">    List&lt;Integer&gt; idList = (List&lt;Integer&gt;)map.get(<span class="string">&quot;idList&quot;</span>);</span><br><span class="line">    StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">    sb.append(<span class="string">&quot;(&quot;</span>);</span><br><span class="line">    <span class="keyword">for</span> (Integer questionId : idList) &#123;</span><br><span class="line">      sb.append(<span class="string">&quot; &#x27;&quot;</span> + questionId + <span class="string">&quot;&#x27;,&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    sb.deleteCharAt(sb.length() - <span class="number">1</span>);</span><br><span class="line">    sb.append(<span class="string">&quot;)&quot;</span>);</span><br><span class="line">    System.out.println(sb.toString());</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> SQL() &#123;&#123;</span><br><span class="line">      SELECT(<span class="string">&quot; question_id,question_title,create_time &quot;</span>);</span><br><span class="line">      FROM(<span class="string">&quot; question &quot;</span>);</span><br><span class="line">      WHERE(<span class="string">&quot; question_id in &quot;</span> + sb.toString());</span><br><span class="line">    &#125;&#125;.toString();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
-      <tags>
-        <tag>Mybatis</tag>
-      </tags>
   </entry>
   <entry>
     <title>Airflow 概念梳理</title>
@@ -141,32 +141,6 @@
       <tags>
         <tag>Airflow</tag>
         <tag>LDAP</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Airflow 居然趁服务器不注意卡在 running 状态不执行</title>
-    <url>/blog/2018/11/01/airflow-dag-get-stuck-in-running-state/</url>
-    <content><![CDATA[<p>就像这样，这小子坏得很。</p>
-<p><img src="/images/airflow/1541489895790.png" alt="1541489895790"></p>
-<h2 id="初现端倪"><a href="#初现端倪" class="headerlink" title="初现端倪"></a>初现端倪</h2><p>好在 <code>Task Instance Details</code> 中可以看到这小子心里都在想些啥，这是十分关键的，以及具有重大突破性的调查入口！</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">depends_on_past is true for this task&#x27;s DAG, but the previous task instance has not run yet.</span><br></pre></td></tr></table></figure>
-
-<p>做为一个新来的 dag，旗下每一个格子都是小白块，怎么可能会有前置依赖没执行？十分任性！</p>
-<h2 id="顺藤摸瓜"><a href="#顺藤摸瓜" class="headerlink" title="顺藤摸瓜"></a>顺藤摸瓜</h2><p>找到问题所在就好办了</p>
-<p>前往代码中查看，我确实将 <code>depends_on_past</code> 置为 True` 了，但是每个 task 之间的依赖更是没有问题。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">default_args = &#123;</span><br><span class="line">    &#x27;owner&#x27;: &#x27;amos&#x27;,</span><br><span class="line">    &#x27;depends_on_past&#x27;: True,</span><br><span class="line">    # &#x27;start_date&#x27;: airflow.utils.dates.days_ago(1),</span><br><span class="line">    &#x27;start_date&#x27;: datetime.now(),</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>尝试着将 <code>depends_on_past</code> 置为 <code>False</code> ，Airflow 立马开始了属于他自己的奔跑（按照依赖关系奔跑）！</p>
-<h2 id="别出纰漏"><a href="#别出纰漏" class="headerlink" title="别出纰漏"></a>别出纰漏</h2><p>顺便一提，还有一种可能会导致这种情况的发生</p>
-<p>那就是没有开启这个 dag，也就是 <code>trigger</code> 的状态为 <code>off</code>，这样会把任务挂起，直至开启 dag 才会执行。</p>
-<hr>
-<h2 id="了解更多"><a href="#了解更多" class="headerlink" title="了解更多"></a>了解更多</h2><p><a href="https://stackoverflow.com/questions/51261841/airflow-dag-get-stuck-in-running-state">AirFlow DAG Get stuck in running state</a></p>
-]]></content>
-      <categories>
-        <category>技术一路走到黑</category>
-      </categories>
-      <tags>
-        <tag>Airflow</tag>
       </tags>
   </entry>
   <entry>
@@ -273,29 +247,56 @@
       </tags>
   </entry>
   <entry>
-    <title>懒汉式单例中双重检查的好处</title>
-    <url>/blog/2017/07/27/benefits-of-singleton-pattern-double-checking/</url>
-    <content><![CDATA[<p>记得前阵子面试金山时碰到了这样一个问题</p>
-<p>1）下面哪一种写法更好，为什么？<br>2）请写出另一种单例模式。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton singleton;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (singleton == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (Singleton.class) &#123;</span><br><span class="line">                singleton = <span class="keyword">new</span> Singleton();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> singleton;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">volatile</span> Singleton singleton;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (singleton == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (Singleton.class) &#123;</span><br><span class="line">                <span class="keyword">if</span> (singleton == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    singleton = <span class="keyword">new</span> Singleton();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> singleton;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    <title>Airflow 居然趁服务器不注意卡在 running 状态不执行</title>
+    <url>/blog/2018/11/01/airflow-dag-get-stuck-in-running-state/</url>
+    <content><![CDATA[<p>就像这样，这小子坏得很。</p>
+<p><img src="/images/airflow/1541489895790.png" alt="1541489895790"></p>
+<h2 id="初现端倪"><a href="#初现端倪" class="headerlink" title="初现端倪"></a>初现端倪</h2><p>好在 <code>Task Instance Details</code> 中可以看到这小子心里都在想些啥，这是十分关键的，以及具有重大突破性的调查入口！</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">depends_on_past is true for this task&#x27;s DAG, but the previous task instance has not run yet.</span><br></pre></td></tr></table></figure>
 
-<p>很显然，第一种代码块是线程不安全的。<br>比如说这种情况，有一个线程调用了getInstance()，但执行到if(singleton==null)这一步时，另一个线程也进入了这个方法，那么便会造成最终创建了两个Singleton实例。<br>而若是第二种代码块，在同步锁中加入第二次验证，就不怕多个线程同时进入方法体导致的多个实例被创建了。</p>
-<p>以上两个方法块俗称懒汉式单例模式，意为调用时再创建实例对象。</p>
-<p>另一种单例模式称为饿汉式单例模式，不同的点在于类装载时便完成了类实例化，以下两种方法块都是饿汉式的表现方法，是一样的。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> Singleton instance = <span class="keyword">new</span> Singleton();</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> &#123;</span><br><span class="line">     instance = <span class="keyword">new</span> Singleton();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>做为一个新来的 dag，旗下每一个格子都是小白块，怎么可能会有前置依赖没执行？十分任性！</p>
+<h2 id="顺藤摸瓜"><a href="#顺藤摸瓜" class="headerlink" title="顺藤摸瓜"></a>顺藤摸瓜</h2><p>找到问题所在就好办了</p>
+<p>前往代码中查看，我确实将 <code>depends_on_past</code> 置为 True` 了，但是每个 task 之间的依赖更是没有问题。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">default_args = &#123;</span><br><span class="line">    &#x27;owner&#x27;: &#x27;amos&#x27;,</span><br><span class="line">    &#x27;depends_on_past&#x27;: True,</span><br><span class="line">    # &#x27;start_date&#x27;: airflow.utils.dates.days_ago(1),</span><br><span class="line">    &#x27;start_date&#x27;: datetime.now(),</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>最后再推荐个与双重检查一样线程安全的，静态内部类实现的懒汉式单例模式。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> class <span class="title">Singleton</span><span class="params">()</span></span>&#123;</span><br><span class="line">     <span class="keyword">private</span> Singleton&#123;&#125;;</span><br><span class="line">     <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">LazyHolder</span></span>&#123;</span><br><span class="line">          <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Singleton INSTANCE = <span class="keyword">new</span> Singleton();</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">          <span class="keyword">return</span> LazyHolder.INSTANCE;</span><br><span class="line">     &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这种方式跟饿汉式方式采用的机制类似，但又有不同。两者都是采用了类装载的机制来保证初始化实例时只有一个线程。不同的地方在饿汉式方式是只要Singleton类被装载就会实例化，没有Lazy-Loading的作用，而静态内部类方式在Singleton类被装载时并不会立即实例化，而是在需要实例化时，调用getInstance方法，才会装载SingletonInstance类，从而完成Singleton的实例化。</p>
-<p>类的静态属性只会在第一次加载类的时候初始化，所以在这里，JVM帮助我们保证了线程的安全性，在类进行初始化时，别的线程是无法进入的。</p>
+<p>尝试着将 <code>depends_on_past</code> 置为 <code>False</code> ，Airflow 立马开始了属于他自己的奔跑（按照依赖关系奔跑）！</p>
+<h2 id="别出纰漏"><a href="#别出纰漏" class="headerlink" title="别出纰漏"></a>别出纰漏</h2><p>顺便一提，还有一种可能会导致这种情况的发生</p>
+<p>那就是没有开启这个 dag，也就是 <code>trigger</code> 的状态为 <code>off</code>，这样会把任务挂起，直至开启 dag 才会执行。</p>
+<hr>
+<h2 id="了解更多"><a href="#了解更多" class="headerlink" title="了解更多"></a>了解更多</h2><p><a href="https://stackoverflow.com/questions/51261841/airflow-dag-get-stuck-in-running-state">AirFlow DAG Get stuck in running state</a></p>
 ]]></content>
       <categories>
         <category>技术一路走到黑</category>
       </categories>
       <tags>
-        <tag>java</tag>
+        <tag>Airflow</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用JavaScript进行货币格式化</title>
+    <url>/blog/2017/05/23/currency-formatting-by-javascript/</url>
+    <content><![CDATA[<p>在项目中碰到关于货币金额的页面显示，为了让金额的显示更为人性化与规范化，需要加入货币格式化策略。<br>也就是所谓的数字千分位格式化。<br>例如<code>￥39,998</code> <code>$1,299</code></p>
+<p>以下为包含小数处理的三种代码块。</p>
+<span id="more"></span>
+
+<p>保留2位小数：</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 将数值四舍五入(保留2位小数)后格式化成金额形式</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param </span>num 数值(Number或者String)</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return </span>金额格式的字符串,如&#x27;1,234,567.45&#x27;</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@type <span class="variable">String</span></span></span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"> <span class="function"><span class="keyword">function</span> <span class="title">formatCurrency</span>(<span class="params">num</span>) </span>&#123;</span><br><span class="line">    num = num.toString().replace(<span class="regexp">/\$|\,/g</span>,<span class="string">&#x27;&#x27;</span>);</span><br><span class="line">    <span class="keyword">if</span>(<span class="built_in">isNaN</span>(num))</span><br><span class="line">        num = <span class="string">&quot;0&quot;</span>;</span><br><span class="line">    sign = (num == (num = <span class="built_in">Math</span>.abs(num)));</span><br><span class="line">    num = <span class="built_in">Math</span>.floor(num*<span class="number">100</span>+<span class="number">0.50000000001</span>);</span><br><span class="line">    cents = num%<span class="number">100</span>;</span><br><span class="line">    num = <span class="built_in">Math</span>.floor(num/<span class="number">100</span>).toString();</span><br><span class="line">    <span class="keyword">if</span>(cents&lt;<span class="number">10</span>)</span><br><span class="line">    cents = <span class="string">&quot;0&quot;</span> + cents;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="built_in">Math</span>.floor((num.length-(<span class="number">1</span>+i))/<span class="number">3</span>); i++)</span><br><span class="line">    num = num.substring(<span class="number">0</span>,num.length-(<span class="number">4</span>*i+<span class="number">3</span>))+<span class="string">&#x27;,&#x27;</span>+</span><br><span class="line">    num.substring(num.length-(<span class="number">4</span>*i+<span class="number">3</span>));</span><br><span class="line">    <span class="keyword">return</span> (((sign)?<span class="string">&#x27;&#x27;</span>:<span class="string">&#x27;-&#x27;</span>) + num + <span class="string">&#x27;.&#x27;</span> + cents);</span><br></pre></td></tr></table></figure>
+
+<p>保留1位小数：</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 将数值四舍五入(保留1位小数)后格式化成金额形式</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param </span>num 数值(Number或者String)</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return </span>金额格式的字符串,如&#x27;1,234,567.4&#x27;</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@type <span class="variable">String</span></span></span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">formatCurrencyTenThou</span>(<span class="params">num</span>) </span>&#123;</span><br><span class="line">    num = num.toString().replace(<span class="regexp">/\$|\,/g</span>,<span class="string">&#x27;&#x27;</span>);</span><br><span class="line">    <span class="keyword">if</span>(<span class="built_in">isNaN</span>(num))</span><br><span class="line">    num = <span class="string">&quot;0&quot;</span>;</span><br><span class="line">    sign = (num == (num = <span class="built_in">Math</span>.abs(num)));</span><br><span class="line">    num = <span class="built_in">Math</span>.floor(num*<span class="number">10</span>+<span class="number">0.50000000001</span>);</span><br><span class="line">    cents = num%<span class="number">10</span>;</span><br><span class="line">    num = <span class="built_in">Math</span>.floor(num/<span class="number">10</span>).toString();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="built_in">Math</span>.floor((num.length-(<span class="number">1</span>+i))/<span class="number">3</span>); i++)</span><br><span class="line">    num = num.substring(<span class="number">0</span>,num.length-(<span class="number">4</span>*i+<span class="number">3</span>))+<span class="string">&#x27;,&#x27;</span>+</span><br><span class="line">    num.substring(num.length-(<span class="number">4</span>*i+<span class="number">3</span>));</span><br><span class="line">    <span class="keyword">return</span> (((sign)?<span class="string">&#x27;&#x27;</span>:<span class="string">&#x27;-&#x27;</span>) + num + <span class="string">&#x27;.&#x27;</span> + cents);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>不保留小数：</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">formatPrice</span>(<span class="params">n</span>) </span>&#123;</span><br><span class="line">   <span class="keyword">var</span> t = <span class="built_in">parseInt</span>(n), i, r;</span><br><span class="line">   <span class="keyword">for</span> (t = t.toString().replace(<span class="regexp">/^(\d*)$/</span>, <span class="string">&quot;$1.&quot;</span>), t = (t + <span class="string">&quot;00&quot;</span>).replace(<span class="regexp">/(\d*\.\d\d)\d*/</span>, <span class="string">&quot;$1&quot;</span>), t = t.replace(<span class="string">&quot;.&quot;</span>, <span class="string">&quot;,&quot;</span>), i = <span class="regexp">/(\d)(\d&#123;3&#125;,)/</span>; i.test(t); )</span><br><span class="line">       t = t.replace(i, <span class="string">&quot;$1,$2&quot;</span>);</span><br><span class="line">   <span class="keyword">return</span> t = t.replace(<span class="regexp">/,(\d\d)$/</span>, <span class="string">&quot;.$1&quot;</span>), r = t.split(<span class="string">&quot;.&quot;</span>), r[<span class="number">1</span>] == <span class="string">&quot;00&quot;</span> &amp;&amp; (t = r[<span class="number">0</span>]), t</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>参考链接：<br><a href="http://www.haorooms.com/post/js_qian_huobi_gs">http://www.haorooms.com/post/js_qian_huobi_gs</a><br><a href="https://github.com/lishengzxc/bblog/issues/15">https://github.com/lishengzxc/bblog/issues/15</a></p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>技术一路走到黑</category>
+      </categories>
+      <tags>
+        <tag>JavaScript</tag>
       </tags>
   </entry>
   <entry>
@@ -335,30 +336,29 @@
       </tags>
   </entry>
   <entry>
-    <title>使用JavaScript进行货币格式化</title>
-    <url>/blog/2017/05/23/currency-formatting-by-javascript/</url>
-    <content><![CDATA[<p>在项目中碰到关于货币金额的页面显示，为了让金额的显示更为人性化与规范化，需要加入货币格式化策略。<br>也就是所谓的数字千分位格式化。<br>例如<code>￥39,998</code> <code>$1,299</code></p>
-<p>以下为包含小数处理的三种代码块。</p>
-<span id="more"></span>
+    <title>懒汉式单例中双重检查的好处</title>
+    <url>/blog/2017/07/27/benefits-of-singleton-pattern-double-checking/</url>
+    <content><![CDATA[<p>记得前阵子面试金山时碰到了这样一个问题</p>
+<p>1）下面哪一种写法更好，为什么？<br>2）请写出另一种单例模式。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Singleton singleton;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (singleton == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (Singleton.class) &#123;</span><br><span class="line">                singleton = <span class="keyword">new</span> Singleton();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> singleton;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">volatile</span> Singleton singleton;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (singleton == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (Singleton.class) &#123;</span><br><span class="line">                <span class="keyword">if</span> (singleton == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    singleton = <span class="keyword">new</span> Singleton();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> singleton;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>保留2位小数：</p>
-<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 将数值四舍五入(保留2位小数)后格式化成金额形式</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param </span>num 数值(Number或者String)</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return </span>金额格式的字符串,如&#x27;1,234,567.45&#x27;</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@type <span class="variable">String</span></span></span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"> <span class="function"><span class="keyword">function</span> <span class="title">formatCurrency</span>(<span class="params">num</span>) </span>&#123;</span><br><span class="line">    num = num.toString().replace(<span class="regexp">/\$|\,/g</span>,<span class="string">&#x27;&#x27;</span>);</span><br><span class="line">    <span class="keyword">if</span>(<span class="built_in">isNaN</span>(num))</span><br><span class="line">        num = <span class="string">&quot;0&quot;</span>;</span><br><span class="line">    sign = (num == (num = <span class="built_in">Math</span>.abs(num)));</span><br><span class="line">    num = <span class="built_in">Math</span>.floor(num*<span class="number">100</span>+<span class="number">0.50000000001</span>);</span><br><span class="line">    cents = num%<span class="number">100</span>;</span><br><span class="line">    num = <span class="built_in">Math</span>.floor(num/<span class="number">100</span>).toString();</span><br><span class="line">    <span class="keyword">if</span>(cents&lt;<span class="number">10</span>)</span><br><span class="line">    cents = <span class="string">&quot;0&quot;</span> + cents;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="built_in">Math</span>.floor((num.length-(<span class="number">1</span>+i))/<span class="number">3</span>); i++)</span><br><span class="line">    num = num.substring(<span class="number">0</span>,num.length-(<span class="number">4</span>*i+<span class="number">3</span>))+<span class="string">&#x27;,&#x27;</span>+</span><br><span class="line">    num.substring(num.length-(<span class="number">4</span>*i+<span class="number">3</span>));</span><br><span class="line">    <span class="keyword">return</span> (((sign)?<span class="string">&#x27;&#x27;</span>:<span class="string">&#x27;-&#x27;</span>) + num + <span class="string">&#x27;.&#x27;</span> + cents);</span><br></pre></td></tr></table></figure>
+<p>很显然，第一种代码块是线程不安全的。<br>比如说这种情况，有一个线程调用了getInstance()，但执行到if(singleton==null)这一步时，另一个线程也进入了这个方法，那么便会造成最终创建了两个Singleton实例。<br>而若是第二种代码块，在同步锁中加入第二次验证，就不怕多个线程同时进入方法体导致的多个实例被创建了。</p>
+<p>以上两个方法块俗称懒汉式单例模式，意为调用时再创建实例对象。</p>
+<p>另一种单例模式称为饿汉式单例模式，不同的点在于类装载时便完成了类实例化，以下两种方法块都是饿汉式的表现方法，是一样的。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> Singleton instance = <span class="keyword">new</span> Singleton();</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> &#123;</span><br><span class="line">     instance = <span class="keyword">new</span> Singleton();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>保留1位小数：</p>
-<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 将数值四舍五入(保留1位小数)后格式化成金额形式</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param </span>num 数值(Number或者String)</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return </span>金额格式的字符串,如&#x27;1,234,567.4&#x27;</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@type <span class="variable">String</span></span></span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">formatCurrencyTenThou</span>(<span class="params">num</span>) </span>&#123;</span><br><span class="line">    num = num.toString().replace(<span class="regexp">/\$|\,/g</span>,<span class="string">&#x27;&#x27;</span>);</span><br><span class="line">    <span class="keyword">if</span>(<span class="built_in">isNaN</span>(num))</span><br><span class="line">    num = <span class="string">&quot;0&quot;</span>;</span><br><span class="line">    sign = (num == (num = <span class="built_in">Math</span>.abs(num)));</span><br><span class="line">    num = <span class="built_in">Math</span>.floor(num*<span class="number">10</span>+<span class="number">0.50000000001</span>);</span><br><span class="line">    cents = num%<span class="number">10</span>;</span><br><span class="line">    num = <span class="built_in">Math</span>.floor(num/<span class="number">10</span>).toString();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="built_in">Math</span>.floor((num.length-(<span class="number">1</span>+i))/<span class="number">3</span>); i++)</span><br><span class="line">    num = num.substring(<span class="number">0</span>,num.length-(<span class="number">4</span>*i+<span class="number">3</span>))+<span class="string">&#x27;,&#x27;</span>+</span><br><span class="line">    num.substring(num.length-(<span class="number">4</span>*i+<span class="number">3</span>));</span><br><span class="line">    <span class="keyword">return</span> (((sign)?<span class="string">&#x27;&#x27;</span>:<span class="string">&#x27;-&#x27;</span>) + num + <span class="string">&#x27;.&#x27;</span> + cents);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最后再推荐个与双重检查一样线程安全的，静态内部类实现的懒汉式单例模式。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> class <span class="title">Singleton</span><span class="params">()</span></span>&#123;</span><br><span class="line">     <span class="keyword">private</span> Singleton&#123;&#125;;</span><br><span class="line">     <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">LazyHolder</span></span>&#123;</span><br><span class="line">          <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Singleton INSTANCE = <span class="keyword">new</span> Singleton();</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">          <span class="keyword">return</span> LazyHolder.INSTANCE;</span><br><span class="line">     &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>不保留小数：</p>
-<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">formatPrice</span>(<span class="params">n</span>) </span>&#123;</span><br><span class="line">   <span class="keyword">var</span> t = <span class="built_in">parseInt</span>(n), i, r;</span><br><span class="line">   <span class="keyword">for</span> (t = t.toString().replace(<span class="regexp">/^(\d*)$/</span>, <span class="string">&quot;$1.&quot;</span>), t = (t + <span class="string">&quot;00&quot;</span>).replace(<span class="regexp">/(\d*\.\d\d)\d*/</span>, <span class="string">&quot;$1&quot;</span>), t = t.replace(<span class="string">&quot;.&quot;</span>, <span class="string">&quot;,&quot;</span>), i = <span class="regexp">/(\d)(\d&#123;3&#125;,)/</span>; i.test(t); )</span><br><span class="line">       t = t.replace(i, <span class="string">&quot;$1,$2&quot;</span>);</span><br><span class="line">   <span class="keyword">return</span> t = t.replace(<span class="regexp">/,(\d\d)$/</span>, <span class="string">&quot;.$1&quot;</span>), r = t.split(<span class="string">&quot;.&quot;</span>), r[<span class="number">1</span>] == <span class="string">&quot;00&quot;</span> &amp;&amp; (t = r[<span class="number">0</span>]), t</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>参考链接：<br><a href="http://www.haorooms.com/post/js_qian_huobi_gs">http://www.haorooms.com/post/js_qian_huobi_gs</a><br><a href="https://github.com/lishengzxc/bblog/issues/15">https://github.com/lishengzxc/bblog/issues/15</a></p>
-</blockquote>
+<p>这种方式跟饿汉式方式采用的机制类似，但又有不同。两者都是采用了类装载的机制来保证初始化实例时只有一个线程。不同的地方在饿汉式方式是只要Singleton类被装载就会实例化，没有Lazy-Loading的作用，而静态内部类方式在Singleton类被装载时并不会立即实例化，而是在需要实例化时，调用getInstance方法，才会装载SingletonInstance类，从而完成Singleton的实例化。</p>
+<p>类的静态属性只会在第一次加载类的时候初始化，所以在这里，JVM帮助我们保证了线程的安全性，在类进行初始化时，别的线程是无法进入的。</p>
 ]]></content>
       <categories>
         <category>技术一路走到黑</category>
       </categories>
       <tags>
-        <tag>JavaScript</tag>
+        <tag>java</tag>
       </tags>
   </entry>
   <entry>
@@ -501,50 +501,6 @@
       <tags>
         <tag>GitHub</tag>
         <tag>BFG</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>给GitHub Pages绑定域名 附namesilo域名优惠券</title>
-    <url>/blog/2017/06/01/github-blog-binding-domain/</url>
-    <content><![CDATA[<p>在GitHub上托管Hexo博客，访问地址自然是username.github.io，如果想用自己的域名访问这个网址，怎么做呢？<br>本文从域名选购到域名绑定一条龙,给你一个更清晰的操作流程。</p>
-<span id="more"></span>
-<h1 id="域名选购"><a href="#域名选购" class="headerlink" title="域名选购"></a>域名选购</h1><p>若已有域名可直接跳到<a href="#%E4%BD%BF%E7%94%A8DNSPod%E8%A7%A3%E6%9E%90%E6%9C%8D%E5%8A%A1">第二步</a>。</p>
-<p>说到域名选购，大家第一个想到的应该是狗爹(godaddy)？name？或namecheap？我使用的域名商叫<code>namesilo</code>，虽不是老牌的域名商，却也不是小年轻。并且不需要你有paypal或双币信用卡，良心地<code>支持支付宝</code>，还<code>免费赠送Whois隐私保护</code>。可能你们也听说过，没错我就是冲着赠送的whois保护去的哈哈哈~~<br>进入<a href="www.namesilo.com">namesilo官网</a>，点击右上角创建账户</p>
-<p><img src="/images/namesilo-address-info.png"><br>值得一提的是上图红框中的信息最好填写真实地址，毕竟账号丢了或者因为其他原因登录不了，你得凭借真实信息找回账号的嘛。whois隐私保护的好处也就体现在这里，你的私人信息只有namesilo看得到。</p>
-<p><img src="/images/namesilo-buy.png"><br>选择你想要的域名</p>
-<p><img src="/images/namesilo-cart.png"><br>然后这个页面记得选上<code>privacy setting</code>里的whois保护</p>
-<p>以及每个账户仅限一次的1美元优惠，填入<code>11%off</code>或者<code>1udown</code>即可以$7.99的价格拿下这个域名。</p>
-<p>今天的汇率是 $1 : ￥6.8 你们呢2333</p>
-<h1 id="域名绑定"><a href="#域名绑定" class="headerlink" title="域名绑定"></a>域名绑定</h1><h2 id="更改namesilo的dns指向"><a href="#更改namesilo的dns指向" class="headerlink" title="更改namesilo的dns指向"></a>更改namesilo的dns指向</h2><p>如果在域名购买时，表单中的NameServers有填入dns的话，就可以直接跳到<a href="#%E4%BD%BF%E7%94%A8DNSPod%E8%A7%A3%E6%9E%90%E6%9C%8D%E5%8A%A1">下一步</a>啦。</p>
-<p><img src="/images/namesilo-dns.png"><br>如果没有的话就在右上角<code>Manage My Domains</code>中点击这个蓝色小按钮，删除其中的三条默认dns解析地址，再回来点击<code>ChangeNameservers</code>按钮。</p>
-<p><img src="/images/namesilo-change.png"><br>将<code>NameServer 1</code>和<code>NameServer 2</code>改成</p>
-<blockquote>
-<p>f1g1ns1.dnspod.net<br>f1g1ns2.dnspod.net</p>
-</blockquote>
-<p>当然你想用默认或其他的dns解析服务也行。</p>
-<h2 id="使用DNSPod解析服务"><a href="#使用DNSPod解析服务" class="headerlink" title="使用DNSPod解析服务"></a>使用DNSPod解析服务</h2><p>提供dns解析的商家有很多，这里只给出DNSPod的操作步骤，但是一通百通，界面不一样，操作手法还是相同的。<br><img src="/images/dnspod-setting.png"></p>
-<p>添加三个数据</p>
-<blockquote>
-<p>@  A  192.30.252.153<br>@  A  192.30.252.154<br>www  CNAME  username.github.io</p>
-</blockquote>
-<p>注意：CNAME后的ip地址，千万不要使用ping命令得到的ip，因为GitHub Pages的页面ip不是固定ip，可能这阵子可以正常解析到你的页面，过阵子可能就解析到别人的页面去了！</p>
-<h3 id="主机记录和记录类型说明"><a href="#主机记录和记录类型说明" class="headerlink" title="主机记录和记录类型说明"></a>主机记录和记录类型说明</h3><blockquote>
-<p>www：解析后的域名为 <a href="http://www.xxxxx.com/">www.xxxxx.com</a><br>@：直接解析主域名 xxxxx.com<br>*：泛解析，匹配其他所有域名 *.xxxxx.com</p>
-<p>A记录：地址记录，用来指定域名的IPv4地址（如：8.8.8.8），如果需要将域名指向一个IP地址，就需要添加A记录。<br>CNAME： 如果需要将域名指向另一个域名，再由另一个域名提供ip地址，就需要添加CNAME记录。</p>
-</blockquote>
-<h2 id="添加CNAME文件"><a href="#添加CNAME文件" class="headerlink" title="添加CNAME文件"></a>添加CNAME文件</h2><p>在Hexo本地目录中的source文件夹里，添加一个命名为CNAME的无后缀文件，文件中的填写你的域名.<br>如果你想让地址栏的域名显示www前缀就输入<code>www.xxxcc.com</code>，否则输入<code>xxxxx.com</code>即可。<br>例如</p>
-<blockquote>
-<p><a href="http://www.xxxxx.com/">www.xxxxx.com</a></p>
-</blockquote>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">hexo c</span><br><span class="line">hexo g -d</span><br></pre></td></tr></table></figure>
-<p>配置完后等待一会儿就可以访问啦~</p>
-]]></content>
-      <tags>
-        <tag>GitHub</tag>
-        <tag>namesilo</tag>
-        <tag>domain</tag>
-        <tag>Hexo</tag>
-        <tag>DNSPod</tag>
       </tags>
   </entry>
   <entry>
@@ -991,6 +947,50 @@
       </categories>
       <tags>
         <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>给GitHub Pages绑定域名 附namesilo域名优惠券</title>
+    <url>/blog/2017/06/01/github-blog-binding-domain/</url>
+    <content><![CDATA[<p>在GitHub上托管Hexo博客，访问地址自然是username.github.io，如果想用自己的域名访问这个网址，怎么做呢？<br>本文从域名选购到域名绑定一条龙,给你一个更清晰的操作流程。</p>
+<span id="more"></span>
+<h1 id="域名选购"><a href="#域名选购" class="headerlink" title="域名选购"></a>域名选购</h1><p>若已有域名可直接跳到<a href="#%E4%BD%BF%E7%94%A8DNSPod%E8%A7%A3%E6%9E%90%E6%9C%8D%E5%8A%A1">第二步</a>。</p>
+<p>说到域名选购，大家第一个想到的应该是狗爹(godaddy)？name？或namecheap？我使用的域名商叫<code>namesilo</code>，虽不是老牌的域名商，却也不是小年轻。并且不需要你有paypal或双币信用卡，良心地<code>支持支付宝</code>，还<code>免费赠送Whois隐私保护</code>。可能你们也听说过，没错我就是冲着赠送的whois保护去的哈哈哈~~<br>进入<a href="www.namesilo.com">namesilo官网</a>，点击右上角创建账户</p>
+<p><img src="/images/namesilo-address-info.png"><br>值得一提的是上图红框中的信息最好填写真实地址，毕竟账号丢了或者因为其他原因登录不了，你得凭借真实信息找回账号的嘛。whois隐私保护的好处也就体现在这里，你的私人信息只有namesilo看得到。</p>
+<p><img src="/images/namesilo-buy.png"><br>选择你想要的域名</p>
+<p><img src="/images/namesilo-cart.png"><br>然后这个页面记得选上<code>privacy setting</code>里的whois保护</p>
+<p>以及每个账户仅限一次的1美元优惠，填入<code>11%off</code>或者<code>1udown</code>即可以$7.99的价格拿下这个域名。</p>
+<p>今天的汇率是 $1 : ￥6.8 你们呢2333</p>
+<h1 id="域名绑定"><a href="#域名绑定" class="headerlink" title="域名绑定"></a>域名绑定</h1><h2 id="更改namesilo的dns指向"><a href="#更改namesilo的dns指向" class="headerlink" title="更改namesilo的dns指向"></a>更改namesilo的dns指向</h2><p>如果在域名购买时，表单中的NameServers有填入dns的话，就可以直接跳到<a href="#%E4%BD%BF%E7%94%A8DNSPod%E8%A7%A3%E6%9E%90%E6%9C%8D%E5%8A%A1">下一步</a>啦。</p>
+<p><img src="/images/namesilo-dns.png"><br>如果没有的话就在右上角<code>Manage My Domains</code>中点击这个蓝色小按钮，删除其中的三条默认dns解析地址，再回来点击<code>ChangeNameservers</code>按钮。</p>
+<p><img src="/images/namesilo-change.png"><br>将<code>NameServer 1</code>和<code>NameServer 2</code>改成</p>
+<blockquote>
+<p>f1g1ns1.dnspod.net<br>f1g1ns2.dnspod.net</p>
+</blockquote>
+<p>当然你想用默认或其他的dns解析服务也行。</p>
+<h2 id="使用DNSPod解析服务"><a href="#使用DNSPod解析服务" class="headerlink" title="使用DNSPod解析服务"></a>使用DNSPod解析服务</h2><p>提供dns解析的商家有很多，这里只给出DNSPod的操作步骤，但是一通百通，界面不一样，操作手法还是相同的。<br><img src="/images/dnspod-setting.png"></p>
+<p>添加三个数据</p>
+<blockquote>
+<p>@  A  192.30.252.153<br>@  A  192.30.252.154<br>www  CNAME  username.github.io</p>
+</blockquote>
+<p>注意：CNAME后的ip地址，千万不要使用ping命令得到的ip，因为GitHub Pages的页面ip不是固定ip，可能这阵子可以正常解析到你的页面，过阵子可能就解析到别人的页面去了！</p>
+<h3 id="主机记录和记录类型说明"><a href="#主机记录和记录类型说明" class="headerlink" title="主机记录和记录类型说明"></a>主机记录和记录类型说明</h3><blockquote>
+<p>www：解析后的域名为 <a href="http://www.xxxxx.com/">www.xxxxx.com</a><br>@：直接解析主域名 xxxxx.com<br>*：泛解析，匹配其他所有域名 *.xxxxx.com</p>
+<p>A记录：地址记录，用来指定域名的IPv4地址（如：8.8.8.8），如果需要将域名指向一个IP地址，就需要添加A记录。<br>CNAME： 如果需要将域名指向另一个域名，再由另一个域名提供ip地址，就需要添加CNAME记录。</p>
+</blockquote>
+<h2 id="添加CNAME文件"><a href="#添加CNAME文件" class="headerlink" title="添加CNAME文件"></a>添加CNAME文件</h2><p>在Hexo本地目录中的source文件夹里，添加一个命名为CNAME的无后缀文件，文件中的填写你的域名.<br>如果你想让地址栏的域名显示www前缀就输入<code>www.xxxcc.com</code>，否则输入<code>xxxxx.com</code>即可。<br>例如</p>
+<blockquote>
+<p><a href="http://www.xxxxx.com/">www.xxxxx.com</a></p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">hexo c</span><br><span class="line">hexo g -d</span><br></pre></td></tr></table></figure>
+<p>配置完后等待一会儿就可以访问啦~</p>
+]]></content>
+      <tags>
+        <tag>GitHub</tag>
+        <tag>namesilo</tag>
+        <tag>domain</tag>
+        <tag>Hexo</tag>
+        <tag>DNSPod</tag>
       </tags>
   </entry>
   <entry>
@@ -1469,6 +1469,31 @@
       </tags>
   </entry>
   <entry>
+    <title>MySQL的default约束用法</title>
+    <url>/blog/2017/05/31/mysql-default-constraint/</url>
+    <content><![CDATA[<p>在sql最基本的curd语句使用熟练后，我开始发现提高数据库的稳定性和易用性需要一些其他的东西，比如<code>constraint</code>(约束)。</p>
+<p>我就一个没经过数据加密的user表演示一下<code>default约束</code>的用法。</p>
+<h2 id="建表语句中使用"><a href="#建表语句中使用" class="headerlink" title="建表语句中使用"></a>建表语句中使用</h2><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> <span class="keyword">user</span>(</span><br><span class="line">	id <span class="type">int</span>(<span class="number">11</span>) <span class="keyword">not</span> <span class="keyword">null</span> auto_increment,</span><br><span class="line">	username <span class="type">varchar</span>(<span class="number">255</span>) <span class="keyword">default</span> <span class="keyword">null</span>,</span><br><span class="line">	status <span class="type">varchar</span>(<span class="number">255</span>) <span class="keyword">default</span> &quot;active&quot;;</span><br><span class="line">	<span class="keyword">primary</span> key (id)</span><br><span class="line">) engine<span class="operator">=</span>InnoDB <span class="keyword">default</span> charset<span class="operator">=</span>utf8;</span><br></pre></td></tr></table></figure>
+
+<h2 id="已有表结构？使用alter插入字段"><a href="#已有表结构？使用alter插入字段" class="headerlink" title="已有表结构？使用alter插入字段"></a>已有表结构？使用alter插入字段</h2><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> <span class="keyword">user</span> <span class="keyword">add</span> status <span class="type">varchar</span>(<span class="number">255</span>) <span class="keyword">default</span> &quot;active&quot;;</span><br></pre></td></tr></table></figure>
+
+<h2 id="有默认值的表如何添加数据"><a href="#有默认值的表如何添加数据" class="headerlink" title="有默认值的表如何添加数据"></a>有默认值的表如何添加数据</h2><p>那么表结构已经有了<code>default约束</code>，在插入值的时候如何处理字段的默认值呢？<br>传入null？空字符串？或者是不填？都不行！</p>
+<span id="more"></span>
+<p>答案是<code>传入default关键字</code>，表示插入字段预设的默认值。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> <span class="keyword">user</span> <span class="keyword">values</span>(<span class="keyword">null</span>, &quot;c&quot;, &quot;c&quot;, <span class="keyword">default</span>);</span><br></pre></td></tr></table></figure>
+<p>你想覆盖default约束传入自定义值？ 填写对应类型的值就行了。</p>
+<hr>
+<p>参考链接：<br><a href="https://www.w3schools.com/sql/sql_default.asp">SQL DEFAULT Constraint</a></p>
+]]></content>
+      <categories>
+        <category>技术一路走到黑</category>
+      </categories>
+      <tags>
+        <tag>MySQL</tag>
+        <tag>Database</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Mybatis传值乱码</title>
     <url>/blog/2017/08/27/mybatis-encoding-garbled/</url>
     <content><![CDATA[<h1 id="分析问题"><a href="#分析问题" class="headerlink" title="分析问题"></a>分析问题</h1><h2 id="前端显示页面"><a href="#前端显示页面" class="headerlink" title="前端显示页面"></a>前端显示页面</h2><p><img src="/images/garbled_page1.png"></p>
@@ -1560,31 +1585,6 @@
       <tags>
         <tag>mac</tag>
         <tag>python</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>MySQL的default约束用法</title>
-    <url>/blog/2017/05/31/mysql-default-constraint/</url>
-    <content><![CDATA[<p>在sql最基本的curd语句使用熟练后，我开始发现提高数据库的稳定性和易用性需要一些其他的东西，比如<code>constraint</code>(约束)。</p>
-<p>我就一个没经过数据加密的user表演示一下<code>default约束</code>的用法。</p>
-<h2 id="建表语句中使用"><a href="#建表语句中使用" class="headerlink" title="建表语句中使用"></a>建表语句中使用</h2><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> <span class="keyword">user</span>(</span><br><span class="line">	id <span class="type">int</span>(<span class="number">11</span>) <span class="keyword">not</span> <span class="keyword">null</span> auto_increment,</span><br><span class="line">	username <span class="type">varchar</span>(<span class="number">255</span>) <span class="keyword">default</span> <span class="keyword">null</span>,</span><br><span class="line">	status <span class="type">varchar</span>(<span class="number">255</span>) <span class="keyword">default</span> &quot;active&quot;;</span><br><span class="line">	<span class="keyword">primary</span> key (id)</span><br><span class="line">) engine<span class="operator">=</span>InnoDB <span class="keyword">default</span> charset<span class="operator">=</span>utf8;</span><br></pre></td></tr></table></figure>
-
-<h2 id="已有表结构？使用alter插入字段"><a href="#已有表结构？使用alter插入字段" class="headerlink" title="已有表结构？使用alter插入字段"></a>已有表结构？使用alter插入字段</h2><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> <span class="keyword">user</span> <span class="keyword">add</span> status <span class="type">varchar</span>(<span class="number">255</span>) <span class="keyword">default</span> &quot;active&quot;;</span><br></pre></td></tr></table></figure>
-
-<h2 id="有默认值的表如何添加数据"><a href="#有默认值的表如何添加数据" class="headerlink" title="有默认值的表如何添加数据"></a>有默认值的表如何添加数据</h2><p>那么表结构已经有了<code>default约束</code>，在插入值的时候如何处理字段的默认值呢？<br>传入null？空字符串？或者是不填？都不行！</p>
-<span id="more"></span>
-<p>答案是<code>传入default关键字</code>，表示插入字段预设的默认值。</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> <span class="keyword">user</span> <span class="keyword">values</span>(<span class="keyword">null</span>, &quot;c&quot;, &quot;c&quot;, <span class="keyword">default</span>);</span><br></pre></td></tr></table></figure>
-<p>你想覆盖default约束传入自定义值？ 填写对应类型的值就行了。</p>
-<hr>
-<p>参考链接：<br><a href="https://www.w3schools.com/sql/sql_default.asp">SQL DEFAULT Constraint</a></p>
-]]></content>
-      <categories>
-        <category>技术一路走到黑</category>
-      </categories>
-      <tags>
-        <tag>MySQL</tag>
-        <tag>Database</tag>
       </tags>
   </entry>
   <entry>
@@ -2124,50 +2124,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Java mail 报错 trying to connect to host &quot;*.*.com&quot;, port 587, isSSL true的另一种解决办法</title>
-    <url>/blog/2017/07/18/trying-to-connect-to-host/</url>
-    <content><![CDATA[<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DEBUG SMTP: trying to connect to host &quot;xxx.xxx.com&quot;, port 587, isSSL true</span><br><span class="line">send failed... the exception is javax.mail.MessagingException: Could not connect to SMTP host: xxx.xxx.com, port: 587;</span><br><span class="line">  nested exception is:</span><br><span class="line">javax.net.ssl.SSLException: Unrecognized SSL message, plaintext connection?</span><br></pre></td></tr></table></figure>
-<p>如果你遇到了这种报错，而其它办法又解决不了。<br>不妨试试调整properties的put()方法放置顺序吧。<br>起初我也觉得put()顺序并不会影响到后续的其他方法块对它的读取啊。<br>然而当我调转了它们的位置时，不再报错了。。<br>邮件成功的发送出去了。</p>
-<p>这是我放置properties的方法块</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">MailSSLSocketFactory mssf = <span class="keyword">null</span>;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">  mssf = <span class="keyword">new</span> MailSSLSocketFactory();</span><br><span class="line">  mssf.setTrustAllHosts(<span class="keyword">true</span>);</span><br><span class="line">  properties.put(<span class="string">&quot;mail.smtp.ssl.socketFactory&quot;</span>, mssf);</span><br><span class="line">  properties.put(<span class="string">&quot;mail.smtp.ssl.enable&quot;</span>, <span class="string">&quot;true&quot;</span>);</span><br><span class="line">  properties.put(<span class="string">&quot;mail.smtp.port&quot;</span>, <span class="string">&quot;587&quot;</span>);</span><br><span class="line">  properties.put(<span class="string">&quot;mail.smtp.ssl.socketFactory.port&quot;</span>, <span class="string">&quot;587&quot;</span>);</span><br><span class="line">  properties.setProperty(<span class="string">&quot;mail.imap.ssl.socketFactory.class&quot;</span>, <span class="string">&quot;DummySSLSocketFactory&quot;</span>);</span><br><span class="line">  properties.setProperty(<span class="string">&quot;mail.imap.ssl.socketFactory.fallback&quot;</span>, <span class="string">&quot;false&quot;</span>);</span><br><span class="line"><span class="comment">// properties.setProperty(&quot;mail.smtp.port&quot;, &quot;587&quot;);</span></span><br><span class="line"><span class="comment">// properties.setProperty(&quot;mail.smtp.socketFactory.port&quot;, &quot;587&quot;);</span></span><br><span class="line"><span class="comment">// properties.setProperty(&quot;mail.imap.ssl.enable&quot;, &quot;true&quot;);</span></span><br><span class="line"><span class="comment">// properties.setProperty(&quot;mail.imap.ssl.socketFactory.class&quot;, &quot;DummySSLSocketFactory&quot;);</span></span><br><span class="line"><span class="comment">// properties.setProperty(&quot;mail.imap.ssl.socketFactory.fallback&quot;, &quot;false&quot;);</span></span><br><span class="line">  &#125; <span class="keyword">catch</span> (<span class="keyword">final</span> GeneralSecurityException e) &#123;</span><br><span class="line">  e.printStackTrace();</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
-
-<p>而你需要做的便是把</p>
-<blockquote>
-<p>properties.put(“mail.smtp.ssl.enable”, “true”);</p>
-</blockquote>
-<p>放在</p>
-<blockquote>
-<p>properties.put(“mail.smtp.port”, “587”);<br>properties.put(“mail.smtp.ssl.socketFactory.port”, “587”);</p>
-</blockquote>
-<p>的下面。</p>
-]]></content>
-      <categories>
-        <category>技术一路走到黑</category>
-      </categories>
-      <tags>
-        <tag>java</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Vue开发路上遇到的坑儿们</title>
-    <url>/blog/2018/01/24/vue-error-collection/</url>
-    <content><![CDATA[<h1 id="开篇"><a href="#开篇" class="headerlink" title="开篇"></a>开篇</h1><p>此文仅用于记录vue开发中遇到的各种奇葩事。</p>
-<h1 id="错误"><a href="#错误" class="headerlink" title="错误"></a>错误</h1><h2 id="项目不报错但是路由不加载"><a href="#项目不报错但是路由不加载" class="headerlink" title="项目不报错但是路由不加载"></a>项目不报错但是路由不加载</h2><p>前方预警：这是个低级错误Orz<br>index.js</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">routes: [</span><br><span class="line">    &#123;</span><br><span class="line">      path: &#x27;/&#x27;,</span><br><span class="line">      name: &#x27;Index&#x27;,</span><br><span class="line">      component: &#123;</span><br><span class="line">        nav: Navv,</span><br><span class="line">        main: Index,</span><br><span class="line">        footer: Footter</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
-<p>App.vue</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;template&gt;</span><br><span class="line">  &lt;div id=&quot;app&quot;&gt;</span><br><span class="line">    &lt;router-view name=&quot;nav&quot;&gt;&lt;/router-view&gt;</span><br><span class="line">    &lt;router-view name=&quot;main&quot;&gt;&lt;/router-view&gt;</span><br><span class="line">    &lt;router-view name=&quot;footer&quot;&gt;&lt;/router-view&gt;</span><br><span class="line">  &lt;/div&gt;</span><br><span class="line">&lt;/template&gt;</span><br></pre></td></tr></table></figure>
-<p>如果你和我一样是只小白菜，可能咋一看会发现没什么毛病，仔细一看就会发现路由配置里的<code>components</code>被我写成了·component·。。<br>vue中到目前为止我知道的两种路由配置方式:</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">// 第一种</span><br><span class="line">...</span><br><span class="line">component: navv</span><br><span class="line">...</span><br><span class="line">// 第二种</span><br><span class="line">components: &#123;</span><br><span class="line">	navv</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>over, 经验值 +1</p>
-<h2 id="Failed-to-execute-‘setAttribute’-on-‘Element’-‘method-’-is-not-a-valid-attribute-name"><a href="#Failed-to-execute-‘setAttribute’-on-‘Element’-‘method-’-is-not-a-valid-attribute-name" class="headerlink" title="Failed to execute ‘setAttribute’ on ‘Element’: ‘method+’ is not a valid attribute name."></a>Failed to execute ‘setAttribute’ on ‘Element’: ‘method+’ is not a valid attribute name.</h2><p>由于项目中引入了饿了么开发的组件库·element-ui·，所以一度以为是和我引入的css文件起了冲突？？甚至我还去执行了<code>npm uninstall element-ui</code>这条命令。最后实在没办法了，一段一段代码排查问题，找到一个诡异的地方。。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;form action=&quot;/listTopic&quot; method+=&quot;post&quot;&gt;</span><br><span class="line">  &lt;input name=&quot;topicName&quot; type=&quot;text&quot; class=&quot;search-input&quot; placeholder=&quot;搜索你感兴趣的内容...&quot;&gt;</span><br><span class="line">  &lt;button type=&quot;submit&quot; class=&quot;search-button&quot;&gt;&lt;i class=&quot;sprite-search&quot;&gt;&lt;/i&gt;&lt;/button&gt;</span><br><span class="line">&lt;/form&gt;</span><br></pre></td></tr></table></figure>
-<p>噗。。form标签下的method方法多了个+号。。。想拿头去撞豆腐了。<br>ok，经验值 +1</p>
-]]></content>
-      <tags>
-        <tag>vue</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Docker + Nginx 镜像部署 Vue 项目</title>
     <url>/blog/2018/03/28/deploy-the-vue-project-using-docker-and-nginx/</url>
     <content><![CDATA[<h1 id="简单介绍-Docker"><a href="#简单介绍-Docker" class="headerlink" title="简单介绍 Docker"></a>简单介绍 Docker</h1><p>Docker 真是个好东西，很好的降低了不同环境发版的兼容性问题。无论是 Linux, Windows 或是 Mac OS，再也不用怕系统环境不同，软件版本不同导致的项目无法启动。这些问题只需要自定义 Docker 镜像，并在 Docker 中启动，就能搞定部署啦。</p>
@@ -2226,6 +2182,50 @@
       </tags>
   </entry>
   <entry>
+    <title>Java mail 报错 trying to connect to host &quot;*.*.com&quot;, port 587, isSSL true的另一种解决办法</title>
+    <url>/blog/2017/07/18/trying-to-connect-to-host/</url>
+    <content><![CDATA[<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">DEBUG SMTP: trying to connect to host &quot;xxx.xxx.com&quot;, port 587, isSSL true</span><br><span class="line">send failed... the exception is javax.mail.MessagingException: Could not connect to SMTP host: xxx.xxx.com, port: 587;</span><br><span class="line">  nested exception is:</span><br><span class="line">javax.net.ssl.SSLException: Unrecognized SSL message, plaintext connection?</span><br></pre></td></tr></table></figure>
+<p>如果你遇到了这种报错，而其它办法又解决不了。<br>不妨试试调整properties的put()方法放置顺序吧。<br>起初我也觉得put()顺序并不会影响到后续的其他方法块对它的读取啊。<br>然而当我调转了它们的位置时，不再报错了。。<br>邮件成功的发送出去了。</p>
+<p>这是我放置properties的方法块</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">MailSSLSocketFactory mssf = <span class="keyword">null</span>;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">  mssf = <span class="keyword">new</span> MailSSLSocketFactory();</span><br><span class="line">  mssf.setTrustAllHosts(<span class="keyword">true</span>);</span><br><span class="line">  properties.put(<span class="string">&quot;mail.smtp.ssl.socketFactory&quot;</span>, mssf);</span><br><span class="line">  properties.put(<span class="string">&quot;mail.smtp.ssl.enable&quot;</span>, <span class="string">&quot;true&quot;</span>);</span><br><span class="line">  properties.put(<span class="string">&quot;mail.smtp.port&quot;</span>, <span class="string">&quot;587&quot;</span>);</span><br><span class="line">  properties.put(<span class="string">&quot;mail.smtp.ssl.socketFactory.port&quot;</span>, <span class="string">&quot;587&quot;</span>);</span><br><span class="line">  properties.setProperty(<span class="string">&quot;mail.imap.ssl.socketFactory.class&quot;</span>, <span class="string">&quot;DummySSLSocketFactory&quot;</span>);</span><br><span class="line">  properties.setProperty(<span class="string">&quot;mail.imap.ssl.socketFactory.fallback&quot;</span>, <span class="string">&quot;false&quot;</span>);</span><br><span class="line"><span class="comment">// properties.setProperty(&quot;mail.smtp.port&quot;, &quot;587&quot;);</span></span><br><span class="line"><span class="comment">// properties.setProperty(&quot;mail.smtp.socketFactory.port&quot;, &quot;587&quot;);</span></span><br><span class="line"><span class="comment">// properties.setProperty(&quot;mail.imap.ssl.enable&quot;, &quot;true&quot;);</span></span><br><span class="line"><span class="comment">// properties.setProperty(&quot;mail.imap.ssl.socketFactory.class&quot;, &quot;DummySSLSocketFactory&quot;);</span></span><br><span class="line"><span class="comment">// properties.setProperty(&quot;mail.imap.ssl.socketFactory.fallback&quot;, &quot;false&quot;);</span></span><br><span class="line">  &#125; <span class="keyword">catch</span> (<span class="keyword">final</span> GeneralSecurityException e) &#123;</span><br><span class="line">  e.printStackTrace();</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<p>而你需要做的便是把</p>
+<blockquote>
+<p>properties.put(“mail.smtp.ssl.enable”, “true”);</p>
+</blockquote>
+<p>放在</p>
+<blockquote>
+<p>properties.put(“mail.smtp.port”, “587”);<br>properties.put(“mail.smtp.ssl.socketFactory.port”, “587”);</p>
+</blockquote>
+<p>的下面。</p>
+]]></content>
+      <categories>
+        <category>技术一路走到黑</category>
+      </categories>
+      <tags>
+        <tag>java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Vue开发路上遇到的坑儿们</title>
+    <url>/blog/2018/01/24/vue-error-collection/</url>
+    <content><![CDATA[<h1 id="开篇"><a href="#开篇" class="headerlink" title="开篇"></a>开篇</h1><p>此文仅用于记录vue开发中遇到的各种奇葩事。</p>
+<h1 id="错误"><a href="#错误" class="headerlink" title="错误"></a>错误</h1><h2 id="项目不报错但是路由不加载"><a href="#项目不报错但是路由不加载" class="headerlink" title="项目不报错但是路由不加载"></a>项目不报错但是路由不加载</h2><p>前方预警：这是个低级错误Orz<br>index.js</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">routes: [</span><br><span class="line">    &#123;</span><br><span class="line">      path: &#x27;/&#x27;,</span><br><span class="line">      name: &#x27;Index&#x27;,</span><br><span class="line">      component: &#123;</span><br><span class="line">        nav: Navv,</span><br><span class="line">        main: Index,</span><br><span class="line">        footer: Footter</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+<p>App.vue</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;template&gt;</span><br><span class="line">  &lt;div id=&quot;app&quot;&gt;</span><br><span class="line">    &lt;router-view name=&quot;nav&quot;&gt;&lt;/router-view&gt;</span><br><span class="line">    &lt;router-view name=&quot;main&quot;&gt;&lt;/router-view&gt;</span><br><span class="line">    &lt;router-view name=&quot;footer&quot;&gt;&lt;/router-view&gt;</span><br><span class="line">  &lt;/div&gt;</span><br><span class="line">&lt;/template&gt;</span><br></pre></td></tr></table></figure>
+<p>如果你和我一样是只小白菜，可能咋一看会发现没什么毛病，仔细一看就会发现路由配置里的<code>components</code>被我写成了·component·。。<br>vue中到目前为止我知道的两种路由配置方式:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">// 第一种</span><br><span class="line">...</span><br><span class="line">component: navv</span><br><span class="line">...</span><br><span class="line">// 第二种</span><br><span class="line">components: &#123;</span><br><span class="line">	navv</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>over, 经验值 +1</p>
+<h2 id="Failed-to-execute-‘setAttribute’-on-‘Element’-‘method-’-is-not-a-valid-attribute-name"><a href="#Failed-to-execute-‘setAttribute’-on-‘Element’-‘method-’-is-not-a-valid-attribute-name" class="headerlink" title="Failed to execute ‘setAttribute’ on ‘Element’: ‘method+’ is not a valid attribute name."></a>Failed to execute ‘setAttribute’ on ‘Element’: ‘method+’ is not a valid attribute name.</h2><p>由于项目中引入了饿了么开发的组件库·element-ui·，所以一度以为是和我引入的css文件起了冲突？？甚至我还去执行了<code>npm uninstall element-ui</code>这条命令。最后实在没办法了，一段一段代码排查问题，找到一个诡异的地方。。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;form action=&quot;/listTopic&quot; method+=&quot;post&quot;&gt;</span><br><span class="line">  &lt;input name=&quot;topicName&quot; type=&quot;text&quot; class=&quot;search-input&quot; placeholder=&quot;搜索你感兴趣的内容...&quot;&gt;</span><br><span class="line">  &lt;button type=&quot;submit&quot; class=&quot;search-button&quot;&gt;&lt;i class=&quot;sprite-search&quot;&gt;&lt;/i&gt;&lt;/button&gt;</span><br><span class="line">&lt;/form&gt;</span><br></pre></td></tr></table></figure>
+<p>噗。。form标签下的method方法多了个+号。。。想拿头去撞豆腐了。<br>ok，经验值 +1</p>
+]]></content>
+      <tags>
+        <tag>vue</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Java如何防范XSS攻击</title>
     <url>/blog/2017/05/27/xss/</url>
     <content><![CDATA[<h1 id="什么是XSS"><a href="#什么是XSS" class="headerlink" title="什么是XSS"></a>什么是XSS</h1><p>XSS攻击：跨站脚本攻击(Cross Site Scripting)，为不和层叠样式表(Cascading Style Sheets, CSS)的缩写混淆，故将跨站脚本攻击缩写为XSS。</p>
@@ -2256,6 +2256,32 @@
       <tags>
         <tag>java</tag>
         <tag>Network Security</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>MyBatis一对一映射注解@One的使用及理解</title>
+    <url>/blog/2018/03/08/the-use-and-understanding-of-one-annotated-by-mybatis/</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>本着更深入地使用注解来开发，慢慢地发现脱离了XML的MyBatis好多好多的坑。我觉得很大的原因还是来自于官方文档的不完善，以及使用注解开发持久层的人并不多见，导致网络上的相关讨论过于贫瘠并重复化，毕竟对于复杂查询的支持，我认为还没有在XML里写一条SQL方便呢～  </p>
+<p>所以这篇文章用于补充一语带过的官方文档，记录下自己趟过的坑。</p>
+<h1 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h1><h2 id="一对一映射"><a href="#一对一映射" class="headerlink" title="一对一映射"></a>一对一映射</h2><p>注解化一对一映射其实就是将XML中的<code>ResultType</code>属性对应的实体写在<code>@Results</code>注解中。其中的<code>@Result</code>填入实体的属性，而若该属性为实体中的实体，则需要@One注解引入。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Select(&quot;select answer_id, answer_content, liked_count, create_time, question_id, user_id from answer where create_time &gt; #&#123;createTime&#125; order by liked_count desc, create_time desc limit 0,10&quot;)</span></span><br><span class="line"><span class="meta">@Results(&#123;</span></span><br><span class="line"><span class="meta">    @Result(id = true, column = &quot;answer_id&quot;, property = &quot;answerId&quot;, javaType = Integer.class),</span></span><br><span class="line"><span class="meta">    @Result(column = &quot;answer_content&quot;, property = &quot;answerContent&quot;),</span></span><br><span class="line"><span class="meta">    @Result(column = &quot;liked_count&quot;, property = &quot;likedCount&quot;, javaType = Integer.class, jdbcType = JdbcType.INTEGER),</span></span><br><span class="line"><span class="meta">    @Result(column = &quot;create_time&quot;, property = &quot;createTime&quot;),</span></span><br><span class="line"><span class="meta">    @Result(column = &quot;question_id&quot;, property = &quot;question&quot;, javaType = Question.class,</span></span><br><span class="line"><span class="meta">        one = @One(select = &quot;selectQuestionById&quot;)),</span></span><br><span class="line"><span class="meta">    @Result(column = &quot;user_id&quot;, property = &quot;user&quot;,</span></span><br><span class="line"><span class="meta">        one = @One(select = &quot;selectUserById&quot;))</span></span><br><span class="line"><span class="meta">&#125;)</span></span><br><span class="line"><span class="function">List&lt;Answer&gt; <span class="title">listAnswerByCreateTime</span><span class="params">(<span class="meta">@Param(&quot;createTime&quot;)</span> <span class="keyword">long</span> createTime)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>值得注意的是，映射中的<code>property</code>属性的值不可和其他实体属性一样，应该填写所返回的实体名称。</p>
+<p>例如下面代码，我返回的实体为<code>Answer</code>类下的<code>Question</code>类，则<code>property</code>中不可写<code>questionId</code>，而得写<code>question</code>。同时@One中select属性对应的方法若在不同类，则需要写出完整的包名（com.xxx.xxx.getxxxByxx）。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Result(column = &quot;question_id&quot;, property = &quot;question&quot;, javaType = Question.class,</span></span><br><span class="line"><span class="meta">        one = @One(select = &quot;selectQuestionById&quot;))</span></span><br></pre></td></tr></table></figure>
+
+<p>需要注意的是，从@One传递过来的查询条件也需要在主查询语句中查询出来，也就是上面的<code>listAnswerByCreateTime</code>方法需要查询出question_id和user_id，千万别漏了。否则报你错哦！</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Select(&quot;select question_id, question_title from question where question_id = #&#123;questionId&#125;&quot;)</span></span><br><span class="line"><span class="meta">@ResultType(Question.class)</span></span><br><span class="line"><span class="function">Question <span class="title">selectQuestionById</span><span class="params">(<span class="meta">@Param(&quot;questionId&quot;)</span> Integer questionId)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Select(&quot;select user_id, username, avatar_url, simple_desc from user where user_id = #&#123;userId&#125;&quot;)</span></span><br><span class="line"><span class="meta">@ResultType(User.class)</span></span><br><span class="line"><span class="function">User <span class="title">selectUserById</span><span class="params">(<span class="meta">@Param(&quot;userId&quot;)</span> Integer userId)</span></span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>由此查询得出的结果集为</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><span class="line"><span class="string">&quot;answerList&quot;</span>: [</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="attr">&quot;answerId&quot;</span>: <span class="number">42</span>,</span><br><span class="line">                <span class="attr">&quot;answerContent&quot;</span>: <span class="string">&quot;这是回答！&quot;</span>,</span><br><span class="line">                <span class="attr">&quot;likedCount&quot;</span>: <span class="number">3</span>,</span><br><span class="line">                <span class="attr">&quot;createTime&quot;</span>: <span class="number">1520508016650</span>,</span><br><span class="line">                <span class="attr">&quot;userId&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                <span class="attr">&quot;questionId&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                <span class="attr">&quot;likeState&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                <span class="attr">&quot;commentCount&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                <span class="attr">&quot;question&quot;</span>: &#123;</span><br><span class="line">                    <span class="attr">&quot;questionId&quot;</span>: <span class="number">1</span>,</span><br><span class="line">                    <span class="attr">&quot;questionTitle&quot;</span>: <span class="string">&quot;Spring，Django，Rails，Express这些框架技术的出现都是为了解决什么问题，现在这些框架都应用在哪些方面？&quot;</span>,</span><br><span class="line">                    <span class="attr">&quot;createTime&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">&quot;userId&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">&quot;user&quot;</span>: <span class="literal">null</span></span><br><span class="line">                &#125;,</span><br><span class="line">                <span class="attr">&quot;user&quot;</span>: &#123;</span><br><span class="line">                    <span class="attr">&quot;userId&quot;</span>: <span class="number">11218</span>,</span><br><span class="line">                    <span class="attr">&quot;weiboUserId&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">&quot;email&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">&quot;username&quot;</span>: <span class="string">&quot;amosamos&quot;</span>,</span><br><span class="line">                    <span class="attr">&quot;password&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">&quot;joinTime&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">&quot;avatarUrl&quot;</span>: <span class="string">&quot;https://avatars3.githubusercontent.com/u/16012509?s=400&amp;u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&amp;v=4&quot;</span></span><br><span class="line">                &#125;,</span><br><span class="line">                <span class="attr">&quot;answerCommentList&quot;</span>: <span class="literal">null</span></span><br><span class="line">            &#125;</span><br><span class="line">        ]</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <tags>
+        <tag>MyBatis</tag>
+        <tag>SpringBoot</tag>
       </tags>
   </entry>
   <entry>
@@ -2297,32 +2323,6 @@
         <tag>Vue</tag>
         <tag>CORS</tag>
         <tag>SpringBoot</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>MyBatis一对一映射注解@One的使用及理解</title>
-    <url>/blog/2018/03/08/the-use-and-understanding-of-one-annotated-by-mybatis/</url>
-    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>本着更深入地使用注解来开发，慢慢地发现脱离了XML的MyBatis好多好多的坑。我觉得很大的原因还是来自于官方文档的不完善，以及使用注解开发持久层的人并不多见，导致网络上的相关讨论过于贫瘠并重复化，毕竟对于复杂查询的支持，我认为还没有在XML里写一条SQL方便呢～  </p>
-<p>所以这篇文章用于补充一语带过的官方文档，记录下自己趟过的坑。</p>
-<h1 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h1><h2 id="一对一映射"><a href="#一对一映射" class="headerlink" title="一对一映射"></a>一对一映射</h2><p>注解化一对一映射其实就是将XML中的<code>ResultType</code>属性对应的实体写在<code>@Results</code>注解中。其中的<code>@Result</code>填入实体的属性，而若该属性为实体中的实体，则需要@One注解引入。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Select(&quot;select answer_id, answer_content, liked_count, create_time, question_id, user_id from answer where create_time &gt; #&#123;createTime&#125; order by liked_count desc, create_time desc limit 0,10&quot;)</span></span><br><span class="line"><span class="meta">@Results(&#123;</span></span><br><span class="line"><span class="meta">    @Result(id = true, column = &quot;answer_id&quot;, property = &quot;answerId&quot;, javaType = Integer.class),</span></span><br><span class="line"><span class="meta">    @Result(column = &quot;answer_content&quot;, property = &quot;answerContent&quot;),</span></span><br><span class="line"><span class="meta">    @Result(column = &quot;liked_count&quot;, property = &quot;likedCount&quot;, javaType = Integer.class, jdbcType = JdbcType.INTEGER),</span></span><br><span class="line"><span class="meta">    @Result(column = &quot;create_time&quot;, property = &quot;createTime&quot;),</span></span><br><span class="line"><span class="meta">    @Result(column = &quot;question_id&quot;, property = &quot;question&quot;, javaType = Question.class,</span></span><br><span class="line"><span class="meta">        one = @One(select = &quot;selectQuestionById&quot;)),</span></span><br><span class="line"><span class="meta">    @Result(column = &quot;user_id&quot;, property = &quot;user&quot;,</span></span><br><span class="line"><span class="meta">        one = @One(select = &quot;selectUserById&quot;))</span></span><br><span class="line"><span class="meta">&#125;)</span></span><br><span class="line"><span class="function">List&lt;Answer&gt; <span class="title">listAnswerByCreateTime</span><span class="params">(<span class="meta">@Param(&quot;createTime&quot;)</span> <span class="keyword">long</span> createTime)</span></span>;</span><br></pre></td></tr></table></figure>
-
-<p>值得注意的是，映射中的<code>property</code>属性的值不可和其他实体属性一样，应该填写所返回的实体名称。</p>
-<p>例如下面代码，我返回的实体为<code>Answer</code>类下的<code>Question</code>类，则<code>property</code>中不可写<code>questionId</code>，而得写<code>question</code>。同时@One中select属性对应的方法若在不同类，则需要写出完整的包名（com.xxx.xxx.getxxxByxx）。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Result(column = &quot;question_id&quot;, property = &quot;question&quot;, javaType = Question.class,</span></span><br><span class="line"><span class="meta">        one = @One(select = &quot;selectQuestionById&quot;))</span></span><br></pre></td></tr></table></figure>
-
-<p>需要注意的是，从@One传递过来的查询条件也需要在主查询语句中查询出来，也就是上面的<code>listAnswerByCreateTime</code>方法需要查询出question_id和user_id，千万别漏了。否则报你错哦！</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Select(&quot;select question_id, question_title from question where question_id = #&#123;questionId&#125;&quot;)</span></span><br><span class="line"><span class="meta">@ResultType(Question.class)</span></span><br><span class="line"><span class="function">Question <span class="title">selectQuestionById</span><span class="params">(<span class="meta">@Param(&quot;questionId&quot;)</span> Integer questionId)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Select(&quot;select user_id, username, avatar_url, simple_desc from user where user_id = #&#123;userId&#125;&quot;)</span></span><br><span class="line"><span class="meta">@ResultType(User.class)</span></span><br><span class="line"><span class="function">User <span class="title">selectUserById</span><span class="params">(<span class="meta">@Param(&quot;userId&quot;)</span> Integer userId)</span></span>;</span><br></pre></td></tr></table></figure>
-
-
-
-<p>由此查询得出的结果集为</p>
-<figure class="highlight json"><table><tr><td class="code"><pre><span class="line"><span class="string">&quot;answerList&quot;</span>: [</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="attr">&quot;answerId&quot;</span>: <span class="number">42</span>,</span><br><span class="line">                <span class="attr">&quot;answerContent&quot;</span>: <span class="string">&quot;这是回答！&quot;</span>,</span><br><span class="line">                <span class="attr">&quot;likedCount&quot;</span>: <span class="number">3</span>,</span><br><span class="line">                <span class="attr">&quot;createTime&quot;</span>: <span class="number">1520508016650</span>,</span><br><span class="line">                <span class="attr">&quot;userId&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                <span class="attr">&quot;questionId&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                <span class="attr">&quot;likeState&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                <span class="attr">&quot;commentCount&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                <span class="attr">&quot;question&quot;</span>: &#123;</span><br><span class="line">                    <span class="attr">&quot;questionId&quot;</span>: <span class="number">1</span>,</span><br><span class="line">                    <span class="attr">&quot;questionTitle&quot;</span>: <span class="string">&quot;Spring，Django，Rails，Express这些框架技术的出现都是为了解决什么问题，现在这些框架都应用在哪些方面？&quot;</span>,</span><br><span class="line">                    <span class="attr">&quot;createTime&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">&quot;userId&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">&quot;user&quot;</span>: <span class="literal">null</span></span><br><span class="line">                &#125;,</span><br><span class="line">                <span class="attr">&quot;user&quot;</span>: &#123;</span><br><span class="line">                    <span class="attr">&quot;userId&quot;</span>: <span class="number">11218</span>,</span><br><span class="line">                    <span class="attr">&quot;weiboUserId&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">&quot;email&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">&quot;username&quot;</span>: <span class="string">&quot;amosamos&quot;</span>,</span><br><span class="line">                    <span class="attr">&quot;password&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">&quot;joinTime&quot;</span>: <span class="literal">null</span>,</span><br><span class="line">                    <span class="attr">&quot;avatarUrl&quot;</span>: <span class="string">&quot;https://avatars3.githubusercontent.com/u/16012509?s=400&amp;u=6fe0dd08943216aeff2d3c9d1b8c3e602f6de8e9&amp;v=4&quot;</span></span><br><span class="line">                &#125;,</span><br><span class="line">                <span class="attr">&quot;answerCommentList&quot;</span>: <span class="literal">null</span></span><br><span class="line">            &#125;</span><br><span class="line">        ]</span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <tags>
-        <tag>SpringBoot</tag>
-        <tag>MyBatis</tag>
       </tags>
   </entry>
 </search>
